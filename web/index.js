@@ -1,4 +1,6 @@
-import React from "react"
-import ReactDOM from "react-dom"
+import React from 'react'
+import ReactDOM from 'react-dom'
+import LoginView from './components/view-login'
 
-ReactDOM.render(<h1>Front Page</h1>, document.getElementById("root"));
+ReactDOM.render(<LoginView/>, document.getElementById('app'));
+
