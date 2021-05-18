@@ -1,6 +1,6 @@
 import React from 'react';
 
-class BackgroundOverlay extends React.Component {
+export default class BackgroundOverlay extends React.Component {
   constructor(props) {
     super(props);
   }
@@ -13,5 +13,3 @@ class BackgroundOverlay extends React.Component {
       </div>
   }
 }
-
-export default BackgroundOverlay;

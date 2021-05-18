@@ -6,7 +6,7 @@ import AnimatorSwitch from './animator/animator-switch';
 import { AnimSlideOut } from './animator/animations';
 import TextInput from './form-components';
 
-class FrontPageView extends React.Component {
+export default class FrontPageView extends React.Component {
   constructor(props) {
     super(props);
   }
@@ -66,5 +66,3 @@ function RegisterView() {
     </div>
   );
 }
-
-export default FrontPageView;
