@@ -1,6 +1,22 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import LoginView from './components/view-login'
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import FrontPageView from './components/view-frontpage';
 
-ReactDOM.render(<LoginView/>, document.getElementById('app'));
+function App() {
+  return (
+    <main>
+      <Switch>
+        <Route path={['/', '/register']} exact component={FrontPageView} />
+        <Route component={Error} />
+      </Switch>
+    </main>
+   );
+}
 
+ReactDOM.render(
+  <BrowserRouter>
+      <App />
+  </BrowserRouter>, 
+  document.getElementById('app')
+);
