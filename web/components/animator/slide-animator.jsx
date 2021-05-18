@@ -1,16 +1,16 @@
 /* https://medium.com/onfido-tech/animations-with-react-router-8e97222e25e1 */
 
-import React from "react";
-import classNames from "classnames";
-import "./styles.css";
+import React from 'react';
+import classNames from 'classnames';
+import './styles.css';
 
-export default class Slider extends React.Component {
+export default class SlideAnimator extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
       animating: false,
-      position: Slider.CENTER,
+      position: SlideAnimator.CENTER,
       animatePrepare: false
     };
 
@@ -22,29 +22,29 @@ export default class Slider extends React.Component {
   componentDidMount() {
     this.startAnimation(this.props.position);
     if (this.node) {
-      this.node.addEventListener("transitionend", this.onTransitionEnd);
+      this.node.addEventListener('transitionend', this.onTransitionEnd);
     }
   }
 
   componentWillUnmount() {
     if (this.node) {
-      this.node.removeEventListener("transitionend", this.onTransitionEnd);
+      this.node.removeEventListener('transitionend', this.onTransitionEnd);
     }
   }
 
-  componentWillReceiveProps(newProps) {
-    if (newProps.position !== this.props.position) {
-      this.startAnimation(newProps.position, newProps.animationCallback);
+  componentDidUpdate(prevProps) {
+    if (this.props.position !== prevProps.position) {
+      this.startAnimation(this.props.position, this.props.animationCallback);
     }
   }
 
   startAnimation(position, animationCallback) {
-    const noAnimate = position === Slider.CENTER;
-    const animatingOut = [Slider.TO_LEFT, Slider.TO_RIGHT].includes(position);
+    const noAnimate = position === SlideAnimator.CENTER;
+    const animatingOut = [SlideAnimator.TO_LEFT, SlideAnimator.TO_RIGHT].includes(position);
     const currentlyIn = [
-      Slider.CENTER,
-      Slider.FROM_LEFT,
-      Slider.FROM_RIGHT
+      SlideAnimator.CENTER,
+      SlideAnimator.FROM_LEFT,
+      SlideAnimator.FROM_RIGHT
     ].includes(this.state.position);
     if (noAnimate || (currentlyIn && animatingOut)) {
       // in these cases we don't need to prepare our animation at all, we can just
@@ -79,9 +79,9 @@ export default class Slider extends React.Component {
   }
 
   onTransitionEnd(e) {
-    // the Slider transitions the `transform` property. Any other transitions
+    // the animator transitions the `transform` property. Any other transitions
     // that occur on the element we can just ignore.
-    if (e.propertyName !== "transform") return;
+    if (e.propertyName !== 'transform') return;
 
     const callback = this._animationCallback;
     delete this._animationCallback;
@@ -96,23 +96,23 @@ export default class Slider extends React.Component {
     return (
       <div
         ref={node => (this.node = node)}
-        className={classNames("animatable", {
-          ["to"]: [Slider.TO_LEFT, Slider.TO_RIGHT].includes(
+        className={classNames('animatable', {
+          ['to']: [SlideAnimator.TO_LEFT, SlideAnimator.TO_RIGHT].includes(
             this.state.position
           ),
-          ["from"]: [Slider.FROM_LEFT, Slider.FROM_RIGHT].includes(
+          ['from']: [SlideAnimator.FROM_LEFT, SlideAnimator.FROM_RIGHT].includes(
             this.state.position
           ),
-          ["right"]: [Slider.TO_RIGHT, Slider.FROM_RIGHT].includes(
+          ['right']: [SlideAnimator.TO_RIGHT, SlideAnimator.FROM_RIGHT].includes(
             this.state.position
           ),
-          ["left"]: [Slider.TO_LEFT, Slider.FROM_LEFT].includes(
+          ['left']: [SlideAnimator.TO_LEFT, SlideAnimator.FROM_LEFT].includes(
             this.state.position
           ),
-          ["prepare"]: this.state.animatePrepare
+          ['prepare']: this.state.animatePrepare
         })}
         data-qa-loading={Boolean(
-          this.props["data-qa-loading"] || this.state.animating
+          this.props['data-qa-loading'] || this.state.animating
         )}
       >
         <div className={this.props.className}>{this.props.children}</div>
@@ -121,8 +121,8 @@ export default class Slider extends React.Component {
   }
 }
 
-Slider.CENTER = "CENTER";
-Slider.TO_LEFT = "TO_LEFT";
-Slider.TO_RIGHT = "TO_RIGHT";
-Slider.FROM_LEFT = "FROM_LEFT";
-Slider.FROM_RIGHT = "FROM_RIGHT";
+SlideAnimator.CENTER = 'CENTER';
+SlideAnimator.TO_LEFT = 'TO_LEFT';
+SlideAnimator.TO_RIGHT = 'TO_RIGHT';
+SlideAnimator.FROM_LEFT = 'FROM_LEFT';
+SlideAnimator.FROM_RIGHT = 'FROM_RIGHT';

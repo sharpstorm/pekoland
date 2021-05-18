@@ -1,13 +1,12 @@
-import React from "react";
-import { Switch, Route } from "react-router-dom";
-import Slider from "./Slider";
+import React from 'react';
+import SlideAnimator from './slide-animator';
 
-class SlideOut extends React.Component {
+class AnimSlideOut extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      childPosition: Slider.CENTER,
+      childPosition: SlideAnimator.CENTER,
       curChild: props.children,
       curUniqId: props.uniqId,
       prevChild: null,
@@ -22,7 +21,7 @@ class SlideOut extends React.Component {
 
     if (prevUniqId !== uniqId) {
       this.setState({
-        childPosition: Slider.TO_LEFT,
+        childPosition: SlideAnimator.TO_LEFT,
         curChild: this.props.children,
         curUniqId: uniqId,
         prevChild: prevProps.children,
@@ -34,7 +33,7 @@ class SlideOut extends React.Component {
 
   swapChildren = () => {
     this.setState({
-      childPosition: Slider.FROM_RIGHT,
+      childPosition: SlideAnimator.FROM_RIGHT,
       prevChild: null,
       prevUniqId: null,
       animationCallback: null
@@ -43,29 +42,14 @@ class SlideOut extends React.Component {
 
   render() {
     return (
-      <Slider
+      <SlideAnimator
         position={this.state.childPosition}
         animationCallback={this.state.animationCallback}
       >
         {this.state.prevChild || this.state.curChild}
-      </Slider>
+      </SlideAnimator>
     );
   }
 }
 
-const animateSwitch = (CustomSwitch, AnimatorComponent) => ({
-  updateStep,
-  children
-}) => (
-  <Route
-    render={({ location }) => (
-      <AnimatorComponent uniqKey={location.pathname} updateStep={updateStep}>
-        <CustomSwitch location={location}>{children}</CustomSwitch>
-      </AnimatorComponent>
-    )}
-  />
-);
-
-const SwitchWithSlide = animateSwitch(Switch, SlideOut);
-
-export default SwitchWithSlide;
+export { AnimSlideOut }

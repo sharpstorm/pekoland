@@ -2,7 +2,8 @@ import React, {Fragment} from 'react';
 import Logo from './logo';
 import BackgroundOverlay from './background-overlay';
 import { Route, Link } from 'react-router-dom';
-import SwitchWithSlide from './animator/switch-with-slide';
+import AnimatorSwitch from './animator/animator-switch';
+import { AnimSlideOut } from './animator/animations';
 import TextInput from './form-components';
 
 class FrontPageView extends React.Component {
@@ -16,10 +17,12 @@ class FrontPageView extends React.Component {
         <BackgroundOverlay/>
         <div style={{overflow: 'hidden'}}>
           <Logo style={{marginBottom: '16px'}}/>
-          <SwitchWithSlide>
-            <Route exact path='/' component={LoginView} />
-            <Route exact path='/register' component={RegisterView} />
-          </SwitchWithSlide>
+          <div style={{width: '100%', margin:'auto', maxWidth:'1200px', position:'relative', overflow: 'hidden'}}>
+            <AnimatorSwitch animator={AnimSlideOut}>
+              <Route exact path='/' component={LoginView} />
+              <Route exact path='/register' component={RegisterView} />
+            </AnimatorSwitch>
+          </div>
         </div>
       </Fragment> 
     );
