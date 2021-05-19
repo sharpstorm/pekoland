@@ -1,0 +1,34 @@
+{
+  "name": "pekoland",
+  "version": "0.0.1",
+  "description": "An online multiplayer experience",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "parcel web/index.html --open",
+    "build": "parcel build web/index.html"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sharpstorm/pekoland.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sharpstorm/pekoland/issues"
+  },
+  "homepage": "https://github.com/sharpstorm/pekoland#readme",
+  "devDependencies": {
+    "parcel-bundler": "^1.12.5"
+  },
+  "dependencies": {
+    "assets": "^3.0.1",
+    "classnames": "^2.3.1",
+    "components": "^0.1.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-router-dom": "^5.2.0",
+    "react-transition-group": "^4.4.1"
+  }
+}

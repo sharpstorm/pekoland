@@ -1,0 +1,120 @@
+:root {
+  --color-primary: #67bfe4;
+  --color-secondary: #23667d;
+  --color-accent: #ffb859;
+  --color-font-light: #fff;
+  --color-font: #000;
+  --color-background: #eee;
+  --color-gray: #ccc;
+  --color-dark-gray: #888;
+}
+
+body {
+  background: linear-gradient(var(--color-primary), var(--color-secondary));
+  /*background: url('assets/login-back.svg');*/
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+body, button, input {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+}
+
+html {
+  height: 100%;
+}
+
+#app {
+  height: calc(100vh - 24px);
+}
+
+h1 { font-weight: 300; font-size: 2.2rem; }
+
+.bg-overlay {
+  position: fixed;
+  z-index: -10;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  left: 0; right: 0; top: 0; bottom: 0;
+}
+
+.bg-overlay > img {
+  width: 100%;
+  height: 60%;
+  position: absolute;
+  object-fit: cover;
+  object-position: 50% 0%;
+}
+
+.bg-overlay > div {
+  width: 100%;
+  position: absolute;
+  height: 100%;
+  background: rgb(120,194,146);
+  background: linear-gradient(0deg, rgba(120,194,146,1) 0%, rgba(120,194,146,1) 40%, rgba(120,194,146,0) 90%);
+}
+
+.panel {
+  width: 90%;
+  max-width: 1200px;
+  margin: auto;
+  background-color: var(--color-background);
+  border-radius: 4px;
+  padding: 8px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+}
+
+.panel.panel-dark {
+  background-color: rgba(0,0,0,0.5);
+  color: var(--color-font-light);
+}
+
+.panel.panel-sm {
+  max-width: 600px;
+}
+
+.flexbox { display: flex; }
+.flexbox.flex-col { flex-direction: column; }
+.flexbox.flex-center { justify-content: center; }
+.center { text-align: center; }
+
+hr {
+  border-top: 1px solid var(--color-gray);
+  width: 100%;
+}
+
+input.form-control {
+  border-radius: 4px;
+  border: 1px solid var(--color-dark-gray);
+  padding: 8px 8px;
+  outline: none;
+}
+
+button.btn {
+  border-radius: 4px;
+  outline: none;
+  padding: 8px;
+  transition: background-color ease-in-out 0.3s;
+}
+
+button.btn.btn-primary {
+  border: none;
+  background-color: var(--color-primary);
+  color: var(--color-font-light);
+}
+
+button.btn.btn-accent {
+  border: none;
+  background-color: var(--color-accent);
+  color: var(--color-font);
+}
+
+button.btn.btn-primary:hover {
+  background-color: var(--color-secondary);
+}
+
+.link {
+  color: var(--color-font-light);
+}
