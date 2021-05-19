@@ -10,7 +10,7 @@
 
 [context."ZH-dev"]
   publish = "ZH-dev-dist/"
-  command = "parcel build web/index.html"
+  command = "parcel build web/index.html --out-dir ZH-dev-dist"
 
 [functions]
   directory = "server/"
