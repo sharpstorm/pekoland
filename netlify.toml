@@ -8,7 +8,7 @@
   publish = "dist/"
   command = "parcel build web/index.html"
 
-[context."ZH-dev"]
+[context.ZH-dev]
   publish = "ZH-dev-dist/"
   command = "parcel build web/index.html --out-dir ZH-dev-dist"
 
