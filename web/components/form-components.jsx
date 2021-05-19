@@ -3,13 +3,16 @@ import React from 'react';
 export default class TextInput extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {value: ''};
+    this.state = {value: props.value === undefined ? '' : props.value};
 
     this.handleChange = this.handleChange.bind(this);
   }
 
   handleChange(event) {
     this.setState({value: event.target.value});
+    if (this.props.onChange !== undefined) {
+      this.props.onChange(event);
+    }
   }
 
   render() {

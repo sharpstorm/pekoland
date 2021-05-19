@@ -105,6 +105,10 @@ button.btn.btn-primary {
   color: var(--color-font-light);
 }
 
+button.btn.btn-primary:disabled, button.btn.btn-primary:disabled:hover {
+  background-color: var(--color-dark-gray);
+}
+
 button.btn.btn-accent {
   border: none;
   background-color: var(--color-accent);
