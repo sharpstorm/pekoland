@@ -1,6 +1,7 @@
 import React from 'react';
+import './style.css';
 
-export default class TextInput extends React.Component {
+class TextInput extends React.Component {
   constructor(props) {
     super(props);
     this.state = {value: props.value === undefined ? '' : props.value};
@@ -18,9 +19,22 @@ export default class TextInput extends React.Component {
   render() {
     return <input className='form-control' 
                   type={this.props.type} 
-                  value={this.state.value} 
+                  value={this.state.value}
+                  disabled={this.props.disabled}
                   onChange={this.handleChange} 
                   placeholder={this.props.placeholder}
                   style={this.props.style} />
   }
 }
+
+const Button = (props) => {
+  return (
+    <button {...props} className={'btn ' + props.className}>
+      <span>
+        {props.children}
+      </span>
+    </button>
+  );
+}
+
+export { TextInput, Button };

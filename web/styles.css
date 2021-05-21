@@ -64,6 +64,7 @@ h1 { font-weight: 300; font-size: 2.2rem; }
   border-radius: 4px;
   padding: 8px;
   box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+  position: relative;
 }
 
 .panel.panel-dark {
@@ -83,40 +84,6 @@ h1 { font-weight: 300; font-size: 2.2rem; }
 hr {
   border-top: 1px solid var(--color-gray);
   width: 100%;
-}
-
-input.form-control {
-  border-radius: 4px;
-  border: 1px solid var(--color-dark-gray);
-  padding: 8px 8px;
-  outline: none;
-}
-
-button.btn {
-  border-radius: 4px;
-  outline: none;
-  padding: 8px;
-  transition: background-color ease-in-out 0.3s;
-}
-
-button.btn.btn-primary {
-  border: none;
-  background-color: var(--color-primary);
-  color: var(--color-font-light);
-}
-
-button.btn.btn-primary:disabled, button.btn.btn-primary:disabled:hover {
-  background-color: var(--color-dark-gray);
-}
-
-button.btn.btn-accent {
-  border: none;
-  background-color: var(--color-accent);
-  color: var(--color-font);
-}
-
-button.btn.btn-primary:hover {
-  background-color: var(--color-secondary);
 }
 
 .link {
