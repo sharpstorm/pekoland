@@ -24,6 +24,18 @@
 .animatable.prepare.to.right {
   transform: translateX(1px);
 }
+.animatable.prepare.from.top {
+  transform: translateY(110%);
+}
+.animatable.prepare.from.bottom {
+  transform: translateY(-110%);
+}
+.animatable.prepare.to.top {
+  transform: translateY(1px);
+}
+.animatable.prepare.to.bottom {
+  transform: translateY(-1px);
+}
 
 .animatable:not(.prepare).to {
   pointer-events: none;
@@ -33,6 +45,12 @@
 }
 .animatable:not(.prepare).to.right {
   transform: translateX(110%);
+}
+.animatable:not(.prepare).to.top {
+  transform: translateY(110%);
+}
+.animatable:not(.prepare).to.bottom {
+  transform: translateY(-110%);
 }
 .animatable:not(.prepare).from {
   transform: translateX(0);
