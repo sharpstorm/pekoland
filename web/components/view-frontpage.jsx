@@ -1,17 +1,22 @@
 import React, {Fragment, useState} from 'react';
 import Logo from './logo';
 import BackgroundOverlay from './background-overlay';
-import { Route, Link } from 'react-router-dom';
+import { Route, Link, useHistory } from 'react-router-dom';
 import AnimatorSwitch from './animator/animator-switch';
 import { AnimSlideOut } from './animator/animations';
 import { TextInput, Button } from './forms/form-components';
 import { useIdentityContext } from 'react-netlify-identity-gotrue';
 import { ArrowLeft } from './icons';
 
+
 export default function FrontPageView() {
   function LoginView() {
     const [loginEmail, setLoginEmail] = useState('');
     const [loginPassword, setLoginPassword] = useState('');
+    const [loginErr, setLoginErr] = useState('');
+    const [formState, setFormState] = useState(0);
+    const identity = useIdentityContext();
+    const history = useHistory();
 
     function validateLogin() {
       return loginEmail.length > 0 && loginPassword.length > 0;
@@ -19,8 +24,26 @@ export default function FrontPageView() {
     
     function loginUser(evt) {
       evt.preventDefault();
+      setFormState(1);
 
-      
+      /*identity.login({
+        email: loginEmail,
+        password: loginPassword
+      }).then(() => {
+        alert('Logged In');
+      })
+      .catch(err => {
+        setLoginErr(err.message);
+        setTimeout(() => setLoginErr(''), 4000);
+      });*/
+
+      /*setTimeout(() => {
+        setLoginErr('Invalid Login');
+        setFormState(0);
+      }, 2000);*/
+      setTimeout(() => {
+        history.push('/home');
+      }, 2000);
     }
 
     return (
@@ -28,13 +51,14 @@ export default function FrontPageView() {
         <h1>Welcome!</h1>
         <form className='flexbox flex-col'>
           <div style={{width: '100%', maxWidth: '400px', margin: '4px auto'}} className='flexbox'>
-            <TextInput type='email' placeholder='Email' style={{flex: '1 1 0'}} onChange={(evt) => setLoginEmail(evt.target.value)} value={loginEmail} />
+            <TextInput type='email' placeholder='Email' style={{flex: '1 1 0'}} onChange={(evt) => setLoginEmail(evt.target.value)} value={loginEmail} disabled={!(formState === 0)} />
           </div>
           <div style={{width: '100%', maxWidth: '400px', margin: '4px auto'}} className='flexbox'>
-            <TextInput type='password' placeholder='Password' style={{flex: '1 1 0'}} onChange={(evt) => setLoginPassword(evt.target.value)} value={loginPassword} />
+            <TextInput type='password' placeholder='Password' style={{flex: '1 1 0'}} onChange={(evt) => setLoginPassword(evt.target.value)} value={loginPassword} disabled={!(formState === 0)} />
           </div>
-          <button className='btn btn-primary' style={{width: '100%', maxWidth: '300px', margin: '2rem auto 8px'}}
-            onClick={loginUser} disabled={!validateLogin()}>Login</button>
+          <span style={{ opacity: (loginErr === '') ? 0 : 1, height: '1em', transition: 'opacity 0.3s ease-in' }}>{loginErr}</span>
+          <Button className={'btn btn-primary' + ['', ' loading', ' tick'][formState]} style={{width: '100%', maxWidth: '300px', margin: '1.5rem auto 8px'}}
+            onClick={loginUser} disabled={!validateLogin()}>Login</Button>
           <Link className='link' to='/register'>Dont Have An Account?</Link>
         </form>
       </div>
@@ -123,6 +147,17 @@ export default function FrontPageView() {
         ) : null}
       </div>
     );
+  }
+
+  const identity = useIdentityContext();
+  if (identity.urlToken?.type === 'confirmation') {
+    alert('Confirming User');
+  } else if (identity.urlToken?.type === 'passwordRecovery') {
+    identity.completeUrlTokenTwoStep({
+      password: 'password1'
+    })
+      .then(() => alert('Done Changing'))
+      .catch(_ => setFormError('Having an issue.. please try later'))
   }
 
   return (

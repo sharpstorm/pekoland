@@ -34,7 +34,7 @@ button.btn.btn-accent {
   color: var(--color-font);
 }
 
-button.btn.btn-primary.loading {
+button.btn.loading {
   transition: border linear 0.2s, background ease-in 0.5s;
   background: transparent;
 }
