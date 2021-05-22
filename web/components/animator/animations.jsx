@@ -114,8 +114,7 @@ class AnimCrossFade extends React.Component {
       curUniqId: props.uniqId,
       prevChild: null,
       prevUniqId: null,
-      animationCallback: null,
-      recursiveCounter: 0
+      animationCallback: null
     };
   }
 
@@ -132,6 +131,9 @@ class AnimCrossFade extends React.Component {
         prevUniqId,
         animationCallback: this.swapChildren
       });
+      if (this.props.fastForward) {
+        this.swapChildren();
+      }
     } else if (prevUniqId !== uniqId) {
       this.setState({
         childState: FadeAnimator.OPAQUE_NOANIMATE,
@@ -150,6 +152,9 @@ class AnimCrossFade extends React.Component {
       prevUniqId: null,
       animationCallback: null
     });
+    if (this.props.onChange !== undefined) {
+      this.props.onChange();
+    }
   };
 
   render() {

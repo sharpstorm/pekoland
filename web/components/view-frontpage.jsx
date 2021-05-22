@@ -33,6 +33,7 @@ export default function FrontPageView(props) {
         password: loginPassword
       }).then(() => {
         setIsHidden(true);
+        history.replace('/home');
       })
       .catch(err => {
         setLoginErr(err.message);
@@ -157,7 +158,7 @@ export default function FrontPageView(props) {
 
   return (
     <Fragment>
-      <BackgroundOverlay isVisible={!isHidden} onChange={() => history.push('/home')} />
+      <BackgroundOverlay isVisible={!isHidden} />
       <div style={{overflow: 'hidden'}}>
         <Logo style={{marginBottom: '16px'}}/>
         <div style={{width: '100%', margin:'auto', maxWidth:'1200px', position:'relative', overflow: 'hidden'}}>

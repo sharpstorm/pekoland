@@ -18,7 +18,7 @@ export default class FadeAnimator extends React.Component {
   }
 
   componentDidMount() {
-    this.startAnimation(this.props.opacity);
+    this.startAnimation(this.props.opacity, this.props.opacity);
     if (this.node) {
       this.node.addEventListener('transitionend', this.onTransitionEnd);
     }
@@ -32,18 +32,19 @@ export default class FadeAnimator extends React.Component {
 
   componentDidUpdate(prevProps) {
     if (this.props.opacity !== prevProps.opacity) {
-      this.startAnimation(this.props.opacity, this.props.animationCallback);
+      this.startAnimation(this.props.opacity, prevProps.opacity, this.props.animationCallback);
     }
   }
 
-  startAnimation(opacity, animationCallback) {
+  startAnimation(opacity, prevOpacity, animationCallback) {
     this._animationCallback = animationCallback;
-    if (this.props.opacity === opacity) {
+    if (prevOpacity === opacity) {
       return this.setState({
         opacity,
         animatePrepare: false
       });
     }
+    
     this._animationCallback = this.postPrepareAnimation;
     this._postPrepareTimeout = setTimeout(this.postPrepareAnimation, 500);
 

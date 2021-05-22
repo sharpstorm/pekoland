@@ -15,12 +15,12 @@ class RouteAnimatorSwitch extends React.Component {
 
     return (
       <Route path={this.props.path}
-        render={({location, match}) => (
-            <AnimatorComponent uniqKey={location.pathname} matchRoute={match.url} updateStep={this.props.updateStep}>
+        render={({location, match}) => {return (
+            <AnimatorComponent uniqKey={location.pathname} matchRoute={match.url} updateStep={this.props.updateStep} fastForward={this.props.fastForward} onChange={this.props.onChange}>
               <CustomSwitch location={location}>{this.props.children}</CustomSwitch>
             </AnimatorComponent>
           )}
-      />
+        }/>
     );
   }
 }
