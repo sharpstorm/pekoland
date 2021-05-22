@@ -14,9 +14,8 @@
 
 [[redirects]]
   from = "/*"
-  to = "/"
-  status = 301
-  force = false
+  to = "/index.html"
+  status = 200
 
 [functions]
   directory = "server/"
