@@ -98,7 +98,7 @@ export default class SlideAnimator extends React.Component {
     return (
       <div
         ref={node => (this.node = node)}
-        className={classNames('animatable', {
+        className={classNames('slideable', {
           ['to']: [SlideAnimator.TO_LEFT, SlideAnimator.TO_RIGHT, SlideAnimator.TO_BOTTOM, SlideAnimator.TO_TOP].includes(
             this.state.position
           ),

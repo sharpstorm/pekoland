@@ -1,18 +1,23 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import { BrowserRouter, Route, Redirect } from 'react-router-dom';
 import FrontPageView from './components/view-frontpage';
 import HomeView from './components/view-home';
-import NetlifyIdentityContext from 'react-netlify-identity-gotrue';
+import { default as NetlifyIdentityContext, useIdentityContext } from 'react-netlify-identity-gotrue';
+import { RouteAnimatorSwitch } from './components/animator/animator-switch';
+import { AnimCrossFade } from './components/animator/animations';
 
 function App() {
+  const identity = useIdentityContext();
+
   return (
     <main>
-      <Switch>
-        <Route path={['/', '/register']} exact component={FrontPageView} />
-        <Route path='/home' exact component={HomeView} />
+      <Route exact path='/' render={() => <Redirect to='/login'/>} />
+      <RouteAnimatorSwitch animator={AnimCrossFade} path='/:p'>
+        <Route exact path={'/login/(register)?'} component={FrontPageView}/>
+        <Route exact path='/home' component={HomeView} />
         <Route component={Error} />
-      </Switch>
+      </RouteAnimatorSwitch>
     </main>
    );
 }

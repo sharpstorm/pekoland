@@ -2,21 +2,23 @@ import React, {Fragment, useState} from 'react';
 import Logo from './logo';
 import BackgroundOverlay from './background-overlay';
 import { Route, Link, useHistory } from 'react-router-dom';
-import AnimatorSwitch from './animator/animator-switch';
+import { RouteAnimatorSwitch } from './animator/animator-switch';
 import { AnimSlideOut } from './animator/animations';
 import { TextInput, Button } from './forms/form-components';
 import { useIdentityContext } from 'react-netlify-identity-gotrue';
 import { ArrowLeft } from './icons';
 
 
-export default function FrontPageView() {
+export default function FrontPageView(props) {
+  const [isHidden, setIsHidden] = useState(false);
+  const history = useHistory();
+
   function LoginView() {
     const [loginEmail, setLoginEmail] = useState('');
     const [loginPassword, setLoginPassword] = useState('');
     const [loginErr, setLoginErr] = useState('');
     const [formState, setFormState] = useState(0);
     const identity = useIdentityContext();
-    const history = useHistory();
 
     function validateLogin() {
       return loginEmail.length > 0 && loginPassword.length > 0;
@@ -26,24 +28,17 @@ export default function FrontPageView() {
       evt.preventDefault();
       setFormState(1);
 
-      /*identity.login({
+      identity.login({
         email: loginEmail,
         password: loginPassword
       }).then(() => {
-        alert('Logged In');
+        setIsHidden(true);
       })
       .catch(err => {
         setLoginErr(err.message);
-        setTimeout(() => setLoginErr(''), 4000);
-      });*/
-
-      /*setTimeout(() => {
-        setLoginErr('Invalid Login');
         setFormState(0);
-      }, 2000);*/
-      setTimeout(() => {
-        history.push('/home');
-      }, 2000);
+        setTimeout(() => setLoginErr(''), 4000);
+      });
     }
 
     return (
@@ -59,7 +54,7 @@ export default function FrontPageView() {
           <span style={{ opacity: (loginErr === '') ? 0 : 1, height: '1em', transition: 'opacity 0.3s ease-in' }}>{loginErr}</span>
           <Button className={'btn btn-primary' + ['', ' loading', ' tick'][formState]} style={{width: '100%', maxWidth: '300px', margin: '1.5rem auto 8px'}}
             onClick={loginUser} disabled={!validateLogin()}>Login</Button>
-          <Link className='link' to='/register'>Dont Have An Account?</Link>
+          <Link className='link' to='/login/register'>Dont Have An Account?</Link>
         </form>
       </div>
     );
@@ -105,7 +100,7 @@ export default function FrontPageView() {
         {(formState < 2) ? (
           <Fragment>
             <div style={{marginTop: '8px', marginLeft: '8px'}}>
-              <Link to='/'>
+              <Link to='/login'>
                 <div style={{float: 'left'}}><ArrowLeft color='#FFF' size='2rem'/></div>
               </Link>
             </div>
@@ -162,14 +157,18 @@ export default function FrontPageView() {
 
   return (
     <Fragment>
-      <BackgroundOverlay/>
+      <BackgroundOverlay isVisible={!isHidden} onChange={() => history.push('/home')} />
       <div style={{overflow: 'hidden'}}>
         <Logo style={{marginBottom: '16px'}}/>
         <div style={{width: '100%', margin:'auto', maxWidth:'1200px', position:'relative', overflow: 'hidden'}}>
-          <AnimatorSwitch animator={AnimSlideOut}>
-            <Route exact path='/' component={LoginView} />
-            <Route exact path='/register' component={RegisterView} />
-          </AnimatorSwitch>
+        <Route
+          render={({location}) => (
+            <AnimSlideOut uniqKey={location.pathname} updateStep={undefined}>
+              {location.pathname === '/login/register' ? (<RegisterView/>) : (<LoginView/>)}
+            </AnimSlideOut>
+          )}
+        />
+
         </div>
       </div>
     </Fragment> 

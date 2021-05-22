@@ -1,5 +1,6 @@
 import React from 'react';
 import SlideAnimator from './slide-animator';
+import FadeAnimator from './fade-animator';
 
 class AnimSlideOut extends React.Component {
   constructor(props) {
@@ -103,4 +104,64 @@ class AnimSlideUp extends React.Component {
   }
 }
 
-export { AnimSlideOut, AnimSlideUp }
+class AnimCrossFade extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      childState: FadeAnimator.OPAQUE,
+      curChild: props.children,
+      curUniqId: props.uniqId,
+      prevChild: null,
+      prevUniqId: null,
+      animationCallback: null,
+      recursiveCounter: 0
+    };
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const prevUniqId = prevProps.uniqKey || prevProps.children.type;
+    const uniqId = this.props.uniqKey || this.props.children.type;
+
+    if (this.props.matchRoute !== prevProps.matchRoute) {
+      this.setState({
+        childState: FadeAnimator.TRANSPARENT,
+        curChild: this.props.children,
+        curUniqId: uniqId,
+        prevChild: prevProps.children,
+        prevUniqId,
+        animationCallback: this.swapChildren
+      });
+    } else if (prevUniqId !== uniqId) {
+      this.setState({
+        childState: FadeAnimator.OPAQUE_NOANIMATE,
+        curChild: this.props.children,
+        prevChild: null,
+        prevUniqId: null,
+        animationCallback: this.swapChildren
+      });
+    }
+  }
+
+  swapChildren = () => {
+    this.setState({
+      childState: FadeAnimator.OPAQUE,
+      prevChild: null,
+      prevUniqId: null,
+      animationCallback: null
+    });
+  };
+
+  render() {
+    return (
+      <FadeAnimator
+        opacity={this.state.childState}
+        animationCallback={this.state.animationCallback}
+      >
+        {this.state.prevChild || this.state.curChild}
+      </FadeAnimator>
+    );
+  }
+}
+
+export { AnimSlideOut, AnimSlideUp, AnimCrossFade }
