@@ -12,5 +12,11 @@
   publish = "ZH-dev-dist/"
   command = "parcel build web/index.html --out-dir ZH-dev-dist"
 
+[[redirects]]
+  from = "/*"
+  to = "/"
+  status = 301
+  force = false
+
 [functions]
   directory = "server/"
