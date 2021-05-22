@@ -34,6 +34,10 @@ button.btn.btn-accent {
   color: var(--color-font);
 }
 
+button.btn.btn-accent:hover {
+  background-color: var(--color-accent-secondary);
+}
+
 button.btn.loading {
   transition: border linear 0.2s, background ease-in 0.5s;
   background: transparent;
