@@ -1,10 +1,10 @@
-.animatable {
+.slideable {
   background: inherit;
   will-change: transform;
   transition: transform 0.5s ease;
 }
 
-.animatable.prepare {
+.slideable.prepare {
   /* we do this so we can tell when the "preparing" was done
      since there seems to be a browser bug where the preparation still takes
      time, even with `transition: none;` */
@@ -12,28 +12,69 @@
   opacity: 0;
 }
 
-.animatable.prepare.from.left {
+.slideable.prepare.from.left {
   transform: translateX(-110%);
 }
-.animatable.prepare.from.right {
+.slideable.prepare.from.right {
   transform: translateX(110%);
 }
-.animatable.prepare.to.left {
+.slideable.prepare.to.left {
   transform: translateX(-1px);
 }
-.animatable.prepare.to.right {
+.slideable.prepare.to.right {
   transform: translateX(1px);
 }
+.slideable.prepare.from.top {
+  transform: translateY(-110vh);
+}
+.slideable.prepare.from.bottom {
+  transform: translateY(110vh);
+}
+.slideable.prepare.to.top {
+  transform: translateY(-1px);
+}
+.slideable.prepare.to.bottom {
+  transform: translateY(1px);
+}
 
-.animatable:not(.prepare).to {
+.slideable:not(.prepare).to {
   pointer-events: none;
 }
-.animatable:not(.prepare).to.left {
+.slideable:not(.prepare).to.left {
   transform: translateX(-110%);
 }
-.animatable:not(.prepare).to.right {
+.slideable:not(.prepare).to.right {
   transform: translateX(110%);
 }
-.animatable:not(.prepare).from {
+.slideable:not(.prepare).to.top {
+  transform: translateY(-110vh);
+}
+.slideable:not(.prepare).to.bottom {
+  transform: translateY(110vh);
+}
+.slideable:not(.prepare).from {
   transform: translateX(0);
+}
+
+
+.fadeable {
+  background: inherit;
+  will-change: opacity;
+  transition: opacity 0.5s ease;
+}
+
+.fadeable.prepare.opaque {
+  opacity: 0;
+}
+
+.fadeable.prepare.transparent {
+  opacity: 1;
+}
+
+.fadeable:not(.prepare).opaque {
+  opacity: 1;
+}
+
+.fadeable:not(.prepare).transparent {
+  opacity: 0;
 }

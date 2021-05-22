@@ -2,6 +2,7 @@
   --color-primary: #67bfe4;
   --color-secondary: #23667d;
   --color-accent: #ffb859;
+  --color-accent-secondary: #bb7923;
   --color-font-light: #fff;
   --color-font: #000;
   --color-background: #eee;
@@ -56,6 +57,13 @@ h1 { font-weight: 300; font-size: 2.2rem; }
   background: linear-gradient(0deg, rgba(120,194,146,1) 0%, rgba(120,194,146,1) 40%, rgba(120,194,146,0) 90%);
 }
 
+.bg-overlay > * {
+  transition: transform 1s ease-in;
+  transform: translateY(0);
+}
+
+.bg-overlay.disappear > * { transform: translateY(100vh); }
+
 .panel {
   width: 90%;
   max-width: 1200px;
@@ -64,6 +72,7 @@ h1 { font-weight: 300; font-size: 2.2rem; }
   border-radius: 4px;
   padding: 8px;
   box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+  position: relative;
 }
 
 .panel.panel-dark {
@@ -83,36 +92,6 @@ h1 { font-weight: 300; font-size: 2.2rem; }
 hr {
   border-top: 1px solid var(--color-gray);
   width: 100%;
-}
-
-input.form-control {
-  border-radius: 4px;
-  border: 1px solid var(--color-dark-gray);
-  padding: 8px 8px;
-  outline: none;
-}
-
-button.btn {
-  border-radius: 4px;
-  outline: none;
-  padding: 8px;
-  transition: background-color ease-in-out 0.3s;
-}
-
-button.btn.btn-primary {
-  border: none;
-  background-color: var(--color-primary);
-  color: var(--color-font-light);
-}
-
-button.btn.btn-accent {
-  border: none;
-  background-color: var(--color-accent);
-  color: var(--color-font);
-}
-
-button.btn.btn-primary:hover {
-  background-color: var(--color-secondary);
 }
 
 .link {

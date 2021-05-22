@@ -40,11 +40,13 @@ export default class SlideAnimator extends React.Component {
 
   startAnimation(position, animationCallback) {
     const noAnimate = position === SlideAnimator.CENTER;
-    const animatingOut = [SlideAnimator.TO_LEFT, SlideAnimator.TO_RIGHT].includes(position);
+    const animatingOut = [SlideAnimator.TO_LEFT, SlideAnimator.TO_RIGHT, SlideAnimator.TO_TOP, SlideAnimator.TO_BOTTOM].includes(position);
     const currentlyIn = [
       SlideAnimator.CENTER,
       SlideAnimator.FROM_LEFT,
-      SlideAnimator.FROM_RIGHT
+      SlideAnimator.FROM_RIGHT,
+      SlideAnimator.FROM_TOP,
+      SlideAnimator.FROM_BOTTOM
     ].includes(this.state.position);
     if (noAnimate || (currentlyIn && animatingOut)) {
       // in these cases we don't need to prepare our animation at all, we can just
@@ -96,17 +98,23 @@ export default class SlideAnimator extends React.Component {
     return (
       <div
         ref={node => (this.node = node)}
-        className={classNames('animatable', {
-          ['to']: [SlideAnimator.TO_LEFT, SlideAnimator.TO_RIGHT].includes(
+        className={classNames('slideable', {
+          ['to']: [SlideAnimator.TO_LEFT, SlideAnimator.TO_RIGHT, SlideAnimator.TO_BOTTOM, SlideAnimator.TO_TOP].includes(
             this.state.position
           ),
-          ['from']: [SlideAnimator.FROM_LEFT, SlideAnimator.FROM_RIGHT].includes(
+          ['from']: [SlideAnimator.FROM_LEFT, SlideAnimator.FROM_RIGHT, SlideAnimator.FROM_BOTTOM, SlideAnimator.FROM_TOP].includes(
             this.state.position
           ),
           ['right']: [SlideAnimator.TO_RIGHT, SlideAnimator.FROM_RIGHT].includes(
             this.state.position
           ),
           ['left']: [SlideAnimator.TO_LEFT, SlideAnimator.FROM_LEFT].includes(
+            this.state.position
+          ),
+          ['top']: [SlideAnimator.TO_TOP, SlideAnimator.FROM_TOP].includes(
+            this.state.position
+          ),
+          ['bottom']: [SlideAnimator.TO_BOTTOM, SlideAnimator.FROM_BOTTOM].includes(
             this.state.position
           ),
           ['prepare']: this.state.animatePrepare
@@ -124,5 +132,9 @@ export default class SlideAnimator extends React.Component {
 SlideAnimator.CENTER = 'CENTER';
 SlideAnimator.TO_LEFT = 'TO_LEFT';
 SlideAnimator.TO_RIGHT = 'TO_RIGHT';
+SlideAnimator.TO_TOP = 'TO_TOP';
+SlideAnimator.TO_BOTTOM = 'TO_BOTTOM';
 SlideAnimator.FROM_LEFT = 'FROM_LEFT';
 SlideAnimator.FROM_RIGHT = 'FROM_RIGHT';
+SlideAnimator.FROM_TOP = 'FROM_TOP';
+SlideAnimator.FROM_BOTTOM = 'FROM_BOTTOM';

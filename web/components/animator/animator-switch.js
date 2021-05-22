@@ -1,7 +1,7 @@
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 
-export default class AnimatorSwitch extends React.Component {
+class RouteAnimatorSwitch extends React.Component {
   constructor(props) {
     super(props);
 
@@ -14,13 +14,15 @@ export default class AnimatorSwitch extends React.Component {
     const CustomSwitch = this.switch;
 
     return (
-      <Route
-        render={({ location }) => (
-          <AnimatorComponent uniqKey={location.pathname} updateStep={this.props.updateStep}>
-            <CustomSwitch location={location}>{this.props.children}</CustomSwitch>
-          </AnimatorComponent>
-        )}
-      />
+      <Route path={this.props.path}
+        render={({location, match}) => {return (
+            <AnimatorComponent uniqKey={location.pathname} matchRoute={match.url} updateStep={this.props.updateStep} fastForward={this.props.fastForward} onChange={this.props.onChange}>
+              <CustomSwitch location={location}>{this.props.children}</CustomSwitch>
+            </AnimatorComponent>
+          )}
+        }/>
     );
   }
 }
+
+export { RouteAnimatorSwitch };
