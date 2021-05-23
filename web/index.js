@@ -21,9 +21,9 @@ function App() {
 
   return (
     <main>
-      <Route exact path='/' render={() => <Redirect to='/login'/>} />
+      <Route exact path='/' render={() => <Redirect to={'/login' + ((document.location.hash !== '') ? `#${document.location.hash}` : '')} /> } />
       <RouteAnimatorSwitch animator={AnimCrossFade} path='/:p' fastForward={fastForward} onChange={() => setFastForward(false)}>
-        <Route exact path={'/login(/register)?'} component={FrontPageView}/>
+        <Route exact path={'/login(/register|/forget|/reset|/confirm)?'} component={FrontPageView}/>
         <Route exact path='/home' component={HomeView} />
         <Redirect from='*' to='/' />
       </RouteAnimatorSwitch>

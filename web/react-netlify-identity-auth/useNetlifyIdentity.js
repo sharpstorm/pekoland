@@ -302,10 +302,14 @@ const useNetlifyIdentity = ({ url: _url }) => {
 
   // API: Requests a password recovery email for the specified email-user
   const sendPasswordRecovery = async ({ email }) => {
-    return fetch(`${url}/recover`, {
+    const response = await fetch(`${url}/recover`, {
       method: 'POST',
       body: JSON.stringify({ email })
-    })
+    }).then(resp => resp.json());
+
+    if (response?.msg) {
+      throw new Error(response.msg);
+    }
   }
 
   // Catches the pendingTokenRefresh flag and runs the token refresh function
@@ -329,6 +333,7 @@ const useNetlifyIdentity = ({ url: _url }) => {
     update,
     signup,
     urlToken,
+    goTrueToken,
     refreshUser: update,
     authorizedFetch,
     provisionalUser,
