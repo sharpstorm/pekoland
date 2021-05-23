@@ -20,12 +20,30 @@ class AnimSlideOut extends React.Component {
     const prevUniqId = prevProps.uniqKey || prevProps.children.type;
     const uniqId = this.props.uniqKey || this.props.children.type;
 
-    if (prevUniqId !== uniqId) {
+    if (this.props.matchRoute !== prevProps.matchRoute) {
       this.setState({
         childPosition: SlideAnimator.TO_LEFT,
         curChild: this.props.children,
         curUniqId: uniqId,
         prevChild: prevProps.children,
+        prevUniqId,
+        animationCallback: this.swapChildren
+      });
+      if (this.props.fastForward) {
+        this.setState({
+          childPosition: SlideAnimator.CENTER,
+          curChild: this.props.children,
+          prevChild: null,
+          prevUniqId,
+          animationCallback: null
+        });
+        this.callback();
+      }
+    } else if (prevUniqId !== uniqId) {
+      this.setState({
+        childPosition: SlideAnimator.TO_LEFT,
+        curChild: this.props.children,
+        prevChild: null,
         prevUniqId,
         animationCallback: this.swapChildren
       });
@@ -39,7 +57,14 @@ class AnimSlideOut extends React.Component {
       prevUniqId: null,
       animationCallback: null
     });
+    this.callback();
   };
+
+  callback() {
+    if (this.props.onChange !== undefined) {
+      this.props.onChange();
+    }
+  }
 
   render() {
     return (
@@ -80,6 +105,9 @@ class AnimSlideUp extends React.Component {
         prevUniqId,
         animationCallback: this.swapChildren
       });
+      if (this.props.fastForward) {
+        this.swapChildren();
+      }
     }
   }
 
