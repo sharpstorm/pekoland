@@ -1,6 +1,6 @@
-import React, {Fragment, useState} from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import { Button } from './forms/form-components'
-import { useIdentityContext } from 'react-netlify-identity-gotrue';
+import { useIdentityContext } from 'react-netlify-identity-auth';
 import { useHistory } from 'react-router-dom';
 
 export default function HomeView() {
@@ -11,6 +11,12 @@ export default function HomeView() {
     identity.logout();
     history.replace('/login');
   }
+
+  useEffect(() => {
+    if (identity.ready && !identity.user) {
+      history.replace('/login');
+    }
+  }, [identity.ready]);
 
   return (
     <div className='panel panel-sm panel-dark flexbox flex-col' style={{textAlign: 'center', paddingBottom: '16px'}}>
