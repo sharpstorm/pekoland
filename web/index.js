@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom'
 import { BrowserRouter, Route, Redirect, useHistory } from 'react-router-dom';
 import FrontPageView from './components/view-frontpage';
 import HomeView from './components/view-home';
-import { default as NetlifyIdentityContext, useIdentityContext } from 'react-netlify-identity-gotrue';
+import NetlifyIdentityContext, { useIdentityContext } from 'react-netlify-identity-auth';
 import { RouteAnimatorSwitch } from './components/animator/animator-switch';
 import { AnimCrossFade } from './components/animator/animations';
 
@@ -13,11 +13,11 @@ function App() {
   const [fastForward, setFastForward] = useState(false);
 
   useEffect(() => {
-    if (identity.user && history.location.pathname.startsWith('/login')) {
+    if (identity.ready && identity.user && history.location.pathname.startsWith('/login')) {
       setFastForward(true);
       history.replace('/home');
     }
-  }, [identity.user]);
+  }, [identity.ready]);
 
   return (
     <main>

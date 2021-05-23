@@ -5,7 +5,7 @@ import { Route, Link, useHistory } from 'react-router-dom';
 import { RouteAnimatorSwitch } from './animator/animator-switch';
 import { AnimSlideOut } from './animator/animations';
 import { TextInput, Button } from './forms/form-components';
-import { useIdentityContext } from 'react-netlify-identity-gotrue';
+import { useIdentityContext } from 'react-netlify-identity-auth';
 import { ArrowLeft } from './icons';
 
 
