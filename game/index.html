@@ -1,0 +1,97 @@
+<html>
+    <h3>Chosen Player: </h3> <h3 id = "currPlayer2"></h3>
+    
+ 
+    <canvas id="game" width="1000" height="500" style="border:1px solid #000000; margin-top:100px; margin-left:250px; position:fixed;"></canvas>
+</html>
+
+
+<script src="Classes/player.js"></script>
+<script src="Classes/joystick.js"></script>
+<script src="Classes/playerManager.js"></script>
+<script src="Classes/spriteManager.js"></script>
+<script src="Classes/drawer.js"></script>
+
+<script>
+    var currentPlayer2 = "";
+    //TODO. Hardcoded sprite var
+    down = [0,38,33];
+    up = [0,116,33];
+    right = [0,158,40];
+    left = [0,77,40];
+    //------------------------\\
+    xx = 50;
+    yy = 50;
+
+    //init rabbit sprite
+    var rabbit = new Image();
+    rabbit.src = "Images/rabbit.png";
+    rabbitSprite = new playerSprite(up,down,right,left,rabbit);
+    
+    //init bg
+    var map = new Image();
+    map.src = "Images/house.jpg";
+
+    //Init player manager and add player TODO::hardcoded
+    playerManager = new playerManager();
+    playerManager.addPlayer(new Player("Johnny",rabbitSprite));
+    //playerManager.addPlayer(new Player("Player 2",rabbitSprite));
+    //playerManager.addPlayer(new Player("Player 3",rabbitSprite));
+
+
+    for(i = 0; i < playerManager.getArr().length; i++){
+        pp = playerManager.getArr()[i];
+        pp.sourceX = pp.playerSprite.down[0];
+        pp.sourceY = pp.playerSprite.down[1];
+    }
+    
+
+    document.onkeydown = joyStick;
+
+    
+    player2List();
+    window.requestAnimationFrame(() => drawer(playerManager));
+
+    // Append <button> to <body>
+    function player2List(){
+        for(i = 0; i < playerManager.getArr().length; i++){
+            pp = playerManager.getArr()[i];
+            pp.sourceX = pp.playerSprite.down[0];
+            pp.sourceY = pp.playerSprite.down[1];
+            var btn = document.createElement("BUTTON");   // Create a <button> element
+            btn.innerHTML = pp.name;                // Insert text
+            btn.id = pp.name;
+            btn.onclick = function(){
+                
+                document.getElementById("currPlayer2").innerHTML = this.id;   
+                for(i = 0; i < playerManager.getArr().length; i++){
+                    if(playerManager.getArr()[i].name == this.id)
+                        currentPlayer2 = playerManager.getArr()[i];
+                }
+                //console.log(currentPlayer2);
+            };
+          
+            document.body.appendChild(btn);
+        }
+          
+    }
+
+    function playerBtn(aa){
+        alert(aa);
+    }
+
+
+    canvas = document.getElementsByTagName('canvas');
+    var ctx = document.getElementById('game').getContext('2d');
+    canvas[0].addEventListener('click', on_canvas_move, false);
+    canvas[0].addEventListener('mousemove', on_canvas_move, false);
+    function on_canvas_move(ev) {
+        xx = ev.offsetX;
+        yy = ev.offsetY;
+    } 
+
+
+    
+
+    
+</script>
