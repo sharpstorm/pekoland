@@ -1,4 +1,4 @@
-class playerSprite{
+export default class PlayerSprite{
     up;
     down;
     right;

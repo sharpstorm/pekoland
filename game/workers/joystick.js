@@ -1,4 +1,8 @@
-function joyStick(e){
+import PlayerManager from '../managers/player-manager.js';
+const playerManager = PlayerManager.getInstance();
+var ctx = document.getElementById('game').getContext('2d');
+
+function joystickWorker(e){
     var event = window.event ? window.event : e;
     if(event.keyCode == "38" && playerManager.getArr()[0].currentSprite > 5){
         playerManager.getPlayer("Johnny").moveY= -50/6;
@@ -94,8 +98,10 @@ function joyStick(e){
   
 }
 
-function joyStickUp(e){
+function joystickUpWorker(e){
     var event = window.event ? window.event : e;
     //if(event.keyCode == "40" || event.keyCode == "39" || event.keyCode == "38" || event.keyCode == "37" )
 
 }
+
+export { joystickWorker, joystickUpWorker };

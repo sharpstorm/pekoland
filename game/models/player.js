@@ -1,4 +1,4 @@
-class Player{
+export default class Player{
     name;
     x = 0;
     y = 0;
@@ -63,9 +63,5 @@ class Player{
         }
         //console.log(ctx.getImageData(this.x, this.y, 1, 1).data);
         //console.log(this.currentSprite);
-       
-        
     }
-
-  
 }

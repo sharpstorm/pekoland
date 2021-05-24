@@ -1,14 +1,12 @@
-counter = 0;
-function drawer(playerManager){
+import PlayerManager from './player-manager.js';
+
+let counter = 0;
+function drawer() {
     if(counter > 4){
         var ctx = document.getElementById('game').getContext('2d');
         ctx.clearRect(0,0,1000,500);
 
         //ctx.fillRect(0, 0, 1000, 500);
-        
-
-
-
         //BG
         //ctx.drawImage(map, -80, 900, 2000,1000,0,0,1000,500);
         drawGrids(1000,500,50);
@@ -27,28 +25,27 @@ function drawer(playerManager){
         
         //console.log(playerManager.getArr());
         
-        for(i = 0; i < playerManager.getArr().length; i++){
+        for(let i = 0; i < PlayerManager.getInstance().getArr().length; i++){
             //console.log(i);
             
-            pp = playerManager.getArr()[i];
+            let pp = PlayerManager.getInstance().getArr()[i];
             //console.log(pp);
             ctx.font = "10px Arial";
             ctx.strokeText(pp.name, pp.x, pp.y);
             ctx.drawImage(pp.playerSprite.image,pp.sourceX,pp.sourceY,37.5,40,pp.x,pp.y,50,50);
         }
-        drawRect();
         animate();
         
         counter = 0;  //FPS
     }
     counter ++;
-    window.requestAnimationFrame(() => drawer(playerManager));
+    window.requestAnimationFrame(drawer);
 }
 
 function animate(){
-    for(i = 0; i < playerManager.getArr().length; i++){
+    for(let i = 0; i < PlayerManager.getInstance().getArr().length; i++){
         //console.log(i);
-        pp = playerManager.getArr()[i];
+        let pp = PlayerManager.getInstance().getArr()[i];
         pp.animate();
     }
     //playerManager.getArr()[0].animate();
@@ -57,8 +54,8 @@ function animate(){
 
 function drawGrids(height, width, gridLength){
     var ctx = document.getElementById('game').getContext('2d');
-    for(i=0;i < height; i+= gridLength){
-        for(ii = 0; ii< width; ii+= gridLength){
+    for(let i=0;i < height; i+= gridLength){
+        for(let ii = 0; ii< width; ii+= gridLength){
         ctx.beginPath();
         ctx.strokeStyle = "black";
         ctx.lineWidth = "1";
@@ -66,12 +63,6 @@ function drawGrids(height, width, gridLength){
         ctx.stroke();
         }
     }
-}
-
-function drawRect(){
-    var ctx = document.getElementById('game').getContext('2d'); 
-    ctx.fillStyle = "#000000"
-    ctx.fillRect(xx, yy, 50, 50);
 }
 
 function draggable(){
@@ -83,3 +74,4 @@ function getPixel(x, y) {
     return context.getImageData(x, y, 1, 1).data;
 }
 
+export default drawer;
