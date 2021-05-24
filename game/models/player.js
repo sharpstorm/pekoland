@@ -1,67 +1,68 @@
-export default class Player{
-    name;
-    x = 0;
-    y = 0;
-    moveX = 0;
-    moveY = 0;
-    sourceX = 0;
-    sourceY = 0;
-    playerSprite;
-    action = "";
-    currentSprite = 7;
+export default class Player {
+  constructor(name, playerSprite) {
+    this.name = name;
+    this.playerSprite = playerSprite;
 
+    this.x = 0;
+    this.y = 0;
+    this.moveX = 0;
+    this.moveY = 0;
+    this.sourceX = 0;
+    this.sourceY = 0;
+    this.action = '';
+    this.isAnimating = false;
+    this.currentSprite = 6;
+  }
 
-    constructor(name, playerSprite){
-        this.name = name;
-        this.playerSprite = playerSprite;
-   
+  updateX(newX) {
+    this.x = newX;
+  }
+
+  updateY(newY) {
+    this.Y = newY;
+  }
+
+  animate() {
+    //var ctx = document.getElementById('game').getContext('2d');
+    //console.log("X:" + this.x + "Y:" + this.y);
+    //console.log(ctx.getImageData(this.x+25, this.y+25, 1, 1).data);
+    if (!this.isAnimating) return;
+
+    if (this.action === 'down') {
+      this.sourceX += this.playerSprite.down[2];
+      this.currentSprite++;
+      this.y += this.moveY;
+    }
+    else if (this.action === 'up') {
+      this.sourceX += this.playerSprite.up[2];
+      this.currentSprite++;
+      this.y += this.moveY;
+    }
+    else if (this.action === 'left') {
+      this.sourceX += this.playerSprite.left[2];
+      this.currentSprite++;
+      this.x += this.moveX;
+    }
+    else if (this.action === 'right') {
+      this.sourceX += this.playerSprite.right[2];
+      this.currentSprite++;
+      this.x += this.moveX;
     }
 
-    updateX(newX){
-        this.x = newX;
+    if (this.currentSprite >= 6) {
+      this.isAnimating = false;
+      this.action = '';
     }
 
-    updateY(newY){
-        this.Y = newY;
-    }
+    //Collision
 
-    animate(){
-         
-        var ctx = document.getElementById('game').getContext('2d');
-        //console.log("X:" + this.x + "Y:" + this.y);
-        //console.log(ctx.getImageData(this.x+25, this.y+25, 1, 1).data);
-        if(this.action == "down" && this.currentSprite < 6){
-            this.sourceX += this.playerSprite.down[2];
-            this.currentSprite++;
-            this.y += this.moveY;
-            
-            //console.log(this.y);
-        }
-        else if(this.action == "up" && this.currentSprite < 6){
-            this.sourceX += this.playerSprite.up[2];
-            this.currentSprite++;
-            this.y += this.moveY;
-        }
-        else if(this.action == "left" && this.currentSprite < 6){
-            this.sourceX += this.playerSprite.left[2];
-            this.currentSprite++;
-            this.x += this.moveX;
-        }
-        else if(this.action == "right" && this.currentSprite < 6){
-            this.sourceX += this.playerSprite.right[2];
-            this.currentSprite++;
-            this.x += this.moveX;
-        }
-
-        //Collision
-       
-        //console.log(ctx.getImageData(this.x, this.y, 1, 1).data[3]);
-        if(ctx.getImageData(this.x, this.y, 50, 50).data[3] == 255){
-            //console.log("collide: " + this.name);
-            //console.log(this.x + "," + this.y);
-            //console.log(ctx.getImageData(this.x + 25, this.y + 25, 1, 1).data);
-        }
-        //console.log(ctx.getImageData(this.x, this.y, 1, 1).data);
-        //console.log(this.currentSprite);
-    }
+    //console.log(ctx.getImageData(this.x, this.y, 1, 1).data[3]);
+    //if (ctx.getImageData(this.x, this.y, 50, 50).data[3] == 255) {
+      //console.log("collide: " + this.name);
+      //console.log(this.x + "," + this.y);
+      //console.log(ctx.getImageData(this.x + 25, this.y + 25, 1, 1).data);
+    //}
+    //console.log(ctx.getImageData(this.x, this.y, 1, 1).data);
+    //console.log(this.currentSprite);
+  }
 }

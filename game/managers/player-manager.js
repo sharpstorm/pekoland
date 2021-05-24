@@ -1,30 +1,36 @@
 let instance;
 
-export default class PlayerManager{
-    playerArr = [];
+export default class PlayerManager {
 
+  constructor() {
+    this.players = {};
+    this.self = undefined;
+  }
 
-    addPlayer(player){
-        this.playerArr.push(player);
+  addPlayer(player) {
+    this.players[player.name] = player;
+  }
+
+  setSelf(playerName) {
+    this.self = playerName;
+  }
+
+  getSelf() {
+    return (this.self === undefined) ? undefined : this.players[this.self];
+  }
+
+  getPlayers() {
+    return Object.values(this.players);
+  }
+
+  getPlayer(name) {
+    return this.players[name];
+  }
+
+  static getInstance() {
+    if (instance === undefined) {
+      instance = new PlayerManager();
     }
-
-    getArr(){
-        return this.playerArr;
-    }
-
-    getPlayer(name)
-    {
-        for(let i = 0; i < this.getArr().length; i++){
-            if(this.getArr()[i].name == name)
-                return this.getArr()[i];
-        }
-        return undefined;
-    }
-
-    static getInstance() {
-        if (instance === undefined) {
-            instance = new PlayerManager();
-        }
-        return instance;
-    }
+    return instance;
+  }
 }
