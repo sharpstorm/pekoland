@@ -1,20 +1,25 @@
 import PlayerSprite from './managers/sprite-manager.js';
 import Player from './models/player.js';
 import PlayerManager from './managers/player-manager.js';
+import ChatManager from './managers/chat-manager.js';
 import { joystickWorker, joystickUpWorker } from './workers/joystick.js';
 import drawer from './managers/animation-manager.js';
 
+
 let currentPlayer2 = '';
-//TODO. Hardcoded sprite var
+
+
+
+//Rabbit
 let down = [0,38,33];
 let up = [0,116,33];
 let right = [0,158,40];
 let left = [0,77,40];
-
-//init rabbit sprite
 let rabbit = new Image();
 rabbit.src = 'Images/rabbit.png';
 let rabbitSprite = new PlayerSprite(up,down,right,left,rabbit);
+
+
 
 //init bg
 var map = new Image();
@@ -22,6 +27,7 @@ map.src = 'Images/house.jpg';
 
 //Init player manager and add player TODO::hardcoded
 const playerManager = PlayerManager.getInstance();
+const chatManager = ChatManager.getInstance();
 playerManager.addPlayer(new Player('Johnny',rabbitSprite));
 playerManager.setSelf('Johnny');
 //playerManager.addPlayer(new Player("Player 2",rabbitSprite));
@@ -50,8 +56,11 @@ function player2List() {
       let playerName = evt.target.getAttribute('data-player-name');
       document.getElementById('currPlayer2').textContent = playerName;
       currentPlayer2 = playerManager.getPlayer(playerName);
+      console.log(currentPlayer2);
     }
 
     document.body.appendChild(btn);
   });
 }
+
+

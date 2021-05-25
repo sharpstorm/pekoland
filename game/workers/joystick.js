@@ -1,9 +1,14 @@
+import ChatManager from '../managers/chat-manager.js';
 import PlayerManager from '../managers/player-manager.js';
+import aa from '../managers/animation-manager.js';
 
 const playerManager = PlayerManager.getInstance();
+const chatManager = ChatManager.getInstance();
 const ctx = document.getElementById('game').getContext('2d');
 
 function joystickWorker(e) {
+
+  
   if (playerManager.getSelf().isAnimating) {
     return;
   }
@@ -86,7 +91,7 @@ function joystickWorker(e) {
 
   }
 
-
+  
 
 }
 

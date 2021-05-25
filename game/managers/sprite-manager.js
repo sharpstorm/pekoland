@@ -7,3 +7,7 @@ export default class PlayerSprite {
     this.image = img;
   }
 }
+
+
+
+
