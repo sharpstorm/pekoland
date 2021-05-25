@@ -5,6 +5,7 @@ import aa from '../managers/animation-manager.js';
 const playerManager = PlayerManager.getInstance();
 const chatManager = ChatManager.getInstance();
 const ctx = document.getElementById('game').getContext('2d');
+let joystickEventHandlers = [];
 
 
   var map = new Image();
@@ -81,6 +82,12 @@ function joystickWorker(e) {
   playerManager.getSelf().isAnimating = true;
   playerManager.getSelf().currentSprite = 0;
 
+  joystickEventHandlers.forEach(x => x({
+    id: action,
+    deltaX,
+    deltaY
+  }));
+
   //player2 
   //console.log("WTF");
   //console.log(currentPlayer2)
@@ -128,4 +135,12 @@ function joystickUpWorker(e) {
 
 }
 
-export { joystickWorker, joystickUpWorker };
+function addJoystickEventHandler(handler) {
+  joystickEventHandlers.push(handler);
+}
+
+function removeJoystickEventHandler(handler) {
+  joystickEventHandlers = joystickEventHandlers.filter(x => x !== handler);
+}
+
+export { joystickWorker, joystickUpWorker, addJoystickEventHandler, removeJoystickEventHandler };
