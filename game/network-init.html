@@ -1,0 +1,53 @@
+<html>
+
+<body style="text-align: center;">
+  <h1>Start A Connection</h1>
+  <textarea id="inp-connection-string" type="text" style="width: 800px;height: 400px;">
+
+  </textarea>
+  <br/><br/>
+  Operation Mode: 
+  <select id="select-mode">
+    <option value="1" selected="selected">Server</option>
+    <option value="2">Client</option>
+  </select>
+  <br/><br/>
+  <button id="btn-go">Connect</button>
+</body>
+
+<script>
+  // Receive Message Headers
+  const SENDOP_CONFIG_CHANGED = 'pekoconn-config-changed';
+
+  // Send Message Headers
+  const RECVOP_CONFIG_REQUEST = 'pekoconn-config-request';
+
+  let channel = new BroadcastChannel('pekoland-data');
+
+  document.addEventListener('DOMContentLoaded', () => {
+    let connString, opMode, windowId;
+
+    document.getElementById('btn-go').addEventListener('click', () => {
+      connString = document.getElementById('inp-connection-string').value;
+      opMode = document.getElementById('select-mode').selectedIndex + 1;
+      windowId = Date.now().toString();
+
+      window.open('network.html#' + windowId, '_blank');
+    });
+
+    channel.onmessage = (evt) => {
+      if (!evt.data || !evt.data.op) return;
+      let data = evt.data;
+
+      if (data.op === RECVOP_CONFIG_REQUEST) {
+        channel.postMessage({
+          op: SENDOP_CONFIG_CHANGED,
+          channel: windowId,
+          partnerString: connString,
+          opMode
+        });
+      }
+    }
+  });
+</script>
+</html>
