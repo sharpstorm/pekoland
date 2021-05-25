@@ -9,6 +9,22 @@ import drawer from './managers/animation-manager.js';
 let currentPlayer2 = '';
 
 
+//focus
+window.onload = function() {
+  document.getElementById("game").focus();
+};
+
+
+/*
+//2nd convas
+var map = new Image();
+//map.src = 'Images/house.jpg';
+map.src = 'Images/grids.png';
+var ctx = document.getElementById('game2').getContext('2d');
+ctx.drawImage(map,0,0,1335,679,0,0,1000,500);
+*/
+
+
 
 //Rabbit
 let down = [0,38,33];
@@ -23,7 +39,8 @@ let rabbitSprite = new PlayerSprite(up,down,right,left,rabbit);
 
 //init bg
 var map = new Image();
-map.src = 'Images/house.jpg';
+//map.src = 'Images/house.jpg';
+map.src = 'Images/grids.png';
 
 //Init player manager and add player TODO::hardcoded
 const playerManager = PlayerManager.getInstance();

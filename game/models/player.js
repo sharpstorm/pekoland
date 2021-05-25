@@ -12,6 +12,9 @@ export default class Player {
     this.action = '';
     this.isAnimating = false;
     this.currentSprite = 6;
+    this.speechBubble = false;
+    this.speechBubbleCounter = 0;
+    this.currentSpeech = '';
   }
 
   updateX(newX) {

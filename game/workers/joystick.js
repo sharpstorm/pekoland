@@ -6,9 +6,22 @@ const playerManager = PlayerManager.getInstance();
 const chatManager = ChatManager.getInstance();
 const ctx = document.getElementById('game').getContext('2d');
 
+
+  var map = new Image();
+  //map.src = 'Images/house.jpg';
+  map.src = 'Images/house1_colli.png';
+  var canvas = document.createElement('canvas');
+
+  canvas.id = "collision";
+  canvas.width = 1000;
+  canvas.height = 500;
+  canvas.getContext('2d').drawImage(map,0,0,1551,779,0,0,1000,500);
+
+
 function joystickWorker(e) {
 
   
+  if(event.keyCode === 37 || event.keyCode === 38 || event.keyCode === 39 || event.keyCode === 40){
   if (playerManager.getSelf().isAnimating) {
     return;
   }
@@ -38,11 +51,26 @@ function joystickWorker(e) {
   }
 
   // Collision Detection
-  if (ctx.getImageData(playerManager.getSelf().x + 25 + deltaX, playerManager.getPlayer("Johnny").y + 25 + deltaY, 1, 1).data[3] === 255) {
+
+  //BUT IN JOYSTICK FOR NOW
+  var map = new Image();
+  //map.src = 'Images/house.jpg';
+  map.src = 'Images/house1_colli.png';
+  var canvas = document.createElement('canvas');
+
+  canvas.id = "collision";
+  canvas.width = 1000;
+  canvas.height = 500;
+  canvas.getContext('2d').drawImage(map,0,0,1551,779,0,0,1000,500);
+
+
+  let lala = canvas.getContext('2d').getImageData(playerManager.getSelf().x + 25 + deltaX, playerManager.getPlayer("Johnny").y + 25 + deltaY, 1, 1).data;
+  if (lala[3] === 255 && lala[0] === 0 && lala[1] === 0 && lala[2] === 0) {
+    console.log(ctx.getImageData(playerManager.getSelf().x + 25 + deltaX, playerManager.getPlayer("Johnny").y + 25 + deltaY, 1, 1).data);
     // Collide, no move
     deltaX = 0;
     deltaY = 0;
-    return;
+
   }
 
   playerManager.getSelf().moveY = deltaY / 6;
@@ -91,8 +119,7 @@ function joystickWorker(e) {
 
   }
 
-  
-
+}
 }
 
 function joystickUpWorker(e) {
