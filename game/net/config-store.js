@@ -9,26 +9,61 @@ const SENDOP_CONFIG_REQUEST = 'pekoconn-config-request';
 export default class ConfigStore {
   constructor() {
     this.broadcastChannel = new BroadcastChannel(BROADCAST_CHANNEL_ID);
+    if (window.location.hash && window.location.hash.length >= 2) {
+      this.subchannelId = window.location.hash.substring(1);
+      window.location.hash = '';
+    } 
     this.peerConnectionString = undefined;
+    this.opMode = undefined;
+    this.listener = undefined;
+    this.isBusy = false;
+    this.frozen = false;
 
     this.setup();
   }
 
   setup() {
-    this.broadcastChannel.onmessage = (ev) => {
-      if (!ev.data || !ev.data.op) return;
+    this.broadcastChannel.onmessage = ((ev) => {
+      if (!ev.data || !ev.data.op || this.frozen) return;
       let data = ev.data;
+      if (this.subchannelId !== '' && ev.data.channel !== this.subchannelId) return;
 
       if (data.op === RECVOP_CONFIG_CHANGED) {
         this.peerConnectionString = data.partnerString;
+        this.opMode = (data.opMode === ConfigStore.Mode.SERVER) ? ConfigStore.Mode.SERVER : ConfigStore.Mode.CLIENT;
+
         console.log('[NetworkConfig] Peer String Changed');
+        if (this.listener) this.listener(this.peerConnectionString);
+        this.isBusy = false;
       }
-    }
+    }).bind(this);
   }
 
   updateConfig() {
-    this.broadcastChannel.postMessage({
-      op: SENDOP_CONFIG_REQUEST
-    })
+    return new Promise((resolve, reject) => {
+      if (this.isBusy) { //Awaiting Response
+        reject('[NetworkConfig] Config Worker is Busy');
+        return;
+      }
+
+      this.listener = resolve;
+      this.isBusy = true;
+      this.broadcastChannel.postMessage({
+        op: SENDOP_CONFIG_REQUEST
+      });
+    });
   }
+
+  freeze() {
+    this.frozen = true;
+  }
+
+  resume() {
+    this.frozen = false;
+  }
+}
+
+ConfigStore.Mode = {
+  SERVER: 1,
+  CLIENT: 2
 }
