@@ -30,7 +30,8 @@ function drawer() {
       ctx.strokeStyle = 'black';
       ctx.font = '10px Arial';
       ctx.strokeText("   "+ player.name, player.x, player.y);
-      ctx.drawImage(player.playerSprite.image, player.sourceX, player.sourceY, 37.5, 40, player.x, player.y, 50, 50);
+      player.drawAt(ctx, player.x, player.y, 50, 50);
+      
       if(player.speechBubbleCounter > 30){
         player.speechBubbleCounter = 0;
         player.speechBubble = false;

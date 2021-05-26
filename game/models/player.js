@@ -7,11 +7,9 @@ export default class Player {
     this.y = 0;
     this.moveX = 0;
     this.moveY = 0;
-    this.sourceX = 0;
-    this.sourceY = 0;
-    this.action = '';
+    this.direction = Player.Direction.DOWN;
     this.isAnimating = false;
-    this.currentSprite = 6;
+    this.currentFrame = 6;
     this.speechBubble = false;
     this.speechBubbleCounter = 0;
     this.currentSpeech = '';
@@ -25,38 +23,31 @@ export default class Player {
     this.Y = newY;
   }
 
+  drawAt(ctx, x, y, width, height) {
+    let sprite = this.playerSprite.getSpriteByDirection(Player.DirectionToIntMap[this.direction]).getSpriteAtFrame(this.currentFrame);
+    let marginX = (width - sprite.width) / 2;
+    let marginY = (height - sprite.height) / 2;
+    ctx.drawImage(sprite.spritesheet, sprite.x, sprite.y, sprite.width, sprite.height, x + marginX, y + marginY, sprite.width, sprite.height);
+  }
+
   animate() {
     //var ctx = document.getElementById('game').getContext('2d');
     //console.log("X:" + this.x + "Y:" + this.y);
     //console.log(ctx.getImageData(this.x+25, this.y+25, 1, 1).data);
     if (!this.isAnimating) return;
 
-    if (this.action === 'down') {
-      this.sourceX += this.playerSprite.down[2];
-      this.currentSprite++;
+    if (this.direction === Player.Direction.UP || this.direction === Player.Direction.DOWN) {
+      this.currentFrame++;
       this.y += this.moveY;
     }
-    else if (this.action === 'up') {
-      this.sourceX += this.playerSprite.up[2];
-      this.currentSprite++;
-      this.y += this.moveY;
-    }
-    else if (this.action === 'left') {
-      this.sourceX += this.playerSprite.left[2];
-      this.currentSprite++;
-      this.x += this.moveX;
-    }
-    else if (this.action === 'right') {
-      this.sourceX += this.playerSprite.right[2];
-      this.currentSprite++;
+    else if (this.direction === Player.Direction.LEFT || this.direction === Player.Direction.RIGHT) {
+      this.currentFrame++;
       this.x += this.moveX;
     }
 
-    if (this.currentSprite >= 6) {
+    if (this.currentFrame >= 6) {
       this.isAnimating = false;
-      this.action = '';
     }
-
     //Collision
 
     //console.log(ctx.getImageData(this.x, this.y, 1, 1).data[3]);
@@ -68,4 +59,18 @@ export default class Player {
     //console.log(ctx.getImageData(this.x, this.y, 1, 1).data);
     //console.log(this.currentSprite);
   }
+}
+
+Player.Direction = {
+  UP: 'up',
+  RIGHT: 'right',
+  DOWN: 'down',
+  LEFT: 'left'
+}
+
+Player.DirectionToIntMap = {
+  'up': 0,
+  'right': 1,
+  'down': 2,
+  'left': 3
 }
