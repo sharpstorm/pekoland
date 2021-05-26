@@ -3,12 +3,16 @@ import Player from '../../models/player.js';
 import PlayerManager from '../../managers/player-manager.js';
 import { joystickWorker, joystickUpWorker, addJoystickEventHandler, removeJoystickEventHandler } from '../../workers/joystick.js';
 import drawer from '../../managers/animation-manager.js';
+import Sprite, {AnimatableSprite, AvatarSprite} from '../../models/sprites.js';
+import SpriteManager from '../../managers/sprite-manager.js';
 import NetworkManager from '../network-manager.js';
-import handleGamePacket from '../game-data-handler.js';
-import buildGameDataPacket from '../game-data-sender.js';
+import handleClientGamePacket from '../client/game-data-handler.js';
+import buildClientGamePacket from '../client/game-data-sender.js';
+import handleServerGamePacket from '../server/game-data-handler.js';
+import buildServerGamePacket from '../server/game-data-sender.js';
 import { timeout } from '../utils.js'
 
-let networkManager = new NetworkManager();
+let networkManager = NetworkManager.getInstance();
 
 timeout(networkManager
   .setup()
@@ -19,7 +23,7 @@ timeout(networkManager
 networkManager.on('connected', () => {
   console.log('Connected to remote');
 });
-networkManager.on('clientConnected', () => {
+networkManager.on('clientConnected', (conn) => {
   console.log('Remote has connected');
 });
 networkManager.on('modeChanged', (mode) => {
@@ -28,29 +32,29 @@ networkManager.on('modeChanged', (mode) => {
 networkManager.on('initialized', () => {
   if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {
     networkManager.initConnection().then(() => {
-      networkManager.setDataHandler(handleGamePacket);
-      console.log('connection successful')
+      networkManager.setDataHandler(handleClientGamePacket);
+      console.log('connection successful');
+      networkManager.send(buildClientGamePacket('handshake'));     
     });
   } else {
-    networkManager.setDataHandler(handleGamePacket);
+    networkManager.setDataHandler(handleServerGamePacket);
   }
 });
 
 addJoystickEventHandler((evt) => {
-  networkManager.send(buildGameDataPacket('movement', evt.id));
+  //networkManager.send(buildGameDataPacket('movement', evt.id));
 })
 
-let currentPlayer2 = '';
-//TODO. Hardcoded sprite var
-let down = [0,38,33];
-let up = [0,116,33];
-let right = [0,158,40];
-let left = [0,77,40];
-
-//init rabbit sprite
-let rabbit = new Image();
-rabbit.src = 'Images/rabbit.png';
-let rabbitSprite = new PlayerSprite(up,down,right,left,rabbit);
+//Rabbit
+let rabbitSheet = new Image();
+rabbitSheet.src = 'Images/rabbit.png';
+let rabbitSprite = new AvatarSprite(
+  AnimatableSprite.generateFromTiledFrames(rabbitSheet, 7, 118, 24, 36, 33, 0, 7),
+  AnimatableSprite.generateFromTiledFrames(rabbitSheet, 0, 159, 36, 36, 40, 0, 7),
+  AnimatableSprite.generateFromTiledFrames(rabbitSheet, 7, 38, 24, 36, 33, 0, 7),
+  AnimatableSprite.generateFromTiledFrames(rabbitSheet, 0, 79, 36, 36, 40, 0, 7),
+);
+SpriteManager.getInstance().registerSprite('rabbit-avatar', rabbitSprite);
 
 //init bg
 var map = new Image();
@@ -62,11 +66,6 @@ playerManager.addPlayer(new Player('Johnny',rabbitSprite));
 playerManager.setSelf('Johnny');
 //playerManager.addPlayer(new Player("Player 2",rabbitSprite));
 //playerManager.addPlayer(new Player("Player 3",rabbitSprite));
-
-playerManager.getPlayers().forEach(player => {
-  player.sourceX = player.playerSprite.down[0];
-  player.sourceY = player.playerSprite.down[1];
-});
 
 document.onkeydown = joystickWorker;
 

@@ -9,6 +9,7 @@ const CONN_TIMEOUT = 10000;
 
 class Connection {
   constructor(client, target) {
+    this.id = 
     this.client = client;
     this.target = target;
     this.conn = undefined;
@@ -42,7 +43,14 @@ class Connection {
   }
 
   setDataHandler(handler) {
-    this.conn.on('data', handler);
+    this.conn.on('data', this.handlerAdapter(handler));
+  }
+
+  handlerAdapter(handler) {
+    return (data => {
+      console.log('hi');
+      handler(data, this);
+    }).bind(this);
   }
 }
 
@@ -67,7 +75,7 @@ class BroadcastConnection {
     }).bind(this));
 
     if (this.dataHandler !== undefined) {
-      conn.on('data', this.dataHandler);
+      conn.on('data', this.handlerAdapter(conn));
     }
   }
 
@@ -82,9 +90,22 @@ class BroadcastConnection {
     Object.values(this.connections).forEach(conn => conn.send(data));
   }
 
+  sendAllExcept(data, peerId) {
+    Object.values(this.connections).forEach(conn => { 
+      if (conn.peer === peerId) return;
+      conn.send(data)
+    });
+  }
+
   setDataHandler(handler) {
     this.dataHandler = handler;
-    Object.values(this.connections).forEach(conn => conn.on('data', handler));
+    Object.values(this.connections).forEach((conn => {
+      conn.on('data', this.handlerAdapter(conn));
+    }).bind(this));
+  }
+
+  handlerAdapter(conn) {
+    return (data => this.dataHandler(data, conn)).bind(this);
   }
 }
 

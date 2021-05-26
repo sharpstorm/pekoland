@@ -1,5 +1,5 @@
 export default function buildGameDataPacket(opCode, data) {
-  if (opCode === 'movement') {
+  if (opCode === 'handshake' || opCode === 'spawn-request' || opCode === 'movement') {
     return {
       opCode,
       data
