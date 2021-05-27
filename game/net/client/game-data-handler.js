@@ -21,8 +21,11 @@ export default function handleGamePacket(data, conn) {
     })
   } else if (opCode === 'spawn-player') {
     PlayerManager.getInstance().addPlayer(inflatePlayer(data.player));
-  } else if (opCode === 'movement') {
-    console.log('update position: ' + data.data);
+  } else if (opCode === 'move-echo') {
+    let player = PlayerManager.getInstance().getPlayer(data.name);
+    player.x += data.dX;
+    player.y += data.dY;
+    player.direction = data.direction;
   }
 }
 

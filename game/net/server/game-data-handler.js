@@ -26,7 +26,12 @@ export default function handleGamePacket(data, conn) {
 
     // Register User to Server Player Manager
     PlayerManager.getInstance().addPlayer(player);
-  } else if (opCode === 'movement') {
-    console.log('update position: ' + data.data);
+  } else if (opCode === 'move') {
+    let player = PlayerManager.getInstance().getPlayer(data.name);
+    player.x += data.dX;
+    player.y += data.dY;
+    player.direction = data.direction;
+
+    NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('move-echo', data), conn.peer);
   }
 }

@@ -48,7 +48,6 @@ class Connection {
 
   handlerAdapter(handler) {
     return (data => {
-      console.log('hi');
       handler(data, this);
     }).bind(this);
   }

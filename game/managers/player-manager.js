@@ -19,6 +19,10 @@ export default class PlayerManager {
     return (this.self === undefined) ? undefined : this.players[this.self];
   }
 
+  getSelfName() {
+    return this.self;
+  }
+
   getPlayers() {
     return Object.values(this.players);
   }

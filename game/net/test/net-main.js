@@ -46,7 +46,11 @@ networkManager.on('initialized', () => {
 });
 
 addJoystickEventHandler((evt) => {
-  //networkManager.send(buildGameDataPacket('movement', evt.id));
+  if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {
+    networkManager.send(buildClientGamePacket('move', evt));
+  } else {
+    networkManager.send(buildServerGamePacket('move-echo', buildClientGamePacket('move', evt)));
+  }
 })
 
 //Rabbit
