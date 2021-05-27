@@ -28,8 +28,12 @@ export default function handleGamePacket(data, conn) {
     PlayerManager.getInstance().addPlayer(player);
   } else if (opCode === 'move') {
     let player = PlayerManager.getInstance().getPlayer(data.name);
-    player.x += data.dX;
-    player.y += data.dY;
+    //player.x += data.dX;
+    //player.y += data.dY;
+    player.updateX(player.x + data.dX);
+    player.updateY(player.y + data.dY);
+    //console.log(data.dX);
+    player.currentFrame = 0;
     player.direction = data.direction;
 
     NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('move-echo', data), conn.peer);
