@@ -13,6 +13,7 @@ export default class ConfigStore {
       this.subchannelId = window.location.hash.substring(1);
       window.location.hash = '';
     } 
+    this.name = undefined;
     this.peerConnectionString = undefined;
     this.opMode = undefined;
     this.listener = undefined;
@@ -30,9 +31,10 @@ export default class ConfigStore {
 
       if (data.op === RECVOP_CONFIG_CHANGED) {
         this.peerConnectionString = data.partnerString;
+        this.name = data.name;
         this.opMode = (data.opMode === ConfigStore.Mode.SERVER) ? ConfigStore.Mode.SERVER : ConfigStore.Mode.CLIENT;
 
-        console.log('[NetworkConfig] Peer String Changed');
+        console.log('[NetworkConfig] Configuration Received');
         if (this.listener) this.listener(this.peerConnectionString);
         this.isBusy = false;
       }

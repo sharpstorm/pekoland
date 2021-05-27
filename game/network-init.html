@@ -1,53 +1,64 @@
 <html>
+  <body style="text-align: center;">
+    <h1>Start A Connection</h1>
+    Operation Mode: 
+    <select id="select-mode" style="padding: 8px;">
+      <option value="1" selected="selected">Server</option>
+      <option value="2">Client</option>
+    </select>
+    <br/>
+    <input id="inp-name" type="text" style="width: 800px; padding: 8px; margin-top: 8px;" placeholder="name" />
+    <div id="join-opts" style="margin-top: 8px; display: none;">
+      <input id="inp-connection-string" type="text" style="width: 800px; padding: 8px;" placeholder="peer id"/>
+    </div>
+    <br/><br/>
+    <button id="btn-go">Connect</button>
+  </body>
 
-<body style="text-align: center;">
-  <h1>Start A Connection</h1>
-  <textarea id="inp-connection-string" type="text" style="width: 800px;height: 400px;">
+  <script>
+    // Receive Message Headers
+    const SENDOP_CONFIG_CHANGED = 'pekoconn-config-changed';
 
-  </textarea>
-  <br/><br/>
-  Operation Mode: 
-  <select id="select-mode">
-    <option value="1" selected="selected">Server</option>
-    <option value="2">Client</option>
-  </select>
-  <br/><br/>
-  <button id="btn-go">Connect</button>
-</body>
+    // Send Message Headers
+    const RECVOP_CONFIG_REQUEST = 'pekoconn-config-request';
 
-<script>
-  // Receive Message Headers
-  const SENDOP_CONFIG_CHANGED = 'pekoconn-config-changed';
+    let channel = new BroadcastChannel('pekoland-data');
 
-  // Send Message Headers
-  const RECVOP_CONFIG_REQUEST = 'pekoconn-config-request';
+    document.addEventListener('DOMContentLoaded', () => {
+      let opMode, name, connString, windowId;
 
-  let channel = new BroadcastChannel('pekoland-data');
+      document.getElementById('btn-go').addEventListener('click', () => {
+        opMode = document.getElementById('select-mode').selectedIndex + 1;
+        name = document.getElementById('inp-name').value;
+        if (opMode === 2) {
+          connString = document.getElementById('inp-connection-string').value;
+        }
+        if (name === '') {
+          alert('Name is required');
+        }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    let connString, opMode, windowId;
+        windowId = Date.now().toString();
+        window.open('network.html#' + windowId, '_blank');
+      });
 
-    document.getElementById('btn-go').addEventListener('click', () => {
-      connString = document.getElementById('inp-connection-string').value;
-      opMode = document.getElementById('select-mode').selectedIndex + 1;
-      windowId = Date.now().toString();
+      document.getElementById('select-mode').addEventListener('change', () => {
+        document.getElementById('join-opts').style.display = (document.getElementById('select-mode').selectedIndex === 0) ? 'none' : 'block'
+      });
 
-      window.open('network.html#' + windowId, '_blank');
-    });
+      channel.onmessage = (evt) => {
+        if (!evt.data || !evt.data.op) return;
+        let data = evt.data;
 
-    channel.onmessage = (evt) => {
-      if (!evt.data || !evt.data.op) return;
-      let data = evt.data;
-
-      if (data.op === RECVOP_CONFIG_REQUEST) {
-        channel.postMessage({
-          op: SENDOP_CONFIG_CHANGED,
-          channel: windowId,
-          partnerString: connString,
-          opMode
-        });
+        if (data.op === RECVOP_CONFIG_REQUEST) {
+          channel.postMessage({
+            op: SENDOP_CONFIG_CHANGED,
+            channel: windowId,
+            opMode,
+            name,
+            partnerString: connString
+          });
+        }
       }
-    }
-  });
-</script>
+    });
+  </script>
 </html>

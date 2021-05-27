@@ -63,9 +63,9 @@ function joystickWorker(e) {
   canvas.getContext('2d').drawImage(map,0,0,1551,779,0,0,1000,500);
 
 
-  let lala = canvas.getContext('2d').getImageData(playerManager.getSelf().x + 25 + deltaX, playerManager.getPlayer("Johnny").y + 25 + deltaY, 1, 1).data;
+  let lala = canvas.getContext('2d').getImageData(playerManager.getSelf().x + 25 + deltaX, playerManager.getSelf().y + 25 + deltaY, 1, 1).data;
   if (lala[3] === 255 && lala[0] === 0 && lala[1] === 0 && lala[2] === 0) {
-    console.log(ctx.getImageData(playerManager.getSelf().x + 25 + deltaX, playerManager.getPlayer("Johnny").y + 25 + deltaY, 1, 1).data);
+    console.log(ctx.getImageData(playerManager.getSelf().x + 25 + deltaX, playerManager.getSelf().y + 25 + deltaY, 1, 1).data);
     // Collide, no move
     deltaX = 0;
     deltaY = 0;

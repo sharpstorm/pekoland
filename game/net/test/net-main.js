@@ -34,10 +34,14 @@ networkManager.on('initialized', () => {
     networkManager.initConnection().then(() => {
       networkManager.setDataHandler(handleClientGamePacket);
       console.log('connection successful');
-      networkManager.send(buildClientGamePacket('handshake'));     
+      networkManager.send(buildClientGamePacket('handshake'));
     });
   } else {
     networkManager.setDataHandler(handleServerGamePacket);
+
+    const playerManager = PlayerManager.getInstance();
+    playerManager.addPlayer(new Player(networkManager.configStore.name, SpriteManager.getInstance().getSprite('rabbit-avatar')));
+    playerManager.setSelf(networkManager.configStore.name);
   }
 });
 
@@ -60,13 +64,6 @@ SpriteManager.getInstance().registerSprite('rabbit-avatar', rabbitSprite);
 var map = new Image();
 map.src = 'Images/house.jpg';
 
-//Init player manager and add player TODO::hardcoded
-const playerManager = PlayerManager.getInstance();
-playerManager.addPlayer(new Player('Johnny',rabbitSprite));
-playerManager.setSelf('Johnny');
-//playerManager.addPlayer(new Player("Player 2",rabbitSprite));
-//playerManager.addPlayer(new Player("Player 3",rabbitSprite));
-
 document.onkeydown = joystickWorker;
 
-window.requestAnimationFrame(() => drawer(playerManager));
+window.requestAnimationFrame(() => drawer(PlayerManager.getInstance()));

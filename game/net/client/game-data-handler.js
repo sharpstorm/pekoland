@@ -1,6 +1,7 @@
 import PlayerManager from '../../managers/player-manager.js';
 import SpriteManager from '../../managers/sprite-manager.js';
 import Player from '../../models/player.js';
+import NetworkManager from '../network-manager.js';
 import buildClientGamePacket from './game-data-sender.js';
 
 // Conn will always be the server
@@ -10,7 +11,7 @@ export default function handleGamePacket(data, conn) {
 
   const opCode = data.opCode;
   if (opCode === 'handshake') {
-    conn.send(buildClientGamePacket('spawn-request', 'Johnny 2'));
+    conn.send(buildClientGamePacket('spawn-request', NetworkManager.getInstance().configStore.name));
   } else if (opCode === 'spawn-reply') {
     let self = inflatePlayer(data.self);
     PlayerManager.getInstance().addPlayer(self);
