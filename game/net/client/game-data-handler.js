@@ -25,9 +25,10 @@ export default function handleGamePacket(data, conn) {
     let player = PlayerManager.getInstance().getPlayer(data.name);
     //player.x += data.dX;
     //player.y += data.dY;
-    player.updateX(data.dX);
-    player.updateY(data.dY);
+    player.updateX(player.x + data.dX);
+    player.updateY(player.y + data.dY);
     console.log(data.dX);
+    player.currentFrame = 0;
     player.direction = data.direction;
 
   }

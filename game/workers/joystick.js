@@ -9,16 +9,18 @@ const ctx = document.getElementById('game').getContext('2d');
 let joystickEventHandlers = [];
 
 
-  var map = new Image();
-  //map.src = 'Images/house.jpg';
-  map.src = 'Images/house1_colli.png';
+ 
   var canvas = document.createElement('canvas');
-
-  canvas.id = "collision";
+  canvas.id = 'collision';
   canvas.width = 1000;
   canvas.height = 500;
-  canvas.getContext('2d').drawImage(map,0,0,1551,779,0,0,1000,500);
-
+  let map = new Image();
+  //map.src = 'Images/house.jpg';
+  map.src = 'Images/house1_colli.png';
+  
+  map.onload = () => {
+    canvas.getContext('2d').drawImage(map,0,0,1551,779,0,0,1000,500);
+  }
 
 function joystickWorker(e) {
   let event = window.event ? window.event : e;
@@ -35,18 +37,19 @@ function joystickWorker(e) {
 
   if (event.keyCode === 38) {
     deltaY = -50;
+    playerManager.getSelf().updateY(playerManager.getSelf().y + deltaY);
     direction = Player.Direction.UP;
   } else if (event.keyCode === 40) {
     deltaY = 50;
+    playerManager.getSelf().updateY(playerManager.getSelf().y + deltaY);
     direction = Player.Direction.DOWN;
   } else if (event.keyCode === 37) {
     deltaX = -50;
+    playerManager.getSelf().updateX(playerManager.getSelf().x + deltaX);
     direction = Player.Direction.LEFT;
   } else if (event.keyCode === 39) {
-    //test
-    playerManager.getSelf().newX = 50;
-
     deltaX = 50;
+    playerManager.getSelf().updateX(playerManager.getSelf().x + deltaX);
     direction = Player.Direction.RIGHT;
   } else {
     return;
@@ -55,22 +58,24 @@ function joystickWorker(e) {
   // Collision Detection
 
   //BUT IN JOYSTICK FOR NOW
-  canvas.getContext('2d').drawImage(map,0,0,1551,779,0,0,1000,500);
-
+  //canvas.getContext('2d').drawImage(map,0,0,1551,779,0,0,1000,500);
+  playerManager.getSelf().isAnimating = true;
 
   let lala = canvas.getContext('2d').getImageData(playerManager.getSelf().x + 25 + deltaX, playerManager.getSelf().y + 25 + deltaY, 1, 1).data;
   if (lala[3] === 255 && lala[0] === 0 && lala[1] === 0 && lala[2] === 0) {
     console.log(ctx.getImageData(playerManager.getSelf().x + 25 + deltaX, playerManager.getSelf().y + 25 + deltaY, 1, 1).data);
     // Collide, no move
+    playerManager.getSelf().isAnimating = false;
+    playerManager.getSelf().newX = playerManager.getSelf().oldX;
+    playerManager.getSelf().newY = playerManager.getSelf().oldY;
     deltaX = 0;
     deltaY = 0;
-
+    
   }
 
-  playerManager.getSelf().moveY = deltaY / 6;
-  playerManager.getSelf().moveX = deltaX / 6;
+
   playerManager.getSelf().direction = direction;
-  playerManager.getSelf().isAnimating = true;
+  
   playerManager.getSelf().currentFrame = 0;
 
   joystickEventHandlers.forEach(x => x({

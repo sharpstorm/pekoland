@@ -47,7 +47,7 @@ function drawer() {
       else{
 
       }
-      player.animate();
+      player.moveTo(player.newX, player.newY);
 
     });
     counter = 0;  //FPS
