@@ -5,6 +5,8 @@ export default class Player {
 
     this.x = 0;
     this.y = 0;
+    this.newX = 0;
+    this.newY = 0;
     this.moveX = 0;
     this.moveY = 0;
     this.direction = Player.Direction.DOWN;
@@ -16,11 +18,13 @@ export default class Player {
   }
 
   updateX(newX) {
+    this.prevX = this.x;
     this.x = newX;
   }
 
   updateY(newY) {
-    this.Y = newY;
+    this.prevY = this.y;
+    this.y = newY;
   }
 
   drawAt(ctx, x, y, width, height) {
@@ -31,35 +35,44 @@ export default class Player {
   }
 
   animate() {
-    //var ctx = document.getElementById('game').getContext('2d');
-    //console.log("X:" + this.x + "Y:" + this.y);
-    //console.log(ctx.getImageData(this.x+25, this.y+25, 1, 1).data);
-    if (!this.isAnimating) return;
+    //if (!this.isAnimating) return;
+    //console.log("sdf");
 
+    /*
     if (this.direction === Player.Direction.UP || this.direction === Player.Direction.DOWN) {
       this.currentFrame++;
-      this.y += this.moveY;
+      //this.y += this.moveY;
+      this.updateY(this.y + this.moveY);
     }
     else if (this.direction === Player.Direction.LEFT || this.direction === Player.Direction.RIGHT) {
       this.currentFrame++;
-      this.x += this.moveX;
+      //this.x += this.moveX;
+      this.updateX(this.x + this.moveX);
     }
+    */
 
+    
+    if (this.newX === 50){
+      this.isAnimating = true;
+      if(this.currentFrame < 6){
+        this.x += this.newX/6;
+        this.currentFrame = this.currentFrame + 1;
+      }
+      if(this.currentFrame === 6)
+        this.newX = 0 ;
+      this.isAnimating = false;
+    }    
+    //console.log(this.currentFrame);
+    
+
+    /*
     if (this.currentFrame >= 6) {
       this.isAnimating = false;
-    }
-    //Collision
+    }*/
 
-    //console.log(ctx.getImageData(this.x, this.y, 1, 1).data[3]);
-    //if (ctx.getImageData(this.x, this.y, 50, 50).data[3] == 255) {
-      //console.log("collide: " + this.name);
-      //console.log(this.x + "," + this.y);
-      //console.log(ctx.getImageData(this.x + 25, this.y + 25, 1, 1).data);
-    //}
-    //console.log(ctx.getImageData(this.x, this.y, 1, 1).data);
-    //console.log(this.currentSprite);
   }
 }
+
 
 Player.Direction = {
   UP: 'up',

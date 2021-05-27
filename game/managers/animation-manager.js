@@ -25,6 +25,7 @@ function drawer() {
       drawExanpadedTextBox();
     else
       drawTextBox();
+    //console.log(PlayerManager.getInstance().getPlayers());
     PlayerManager.getInstance().getPlayers().forEach(player => {
       // Nametag
       ctx.strokeStyle = 'black';
@@ -46,8 +47,8 @@ function drawer() {
       else{
 
       }
-
       player.animate();
+
     });
     counter = 0;  //FPS
   }
@@ -182,16 +183,6 @@ function pushMsg(){
 }
 var ctx = document.getElementById('game');
 
-//NOT WORKING. COORDINATES NOT ZUN WHEN RESIZING. USING ALT + ENTER TO OPEN CHAT FOR NOW
-/*
-ctx.addEventListener('click', function(e) {
-  console.log(e);
-  if(e.screenX <= 682 && e.screenX >= 663 && e.screenY <= 793 && e.screenY >= 773 ){
-    che = !che;
-    ChatManager.getInstance().chatting = !ChatManager.getInstance().chatting;
-  }
-}, false);
-*/
 
 ctx.addEventListener('keydown', function(e) {
   //console.log(e);

@@ -43,6 +43,9 @@ function joystickWorker(e) {
     deltaX = -50;
     direction = Player.Direction.LEFT;
   } else if (event.keyCode === 39) {
+    //test
+    playerManager.getSelf().newX = 50;
+
     deltaX = 50;
     direction = Player.Direction.RIGHT;
   } else {
@@ -52,14 +55,6 @@ function joystickWorker(e) {
   // Collision Detection
 
   //BUT IN JOYSTICK FOR NOW
-  var map = new Image();
-  //map.src = 'Images/house.jpg';
-  map.src = 'Images/house1_colli.png';
-  var canvas = document.createElement('canvas');
-
-  canvas.id = "collision";
-  canvas.width = 1000;
-  canvas.height = 500;
   canvas.getContext('2d').drawImage(map,0,0,1551,779,0,0,1000,500);
 
 

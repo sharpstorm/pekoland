@@ -23,9 +23,13 @@ export default function handleGamePacket(data, conn) {
     PlayerManager.getInstance().addPlayer(inflatePlayer(data.player));
   } else if (opCode === 'move-echo') {
     let player = PlayerManager.getInstance().getPlayer(data.name);
-    player.x += data.dX;
-    player.y += data.dY;
+    //player.x += data.dX;
+    //player.y += data.dY;
+    player.updateX(data.dX);
+    player.updateY(data.dY);
+    console.log(data.dX);
     player.direction = data.direction;
+
   }
 }
 
