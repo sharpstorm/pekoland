@@ -7,6 +7,7 @@ const WEBRTC_CONFIG = {
   ]
 };
 
+let instance;
 export default class NetworkManager {
   constructor() {
     this.configStore = new ConfigStore();
@@ -46,9 +47,11 @@ export default class NetworkManager {
     this.state = NetworkManager.State.READY;
 
     this.peer.on('connection', ((dataConnection) => {
-      console.log('[NetworkManager] Connection with Remote Peer Established');
-      this.emitEvent(NetworkManager.Events.CLIENT_CONNECTED);
-      this.connection.registerConnection(dataConnection);
+      dataConnection.on('open', (() => {
+        console.log('[NetworkManager] Connection with Remote Peer Established');
+        this.connection.registerConnection(dataConnection);
+        this.emitEvent(NetworkManager.Events.CLIENT_CONNECTED, dataConnection);
+      }).bind(this));
     }).bind(this));
   }
 
@@ -100,10 +103,21 @@ export default class NetworkManager {
     }
   }
 
+  getConnection() {
+    return this.connection;
+  }
+
   setDataHandler(handler) {
     if (this.connection) {
       this.connection.setDataHandler(handler);
     }
+  }
+
+  static getInstance() {
+    if (instance === undefined) {
+      instance = new NetworkManager();
+    }
+    return instance;
   }
 }
 
