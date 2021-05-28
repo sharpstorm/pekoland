@@ -54,6 +54,9 @@ export default class NetworkManager {
       }).bind(this));
     }).bind(this));
     this.configStore.updateRemote(this.peerId);
+    window.onbeforeunload = () => {
+      this.configStore.updateRemote('');
+    };
   }
 
   initConnection() {
