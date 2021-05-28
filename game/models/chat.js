@@ -27,8 +27,8 @@ export default class Chat {
         }
         
         if(this.speechBubble){
-            console.log('her');
-            console.log(this.speechBubbleCounter);
+            //console.log('her');
+            //console.log(this.speechBubbleCounter);
            
             ctx.drawImage(this.speech,0,0,1551,779,x,y,100,50);
             ctx.font = '15px Arial';
