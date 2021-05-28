@@ -34,7 +34,7 @@ export default function handleGamePacket(data, conn) {
   }
   else if (opCode === 'chat-echo'){
     let player = PlayerManager.getInstance().getPlayer(data.name);
-    player.updateMessage(data.message);
+    player.chat.updateMessage(data.message);
   }
 }
 

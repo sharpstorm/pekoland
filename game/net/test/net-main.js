@@ -2,6 +2,7 @@ import PlayerSprite from '../../managers/sprite-manager.js';
 import Player from '../../models/player.js';
 import PlayerManager from '../../managers/player-manager.js';
 import { joystickWorker, joystickUpWorker, addJoystickEventHandler, removeJoystickEventHandler } from '../../workers/joystick.js';
+import {addChatEventHandler, removeChatEventHandler, chatWorker} from '../../workers/joystick.js';
 import drawer from '../../managers/animation-manager.js';
 import Sprite, {AnimatableSprite, AvatarSprite} from '../../models/sprites.js';
 import SpriteManager from '../../managers/sprite-manager.js';
@@ -12,7 +13,7 @@ import handleServerGamePacket from '../server/game-data-handler.js';
 import buildServerGamePacket from '../server/game-data-sender.js';
 import { timeout } from '../utils.js'
 
-import {addChatEventHandler, removeChatEventHandler, chatWorkyy} from '../../managers/animation-manager.js';
+
 
 let networkManager = NetworkManager.getInstance();
 
@@ -83,9 +84,13 @@ var map = new Image();
 map.src = 'Images/house.jpg';
 
 
-var ctx = document.getElementById('game');
-document.onkeydown = joystickWorker;
-ctx.addEventListener('keydown', chatWorkyy, false);
+
+document.addEventListener('keydown',joystickWorker);
+document.addEventListener('keydown',chatWorker);
+
+
+
+
 //document.onkeydown = chatWorker;
 
 window.requestAnimationFrame(() => drawer(PlayerManager.getInstance()));

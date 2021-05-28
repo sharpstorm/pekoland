@@ -6,7 +6,9 @@ import Player from '../models/player.js';
 const playerManager = PlayerManager.getInstance();
 const chatManager = ChatManager.getInstance();
 const ctx = document.getElementById('game').getContext('2d');
+
 let joystickEventHandlers = [];
+let chatEventHandlers = [];
 
 
  
@@ -87,6 +89,40 @@ function joystickWorker(e) {
 }
 }
 
+function chatWorker(e){
+ 
+  if(e.key.length === 1 && ChatManager.getInstance().chatting)
+  typing(e.key);
+
+  if(e.keyCode === 13 && e.altKey === true){  
+    ChatManager.getInstance().chatting = !ChatManager.getInstance().chatting;
+  }
+   
+  if(e.keyCode === 13 && ChatManager.getInstance().chatting && chatManager.textField != ''){  //nani
+    pushMsg();
+  }
+  
+  if(e.keyCode === 8 && ChatManager.getInstance().chatting){  //nani
+    chatManager.textField = chatManager.textField.substring(0, chatManager.textField.length - 1)
+  }
+}
+
+function typing(letter){
+  chatManager.textField += letter;
+}
+
+function pushMsg(){
+  playerManager.getSelf().chat.speechBubbleCounter  = 0;
+  playerManager.getSelf().chat.speechBubble = true;
+  playerManager.getSelf().chat.currentSpeech = ChatManager.getInstance().textField;
+  chatManager.bigChatBox.push(playerManager.getSelf().name + ": " + playerManager.getSelf().chat.currentSpeech);
+  chatManager.textField = '';
+  chatEventHandlers.forEach(x => x({
+    msg: playerManager.getSelf().chat.currentSpeech,
+  }));
+}
+
+
 function joystickUpWorker(e) {
   var event = window.event ? window.event : e;
   //if(event.keyCode == "40" || event.keyCode == "39" || event.keyCode == "38" || event.keyCode == "37" )
@@ -101,4 +137,14 @@ function removeJoystickEventHandler(handler) {
   joystickEventHandlers = joystickEventHandlers.filter(x => x !== handler);
 }
 
-export { joystickWorker, joystickUpWorker, addJoystickEventHandler, removeJoystickEventHandler };
+function addChatEventHandler(handler) {
+  chatEventHandlers.push(handler);
+}
+
+function removeChatEventHandler(handler) {
+  chatEventHandlers = chatEventHandlers.filter(x => x !== handler);
+}
+
+
+export {joystickWorker, joystickUpWorker, addJoystickEventHandler, removeJoystickEventHandler};
+export {addChatEventHandler, removeChatEventHandler, chatWorker};

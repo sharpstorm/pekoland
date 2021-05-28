@@ -1,13 +1,14 @@
 let instance;
 
-export default class ChatManager {
+export default class ChatManager{
 
-
-  
   constructor() {
     this.chatting = false;
     this.self = undefined;
     this.bigChatBox = [];
+    this.textField = '';
+    let speech = new Image();
+    speech.src = 'Images/speech.png'
   }
 
   getSelf() {
@@ -24,4 +25,5 @@ export default class ChatManager {
     }
     return instance;
   }
+
 }

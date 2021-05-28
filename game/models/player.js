@@ -1,3 +1,5 @@
+import Chat from "../models/chat.js";
+
 export default class Player {
   constructor(name, playerSprite) {
     this.name = name;
@@ -14,9 +16,8 @@ export default class Player {
     this.direction = Player.Direction.DOWN;
     this.isAnimating = false;
     this.currentFrame = 6;
-    this.speechBubble = false;
-    this.speechBubbleCounter = 0;
-    this.currentSpeech = '';
+    this.chat = new Chat();
+    
   }
 
   updateX(X) {
@@ -29,17 +30,16 @@ export default class Player {
     this.newY = Y;
   }
 
-  updateMessage(m){
-      this.currentSpeech = m;
-      this.speechBubbleCounter = 0;
-      this.speechBubble = true;
-  }
 
   drawAt(ctx, x, y, width, height) {
+    ctx.strokeStyle = 'black';
+    ctx.font = '10px Arial';
+    ctx.strokeText("   "+ this.name, this.x, this.y);
     let sprite = this.playerSprite.getSpriteByDirection(Player.DirectionToIntMap[this.direction]).getSpriteAtFrame(this.currentFrame);
     let marginX = (width - sprite.width) / 2;
     let marginY = (height - sprite.height) / 2;
     ctx.drawImage(sprite.spritesheet, sprite.x, sprite.y, sprite.width, sprite.height, x + marginX, y + marginY, sprite.width, sprite.height);
+    this.chat.drawAt(ctx, this.x + 40, this.y-30);  //Hard Coded
   }
 
 
@@ -97,61 +97,7 @@ export default class Player {
       }
     }
   }
-  animate() {
-    if (this.newX > this.oldX){
-      
-      if(this.currentFrame < 6){
-        this.x += (this.newX - this.oldX)/6;
-        this.currentFrame = this.currentFrame + 1;
-      }
-      if(this.currentFrame >= 6){
-        this.x = Math.round(this.x);
-        this.newX = this.x;
-        this.oldX = this.x;
-        this.isAnimating = false;
-      }
-    }
-
-    else if (this.newX < this.oldX){
-      if(this.currentFrame < 6){
-        this.x += (this.newX - this.oldX)/6;
-        this.currentFrame = this.currentFrame + 1;
-      }
-      if(this.currentFrame >= 6){
-        this.x = Math.round(this.x);
-        this.newX = this.x;
-        this.oldX = this.x;
-        this.isAnimating = false;
-      }
-    }
-
-    else if (this.newY < this.oldY){
-      if(this.currentFrame < 6){
-        this.y += (this.newY - this.oldY)/6;
-        this.currentFrame = this.currentFrame + 1;
-      }
-      if(this.currentFrame >= 6){
-        this.y = Math.round(this.y);
-        this.newY = 0;
-        this.oldY = this.y;
-        this.isAnimating = false;
-      }
-    }
-
-    else if (this.newY > this.oldY){
-      if(this.currentFrame < 6){
-        this.y += (this.newY - this.oldY)/6;
-        this.currentFrame = this.currentFrame + 1;
-      }
-      if(this.currentFrame >= 6){
-        this.y = Math.round(this.y);
-        this.newY = 0;
-        this.oldY = this.y;
-        this.isAnimating = false;
-      }
-    }
-
-  }
+  
 }
 
 
