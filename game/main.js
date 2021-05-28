@@ -1,30 +1,74 @@
 import PlayerSprite from './managers/sprite-manager.js';
 import Player from './models/player.js';
 import PlayerManager from './managers/player-manager.js';
-import ChatManager from './managers/chat-manager.js';
-import { joystickWorker, joystickUpWorker } from './workers/joystick.js';
+import { joystickWorker, joystickUpWorker, addJoystickEventHandler, removeJoystickEventHandler } from './workers/joystick.js';
+import {addChatEventHandler, removeChatEventHandler, chatWorker} from './workers/joystick.js';
 import drawer from './managers/animation-manager.js';
 import Sprite, {AnimatableSprite, AvatarSprite} from './models/sprites.js';
 import SpriteManager from './managers/sprite-manager.js';
+import NetworkManager from './net/network-manager.js';
+import handleClientGamePacket from './net/client/game-data-handler.js';
+import buildClientGamePacket from './net/client/game-data-sender.js';
+import handleServerGamePacket from './net/server/game-data-handler.js';
+import buildServerGamePacket from './net/server/game-data-sender.js';
+import { timeout } from './net/utils.js'
 
-let currentPlayer2 = '';
+let networkManager = NetworkManager.getInstance();
 
+timeout(networkManager
+  .setup()
+, 5000)
+  .then(() => console.log('setup successful'))
+  .catch(() => {
+    alert('Could not connect to partner! Please Try Again!');
+    window.close();
+  });
 
-//focus
-window.onload = function() {
-  document.getElementById("game").focus();
-};
+networkManager.on('connected', () => {
+  console.log('Connected to remote');
+});
+networkManager.on('clientConnected', (conn) => {
+  console.log('Remote has connected');
+});
+networkManager.on('modeChanged', (mode) => {
+  console.log(`Currently in ${ mode === NetworkManager.Mode.SERVER ? 'server' : 'client' } mode`);
+});
+networkManager.on('connectionFailed', () => {
+  alert('Could not connect to partner! Please Try Again!');
+  window.close();
+});
+networkManager.on('initialized', () => {
+  if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {
+    networkManager.initConnection().then(() => {
+      networkManager.setDataHandler(handleClientGamePacket);
+      console.log('connection successful');
+      networkManager.send(buildClientGamePacket('handshake'));
+    });
+  } else {
+    networkManager.setDataHandler(handleServerGamePacket);
 
+    const playerManager = PlayerManager.getInstance();
+    playerManager.addPlayer(new Player(networkManager.configStore.name, SpriteManager.getInstance().getSprite('rabbit-avatar')));
+    playerManager.setSelf(networkManager.configStore.name);
+  }
+});
 
-/*
-//2nd convas
-var map = new Image();
-//map.src = 'Images/house.jpg';
-map.src = 'Images/grids.png';
-var ctx = document.getElementById('game2').getContext('2d');
-ctx.drawImage(map,0,0,1335,679,0,0,1000,500);
-*/
+addJoystickEventHandler((evt) => {
+  if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {
+    networkManager.send(buildClientGamePacket('move', evt));
+  } else {
+    networkManager.send(buildServerGamePacket('move-echo', buildClientGamePacket('move', evt)));
+  }
+})
 
+addChatEventHandler((evt) => {
+  console.log(evt);
+  if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {
+    networkManager.send(buildClientGamePacket('chat', evt));
+  } else {
+    networkManager.send(buildServerGamePacket('chat-echo', buildClientGamePacket('chat', evt)));
+  }
+})
 
 //Rabbit
 let rabbitSheet = new Image();
@@ -37,42 +81,7 @@ let rabbitSprite = new AvatarSprite(
 );
 SpriteManager.getInstance().registerSprite('rabbit-avatar', rabbitSprite);
 
-//init bg
-var map = new Image();
-//map.src = 'Images/house.jpg';
-map.src = 'Images/grids.png';
+document.addEventListener('keydown',joystickWorker);
+document.addEventListener('keydown',chatWorker);
 
-//Init player manager and add player TODO::hardcoded
-const playerManager = PlayerManager.getInstance();
-const chatManager = ChatManager.getInstance();
-playerManager.addPlayer(new Player('Johnny', SpriteManager.getInstance().getSprite('rabbit-avatar')));
-playerManager.setSelf('Johnny');
-//playerManager.addPlayer(new Player("Player 2",rabbitSprite));
-//playerManager.addPlayer(new Player("Player 3",rabbitSprite));
-
-document.onkeydown = joystickWorker;
-
-//player2List();
-window.requestAnimationFrame(() => drawer(playerManager));
-
-// Append <button> to <body>
-function player2List() {
-  playerManager.getPlayers().forEach(player => {
-    player.sourceX = player.playerSprite.down[0];
-    player.sourceY = player.playerSprite.down[1];
-
-    let btn = document.createElement('button');
-    btn.textContent = player.name;
-    btn.setAttribute('data-player-name', player.name);
-    btn.onclick = (evt) => {
-      let playerName = evt.target.getAttribute('data-player-name');
-      document.getElementById('currPlayer2').textContent = playerName;
-      currentPlayer2 = playerManager.getPlayer(playerName);
-      console.log(currentPlayer2);
-    }
-
-    document.body.appendChild(btn);
-  });
-}
-
-
+window.requestAnimationFrame(() => drawer(PlayerManager.getInstance()));

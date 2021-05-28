@@ -26,7 +26,7 @@ function App() {
       <RouteAnimatorSwitch animator={AnimCrossFade} path='/:p' fastForward={fastForward} onChange={() => setFastForward(false)}>
         <Route exact path={'/login(/register|/forget|/reset|/confirm)?'} component={FrontPageView}/>
         <Route exact path='/home' component={HomeView} />
-        <Route exact path='/game' component={LaunchGameView} />
+        <Route exact path='/launchgame' component={LaunchGameView} />
         <Redirect from='*' to='/' />
       </RouteAnimatorSwitch>
     </main>

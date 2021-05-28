@@ -1,7 +1,6 @@
 import PlayerManager from '../../managers/player-manager.js';
 import SpriteManager from '../../managers/sprite-manager.js';
 import Player from '../../models/player.js';
-import handleClientGamePacket from '../client/game-data-handler.js';
 import buildGamePacket from './game-data-sender.js';
 import NetworkManager from '../network-manager.js';
 
@@ -28,10 +27,14 @@ export default function handleGamePacket(data, conn) {
     PlayerManager.getInstance().addPlayer(player);
   } else if (opCode === 'move') {
     let player = PlayerManager.getInstance().getPlayer(data.name);
-    player.x += data.dX;
-    player.y += data.dY;
+    player.moveTo(data.x, data.y);
     player.direction = data.direction;
 
     NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('move-echo', data), conn.peer);
+  }
+  else if(opCode == 'chat'){
+    let player = PlayerManager.getInstance().getPlayer(data.name);
+    player.chat.updateMessage(data.message);
+    NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('chat-echo', data), conn.peer);
   }
 }
