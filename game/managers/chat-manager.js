@@ -1,18 +1,21 @@
 let instance;
 
-export default class ChatManager {
+export default class ChatManager{
 
   constructor() {
     this.chatting = false;
     this.self = undefined;
+    this.bigChatBox = [];
+    this.textField = '';
   }
 
   getSelf() {
     return (this.self === undefined) ? undefined : this.players[this.self];
   }
 
-
-  
+  getChats(){
+    return this.bigChatBox;
+  }
 
   static getInstance() {
     if (instance === undefined) {
@@ -20,4 +23,5 @@ export default class ChatManager {
     }
     return instance;
   }
+
 }

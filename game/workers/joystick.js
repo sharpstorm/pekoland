@@ -6,86 +6,110 @@ import Player from '../models/player.js';
 const playerManager = PlayerManager.getInstance();
 const chatManager = ChatManager.getInstance();
 const ctx = document.getElementById('game').getContext('2d');
+
 let joystickEventHandlers = [];
+let chatEventHandlers = [];
 
+let canvas = document.createElement('canvas');
+canvas.id = 'collision';
+canvas.width = 1000;
+canvas.height = 500;
+let map = new Image();
+//map.src = 'Images/house.jpg';
+map.src = 'Images/house1_colli.png';
 
-  var map = new Image();
-  //map.src = 'Images/house.jpg';
-  map.src = 'Images/house1_colli.png';
-  var canvas = document.createElement('canvas');
-
-  canvas.id = "collision";
-  canvas.width = 1000;
-  canvas.height = 500;
+map.onload = () => {
   canvas.getContext('2d').drawImage(map,0,0,1551,779,0,0,1000,500);
-
+}
 
 function joystickWorker(e) {
   let event = window.event ? window.event : e;
 
   if(event.keyCode === 37 || event.keyCode === 38 || event.keyCode === 39 || event.keyCode === 40){
-  if (playerManager.getSelf().isAnimating) {
-    return;
+    if (playerManager.getSelf().isAnimating) {
+      return;
+    }
+
+    let deltaY = 0;
+    let deltaX = 0;
+    let direction;
+
+    if (event.keyCode === 38) {
+      deltaY = -50;
+      direction = Player.Direction.UP;
+    } else if (event.keyCode === 40) {
+      deltaY = 50;
+      direction = Player.Direction.DOWN;
+    } else if (event.keyCode === 37) {
+      deltaX = -50;
+      direction = Player.Direction.LEFT;
+    } else if (event.keyCode === 39) {
+      deltaX = 50;
+      direction = Player.Direction.RIGHT;
+    } else {
+      return;
+    }
+
+    let self = playerManager.getSelf();
+
+    // Collision Detection
+    //BUT IN JOYSTICK FOR NOW
+    //canvas.getContext('2d').drawImage(map,0,0,1551,779,0,0,1000,500);
+    let lala = canvas.getContext('2d').getImageData(self.x + 25 + deltaX, self.y + 25 + deltaY, 1, 1).data;
+    if (lala[3] === 255 && lala[0] === 0 && lala[1] === 0 && lala[2] === 0) {
+      // console.log(ctx.getImageData(self.x + 25 + deltaX, self.y + 25 + deltaY, 1, 1).data);
+      // Collide, no move
+      deltaX = 0;
+      deltaY = 0;
+    }
+    
+    self.direction = direction;
+    if (deltaX !== 0 || deltaY !== 0) {
+      self.moveTo(self.x + deltaX, self.y + deltaY);
+    }
+
+    joystickEventHandlers.forEach(x => x({
+      id: direction,
+      deltaX,
+      deltaY,
+      x: self.x + deltaX,
+      y: self.y + deltaY
+    }));
   }
+}
 
-  let deltaY = 0;
-  let deltaX = 0;
-  let sprite = undefined;
-  let direction;
+function chatWorker(e){
+  if (e.key.length === 1 && ChatManager.getInstance().chatting)
+  typing(e.key);
 
-  if (event.keyCode === 38) {
-    deltaY = -50;
-    direction = Player.Direction.UP;
-  } else if (event.keyCode === 40) {
-    deltaY = 50;
-    direction = Player.Direction.DOWN;
-  } else if (event.keyCode === 37) {
-    deltaX = -50;
-    direction = Player.Direction.LEFT;
-  } else if (event.keyCode === 39) {
-    deltaX = 50;
-    direction = Player.Direction.RIGHT;
-  } else {
-    return;
+  if (e.keyCode === 13 && e.altKey === true) {  
+    ChatManager.getInstance().chatting = !ChatManager.getInstance().chatting;
   }
-
-  // Collision Detection
-
-  //BUT IN JOYSTICK FOR NOW
-  var map = new Image();
-  //map.src = 'Images/house.jpg';
-  map.src = 'Images/house1_colli.png';
-  var canvas = document.createElement('canvas');
-
-  canvas.id = "collision";
-  canvas.width = 1000;
-  canvas.height = 500;
-  canvas.getContext('2d').drawImage(map,0,0,1551,779,0,0,1000,500);
-
-
-  let lala = canvas.getContext('2d').getImageData(playerManager.getSelf().x + 25 + deltaX, playerManager.getSelf().y + 25 + deltaY, 1, 1).data;
-  if (lala[3] === 255 && lala[0] === 0 && lala[1] === 0 && lala[2] === 0) {
-    console.log(ctx.getImageData(playerManager.getSelf().x + 25 + deltaX, playerManager.getSelf().y + 25 + deltaY, 1, 1).data);
-    // Collide, no move
-    deltaX = 0;
-    deltaY = 0;
-
+   
+  if (e.keyCode === 13 && ChatManager.getInstance().chatting && chatManager.textField != '') {  //nani
+    pushMsg();
   }
+  
+  if (e.keyCode === 8 && ChatManager.getInstance().chatting) {  //nani
+    chatManager.textField = chatManager.textField.substring(0, chatManager.textField.length - 1)
+  }
+}
 
-  playerManager.getSelf().moveY = deltaY / 6;
-  playerManager.getSelf().moveX = deltaX / 6;
-  playerManager.getSelf().direction = direction;
-  playerManager.getSelf().isAnimating = true;
-  playerManager.getSelf().currentFrame = 0;
+function typing(letter){
+  chatManager.textField += letter;
+}
 
-  joystickEventHandlers.forEach(x => x({
-    id: direction,
-    deltaX,
-    deltaY
+function pushMsg(){
+  playerManager.getSelf().chat.speechBubbleCounter  = 0;
+  playerManager.getSelf().chat.speechBubble = true;
+  playerManager.getSelf().chat.currentSpeech = ChatManager.getInstance().textField;
+  chatManager.bigChatBox.push(playerManager.getSelf().name + ": " + playerManager.getSelf().chat.currentSpeech);
+  chatManager.textField = '';
+  chatEventHandlers.forEach(x => x({
+    msg: playerManager.getSelf().chat.currentSpeech,
   }));
+}
 
-}
-}
 
 function joystickUpWorker(e) {
   var event = window.event ? window.event : e;
@@ -101,4 +125,14 @@ function removeJoystickEventHandler(handler) {
   joystickEventHandlers = joystickEventHandlers.filter(x => x !== handler);
 }
 
-export { joystickWorker, joystickUpWorker, addJoystickEventHandler, removeJoystickEventHandler };
+function addChatEventHandler(handler) {
+  chatEventHandlers.push(handler);
+}
+
+function removeChatEventHandler(handler) {
+  chatEventHandlers = chatEventHandlers.filter(x => x !== handler);
+}
+
+
+export {joystickWorker, joystickUpWorker, addJoystickEventHandler, removeJoystickEventHandler};
+export {addChatEventHandler, removeChatEventHandler, chatWorker};

@@ -2,6 +2,7 @@ import PlayerSprite from '../../managers/sprite-manager.js';
 import Player from '../../models/player.js';
 import PlayerManager from '../../managers/player-manager.js';
 import { joystickWorker, joystickUpWorker, addJoystickEventHandler, removeJoystickEventHandler } from '../../workers/joystick.js';
+import {addChatEventHandler, removeChatEventHandler, chatWorker} from '../../workers/joystick.js';
 import drawer from '../../managers/animation-manager.js';
 import Sprite, {AnimatableSprite, AvatarSprite} from '../../models/sprites.js';
 import SpriteManager from '../../managers/sprite-manager.js';
@@ -60,6 +61,15 @@ addJoystickEventHandler((evt) => {
   }
 })
 
+addChatEventHandler((evt) => {
+  console.log(evt);
+  if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {
+    networkManager.send(buildClientGamePacket('chat', evt));
+  } else {
+    networkManager.send(buildServerGamePacket('chat-echo', buildClientGamePacket('chat', evt)));
+  }
+})
+
 //Rabbit
 let rabbitSheet = new Image();
 rabbitSheet.src = 'Images/rabbit.png';
@@ -71,10 +81,7 @@ let rabbitSprite = new AvatarSprite(
 );
 SpriteManager.getInstance().registerSprite('rabbit-avatar', rabbitSprite);
 
-//init bg
-var map = new Image();
-map.src = 'Images/house.jpg';
-
-document.onkeydown = joystickWorker;
+document.addEventListener('keydown',joystickWorker);
+document.addEventListener('keydown',chatWorker);
 
 window.requestAnimationFrame(() => drawer(PlayerManager.getInstance()));

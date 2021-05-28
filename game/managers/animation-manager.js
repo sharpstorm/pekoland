@@ -5,48 +5,25 @@ let counter = 0;
 let che = false;
 let chatboxText = '';
 let bigChatBox = [];
-var map = new Image();
-let speechBubble = 0;
+let map = new Image();
 //map.src = 'Images/house.jpg';
 map.src = 'Images/house1.png';
 
-var speech = new Image();
-speech.src = 'Images/speech.png'
+const playerManager = PlayerManager.getInstance();
+const chatManager = ChatManager.getInstance();
 
 function drawer() {
   if (counter > 4) {
-    var ctx = document.getElementById('game').getContext('2d');
-    
+    let ctx = document.getElementById('game').getContext('2d');
     ctx.clearRect(0, 0, 1000, 500);
-    ctx.drawImage(map,0,0,1551,779,0,0,1000,500);
-    
-    //drawGrids(1000, 500, 50);
-    if(che)
-      drawExanpadedTextBox();
+    ctx.drawImage(map, 0, 0, 1551, 779, 0, 0, 1000, 500);
+    if (ChatManager.getInstance().chatting)
+      drawExpandedTextBox();
     else
       drawTextBox();
-    PlayerManager.getInstance().getPlayers().forEach(player => {
-      // Nametag
-      ctx.strokeStyle = 'black';
-      ctx.font = '10px Arial';
-      ctx.strokeText("   "+ player.name, player.x, player.y);
-      player.drawAt(ctx, player.x, player.y, 50, 50);
       
-      if(player.speechBubbleCounter > 30){
-        player.speechBubbleCounter = 0;
-        player.speechBubble = false;
-      }
-      if(player.speechBubble){
-        ctx.drawImage(speech,0,0,1551,779,player.x+40,player.y-30,100,50);
-        ctx.font = '15px Arial';
-        ctx.fillStyle = "rgba(0, 0, 0, 1)";
-        ctx.fillText(player.currentSpeech, player.x+60,player.y);
-        player.speechBubbleCounter++;
-      }
-      else{
-
-      }
-
+    PlayerManager.getInstance().getPlayers().forEach(player => {
+      player.drawAt(ctx, player.x, player.y, 50, 50);
       player.animate();
     });
     counter = 0;  //FPS
@@ -56,7 +33,7 @@ function drawer() {
 }
 
 function drawGrids(height, width, gridLength) {
-  var ctx = document.getElementById('game').getContext('2d');
+  let ctx = document.getElementById('game').getContext('2d');
   for (let i = 0; i < height; i += gridLength) {
     for (let ii = 0; ii < width; ii += gridLength) {
       ctx.beginPath();
@@ -73,145 +50,72 @@ function draggable() {
 }
 
 function getPixel(x, y) {
-  var ctx = document.getElementById('game').getContext('2d');
+  let ctx = document.getElementById('game').getContext('2d');
   return context.getImageData(x, y, 1, 1).data;
 }
 
 
 function drawTextBox(){
-  che = false;  
-  var ctx = document.getElementById('game').getContext('2d');
-  ctx.beginPath();
+  ChatManager.getInstance().chatting = false;  
+  let ctx = document.getElementById('game').getContext('2d');
   ctx.strokeStyle = 'white';
-  ctx.lineWidth = '1';
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+  ctx.lineWidth = 1;
+  ctx.font = '15px Arial';
+
+  ctx.beginPath();
   ctx.rect(0, 485, 500, 15);
-  ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-  ctx.fillRect(0, 485, 500, 15);
   ctx.stroke();
+  ctx.fill();
 
   //Plus sign behind
-  ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
   ctx.fillRect(485, 485, 15, 15);
-  ctx.font = '15px Arial';
   ctx.strokeStyle = 'white';
-  ctx.strokeText("+", 488.5, 497.5);
+  ctx.strokeText('+', 488.5, 497.5);
 
   //To who
-  ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
   ctx.fillRect(0, 485, 50, 15);
   ctx.font = 'normal 10px Arial';
-  ctx.strokeStyle = 'white';
-  ctx.fillStyle = "rgba(255, 255, 255, 1)";
-  ctx.fillText("All", 18, 497);
-
-  
-
+  ctx.fillStyle = 'rgba(255, 255, 255, 1)';
+  ctx.fillText('All', 18, 497);
 }
 
+function drawExpandedTextBox() {
+  ChatManager.getInstance().chatting = true;
 
-
-
-function drawExanpadedTextBox(){
-  che = true;
-  var ctx = document.getElementById('game').getContext('2d');
-  ctx.beginPath();
+  const ctx = document.getElementById('game').getContext('2d');
   ctx.strokeStyle = 'black';
-  ctx.lineWidth = '1';
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+  ctx.lineWidth = 1;
+  ctx.font = '15px Arial';
+
+  ctx.beginPath();
   ctx.rect(0, 485, 500, 15);
-  ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-  ctx.fillRect(0, 485, 500, 15);
   ctx.stroke();
+  ctx.fill();
+  //Expand top for prev chat
+  ctx.fillRect(0, 330, 500, 150);
+  ctx.fillRect(0, 480, 500, 5);
 
   //Plus sign behind
-  ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
   ctx.fillRect(485, 485, 15, 15);
-  ctx.font = '15px Arial';
   ctx.strokeStyle = 'white';
-  ctx.strokeText("-", 490.5, 497);
+  ctx.strokeText('-', 490.5, 497);
 
   //To who
-  ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
   ctx.fillRect(0, 485, 50, 15);
   ctx.font = 'normal 10px Arial';
-  ctx.strokeStyle = 'white';
-  ctx.fillStyle = "rgba(255, 255, 255, 1)";
-  ctx.fillText("All", 18, 497);
-
-  //Expand top for prev chat
-  ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-  ctx.fillRect(0, 330, 500, 150);
-
-
-  ctx.fillRect(0, 480, 500, 5);
+  ctx.fillStyle = 'rgba(255, 255, 255, 1)';
+  ctx.fillText('All', 18, 497);
   
   //typing words
-  ctx.font = 'normal 10px Arial';
-  ctx.fillStyle = "rgba(255, 255, 255, 1)";
-  ctx.fillText(chatboxText, 60, 497);
+  ctx.fillText(ChatManager.getInstance().textField, 60, 497);
 
   //chat history
-  var i;
-  for(i=0;i<bigChatBox.length;i++){
-    ctx.font = 'normal 10px Arial';
-    ctx.fillStyle = "rgba(255, 255, 255, 1)";
-    ctx.fillText(bigChatBox[i], 5, 345 + (i * 15));
+  for (let i = 0; i < chatManager.bigChatBox.length; i++) {
+    ctx.fillText(chatManager.bigChatBox[i], 5, 345 + (i * 15));
   }
-  
-  
-  //flickering line
-  
-
- 
   
 }
-
-
-function typing(letter){
-  chatboxText += letter;
-}
-
-const playerManager = PlayerManager.getInstance();
-
-function pushMsg(){
-  var ctx = document.getElementById('game').getContext('2d');
-  bigChatBox.push(playerManager.getSelf().name + ": " + chatboxText);
-  playerManager.getSelf().speechBubble = true;
-  //ctx.drawImage(speech,0,0,1551,779,player.x+40,player.y-30,100,50);
-  playerManager.getSelf().currentSpeech = chatboxText;
-  chatboxText = '';
-}
-var ctx = document.getElementById('game');
-
-//NOT WORKING. COORDINATES NOT ZUN WHEN RESIZING. USING ALT + ENTER TO OPEN CHAT FOR NOW
-/*
-ctx.addEventListener('click', function(e) {
-  console.log(e);
-  if(e.screenX <= 682 && e.screenX >= 663 && e.screenY <= 793 && e.screenY >= 773 ){
-    che = !che;
-    ChatManager.getInstance().chatting = !ChatManager.getInstance().chatting;
-  }
-}, false);
-*/
-
-ctx.addEventListener('keydown', function(e) {
-  //console.log(e);
-  if(e.key.length === 1 && ChatManager.getInstance().chatting)
-  typing(e.key);
-
-  if(e.keyCode === 13 && e.altKey === true){  
-    che = !che;
-    ChatManager.getInstance().chatting = !ChatManager.getInstance().chatting;
-  }
-   
-  if(e.keyCode === 13 && ChatManager.getInstance().chatting && chatboxText != ''){  //nani
-    pushMsg();
-  }
-  
-  if(e.keyCode === 8 && ChatManager.getInstance().chatting){  //nani
-    chatboxText = chatboxText.substring(0, chatboxText.length - 1)
-  }
-  
-  
-}, false);
 
 export default drawer;
