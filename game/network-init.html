@@ -16,17 +16,19 @@
   </body>
 
   <script>
-    // Receive Message Headers
+    // Send Message Headers
     const SENDOP_CONFIG_CHANGED = 'pekoconn-config-changed';
 
-    // Send Message Headers
+    // Recv Message Headers
     const RECVOP_CONFIG_REQUEST = 'pekoconn-config-request';
+    const RECVOP_UPDATE_PEERID = 'pekoconn-update-peerid';
 
     let channel = new BroadcastChannel('pekoland-data');
+    let peerId;
 
     document.addEventListener('DOMContentLoaded', () => {
       let opMode, name, connString, windowId;
-
+      
       document.getElementById('btn-go').addEventListener('click', () => {
         opMode = document.getElementById('select-mode').selectedIndex + 1;
         name = document.getElementById('inp-name').value;
@@ -57,6 +59,8 @@
             name,
             partnerString: connString
           });
+        } else if (data.op === RECVOP_UPDATE_PEERID) {
+          peerId = data.peerId;
         }
       }
     });

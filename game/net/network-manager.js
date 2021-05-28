@@ -53,6 +53,7 @@ export default class NetworkManager {
         this.emitEvent(NetworkManager.Events.CLIENT_CONNECTED, dataConnection);
       }).bind(this));
     }).bind(this));
+    this.configStore.updateRemote(this.peerId);
   }
 
   initConnection() {

@@ -5,6 +5,7 @@ const RECVOP_CONFIG_CHANGED = 'pekoconn-config-changed';
 
 // Send Message Headers
 const SENDOP_CONFIG_REQUEST = 'pekoconn-config-request';
+const SENDOP_UPDATE_PEERID = 'pekoconn-update-peerid';
 
 export default class ConfigStore {
   constructor() {
@@ -53,6 +54,13 @@ export default class ConfigStore {
       this.broadcastChannel.postMessage({
         op: SENDOP_CONFIG_REQUEST
       });
+    });
+  }
+
+  updateRemote(peerId) {
+    this.broadcastChannel.postMessage({
+      op: SENDOP_UPDATE_PEERID,
+      peerId: peerId
     });
   }
 
