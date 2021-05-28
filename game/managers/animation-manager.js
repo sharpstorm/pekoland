@@ -10,8 +10,16 @@ let speechBubble = 0;
 //map.src = 'Images/house.jpg';
 map.src = 'Images/house1.png';
 
+let chatEventHandlers = [];
+
+
 var speech = new Image();
 speech.src = 'Images/speech.png'
+
+
+const playerManager = PlayerManager.getInstance();
+const chatManager = ChatManager.getInstance();
+
 
 function drawer() {
   if (counter > 4) {
@@ -152,10 +160,10 @@ function drawExanpadedTextBox(){
 
   //chat history
   var i;
-  for(i=0;i<bigChatBox.length;i++){
+  for(i=0;i<chatManager.bigChatBox.length;i++){
     ctx.font = 'normal 10px Arial';
     ctx.fillStyle = "rgba(255, 255, 255, 1)";
-    ctx.fillText(bigChatBox[i], 5, 345 + (i * 15));
+    ctx.fillText(chatManager.bigChatBox[i], 5, 345 + (i * 15));
   }
   
   
@@ -171,16 +179,29 @@ function typing(letter){
   chatboxText += letter;
 }
 
-const playerManager = PlayerManager.getInstance();
-
 function pushMsg(){
   var ctx = document.getElementById('game').getContext('2d');
-  bigChatBox.push(playerManager.getSelf().name + ": " + chatboxText);
+  chatManager.bigChatBox.push(playerManager.getSelf().name + ": " + chatboxText);
   playerManager.getSelf().speechBubble = true;
   //ctx.drawImage(speech,0,0,1551,779,player.x+40,player.y-30,100,50);
   playerManager.getSelf().currentSpeech = chatboxText;
   chatboxText = '';
+
+  chatEventHandlers.forEach(x => x({
+    msg: playerManager.getSelf().currentSpeech,
+  }));
 }
+
+
+function addChatEventHandler(handler) {
+  chatEventHandlers.push(handler);
+}
+
+function removeChatEventHandler(handler) {
+  chatEventHandlers = joystickEventHandlers.filter(x => x !== handler);
+}
+
+
 var ctx = document.getElementById('game');
 
 
@@ -202,7 +223,9 @@ ctx.addEventListener('keydown', function(e) {
     chatboxText = chatboxText.substring(0, chatboxText.length - 1)
   }
   
+
   
 }, false);
 
 export default drawer;
+export {addChatEventHandler, removeChatEventHandler };

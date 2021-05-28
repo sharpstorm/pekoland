@@ -32,6 +32,10 @@ export default function handleGamePacket(data, conn) {
     player.direction = data.direction;
 
   }
+  else if (opCode === 'chat-echo'){
+    let player = PlayerManager.getInstance().getPlayer(data.name);
+    player.updateMessage(data.message);
+  }
 }
 
 function inflatePlayer(data) {

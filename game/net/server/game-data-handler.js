@@ -4,6 +4,7 @@ import Player from '../../models/player.js';
 import handleClientGamePacket from '../client/game-data-handler.js';
 import buildGamePacket from './game-data-sender.js';
 import NetworkManager from '../network-manager.js';
+import buildGameDataPacket from '../client/game-data-sender.js';
 
 const spawnLocation = [0, 0];
 
@@ -37,5 +38,10 @@ export default function handleGamePacket(data, conn) {
     player.direction = data.direction;
 
     NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('move-echo', data), conn.peer);
+  }
+  else if(opCode == 'chat'){
+    let player = PlayerManager.getInstance().getPlayer(data.name);
+    player.currentSpeech = data.message;
+    NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('chat-echo', data), conn.peer);
   }
 }

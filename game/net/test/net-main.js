@@ -12,6 +12,9 @@ import handleServerGamePacket from '../server/game-data-handler.js';
 import buildServerGamePacket from '../server/game-data-sender.js';
 import { timeout } from '../utils.js'
 
+import {addChatEventHandler, removeChatEventHandler } from '../../managers/animation-manager.js';
+import ChatManager from '../../managers/chat-manager.js';
+
 let networkManager = NetworkManager.getInstance();
 
 timeout(networkManager
@@ -40,6 +43,7 @@ networkManager.on('initialized', () => {
     networkManager.setDataHandler(handleServerGamePacket);
 
     const playerManager = PlayerManager.getInstance();
+    const chatManager = ChatManager.getInstance();
     playerManager.addPlayer(new Player(networkManager.configStore.name, SpriteManager.getInstance().getSprite('rabbit-avatar')));
     playerManager.setSelf(networkManager.configStore.name);
   }
@@ -47,11 +51,22 @@ networkManager.on('initialized', () => {
 
 addJoystickEventHandler((evt) => {
   if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {
+    networkManager.send(buildClientGamePacket('chat', evt));
+  } else {
+    networkManager.send(buildServerGamePacket('chat-echo', buildClientGamePacket('chat', evt)));
+  }
+})
+
+addChatEventHandler((evt) => {
+  if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {
     networkManager.send(buildClientGamePacket('move', evt));
   } else {
     networkManager.send(buildServerGamePacket('move-echo', buildClientGamePacket('move', evt)));
   }
 })
+
+
+
 
 //Rabbit
 let rabbitSheet = new Image();

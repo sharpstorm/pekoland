@@ -14,7 +14,17 @@ export default function buildGameDataPacket(opCode, data) {
       dX: data.deltaX,
       dY: data.deltaY,
     };
-  } else {
+  } 
+
+  else if (opCode === 'chat'){
+    return{
+      opCode,
+      message: data.content,
+      name: PlayerManager.getInstance().getSelfName(),
+    };
+  }
+
+  else {
     console.log('unknown op code: ' + opCode);
   }
 }

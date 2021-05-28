@@ -29,6 +29,12 @@ export default class Player {
     this.newY = Y;
   }
 
+  updateMessage(m){
+      this.currentSpeech = m;
+      this.speechBubbleCounter = 0;
+      this.speechBubble = true;
+  }
+
   drawAt(ctx, x, y, width, height) {
     let sprite = this.playerSprite.getSpriteByDirection(Player.DirectionToIntMap[this.direction]).getSpriteAtFrame(this.currentFrame);
     let marginX = (width - sprite.width) / 2;

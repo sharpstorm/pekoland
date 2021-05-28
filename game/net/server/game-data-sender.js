@@ -28,6 +28,13 @@ export default function buildGamePacket(opCode, data) {
       direction: data.direction
     };
   }
+  else if (opCode === 'chat-echo'){
+    return{
+      opCode,
+      name: data.name,
+      message: data.message,
+    };
+  }
 }
 
 function flattenPlayer(playerObj) {
