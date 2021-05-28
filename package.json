@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "parcel web/index.html --open",
-    "build": "parcel build web/index.html"
+    "build": "parcel build web/index.html",
+    "bootstrap-db": "node ./server/bootstrap-faunadb.js"
   },
   "repository": {
     "type": "git",
@@ -26,6 +27,8 @@
     "assets": "^3.0.1",
     "classnames": "^2.3.1",
     "components": "^0.1.0",
+    "dotenv": "^10.0.0",
+    "faunadb": "^4.3.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-router-dom": "^5.2.0",

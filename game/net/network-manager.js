@@ -53,6 +53,10 @@ export default class NetworkManager {
         this.emitEvent(NetworkManager.Events.CLIENT_CONNECTED, dataConnection);
       }).bind(this));
     }).bind(this));
+    this.configStore.updateRemote(this.peerId);
+    window.onbeforeunload = () => {
+      this.configStore.updateRemote('');
+    };
   }
 
   initConnection() {
@@ -76,7 +80,11 @@ export default class NetworkManager {
     return this.connection.connect().then((() => {
       this.state = NetworkManager.State.READY;
       this.emitEvent(NetworkManager.Events.CONNECTED);
-    }).bind(this));
+    }).bind(this))
+    .catch(err => {
+      this.state = NetworkManager.State.INITIALIZED;
+      this.emitEvent(NetworkManager.Events.CONNECTION_FAILED);
+    });
   }
 
   getOperationMode() {
@@ -140,5 +148,6 @@ NetworkManager.Events = {
   INITIALIZED: 'initialized',
   CONNECT: 'connect',
   CONNECTED: 'connected',
-  CLIENT_CONNECTED: 'clientConnected'
+  CLIENT_CONNECTED: 'clientConnected',
+  CONNECTION_FAILED: 'connectionFailed',
 }
