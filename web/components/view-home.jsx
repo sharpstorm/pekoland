@@ -21,7 +21,7 @@ export default function HomeView() {
   return (
     <div className='panel panel-sm panel-dark flexbox flex-col' style={{textAlign: 'center', paddingBottom: '16px'}}>
       <h1>Home</h1>
-      <Link to='/game'><Button className='btn-primary'>Launch Game</Button></Link>
+      <Link to='/launchgame'><Button className='btn-primary'>Launch Game</Button></Link>
       <Button className='btn-accent' style={{margin: '8px 0'}} onClick={logout}>Logout</Button>
     </div>
   );

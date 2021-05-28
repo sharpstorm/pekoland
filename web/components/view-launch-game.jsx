@@ -25,7 +25,7 @@ export default function LaunchGameView() {
   function launchGame() {
     let wid = Date.now().toString();
     setWindowId(wid);
-    window.open('game/network.html#' + wid, '_blank');
+    window.open('game/index.html#' + wid, '_blank');
   }
 
   function selectMode(isHost) {
