@@ -13,8 +13,6 @@ import handleServerGamePacket from '../server/game-data-handler.js';
 import buildServerGamePacket from '../server/game-data-sender.js';
 import { timeout } from '../utils.js'
 
-
-
 let networkManager = NetworkManager.getInstance();
 
 timeout(networkManager
@@ -65,9 +63,6 @@ addChatEventHandler((evt) => {
   }
 })
 
-
-
-
 //Rabbit
 let rabbitSheet = new Image();
 rabbitSheet.src = 'Images/rabbit.png';
@@ -79,18 +74,7 @@ let rabbitSprite = new AvatarSprite(
 );
 SpriteManager.getInstance().registerSprite('rabbit-avatar', rabbitSprite);
 
-//init bg
-var map = new Image();
-map.src = 'Images/house.jpg';
-
-
-
 document.addEventListener('keydown',joystickWorker);
 document.addEventListener('keydown',chatWorker);
-
-
-
-
-//document.onkeydown = chatWorker;
 
 window.requestAnimationFrame(() => drawer(PlayerManager.getInstance()));

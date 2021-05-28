@@ -79,19 +79,18 @@ function joystickWorker(e) {
 }
 
 function chatWorker(e){
- 
-  if(e.key.length === 1 && ChatManager.getInstance().chatting)
+  if (e.key.length === 1 && ChatManager.getInstance().chatting)
   typing(e.key);
 
-  if(e.keyCode === 13 && e.altKey === true){  
+  if (e.keyCode === 13 && e.altKey === true) {  
     ChatManager.getInstance().chatting = !ChatManager.getInstance().chatting;
   }
    
-  if(e.keyCode === 13 && ChatManager.getInstance().chatting && chatManager.textField != ''){  //nani
+  if (e.keyCode === 13 && ChatManager.getInstance().chatting && chatManager.textField != '') {  //nani
     pushMsg();
   }
   
-  if(e.keyCode === 8 && ChatManager.getInstance().chatting){  //nani
+  if (e.keyCode === 8 && ChatManager.getInstance().chatting) {  //nani
     chatManager.textField = chatManager.textField.substring(0, chatManager.textField.length - 1)
   }
 }
