@@ -29,7 +29,7 @@ exports.handler = async function(event, context) {
     };
   }
 
-  if (!data.peer_id) {
+  if (data.peer_id === undefined) {
     return {
       statusCode: 400,
       body: JSON.stringify({message: 'Bad Request'})
@@ -51,12 +51,14 @@ exports.handler = async function(event, context) {
         }
       }));
     } else {
-      let ref = ret.data[0][1];
-      let doc = await client.query(q.Update(ref, {
-        data: {
-          peer_id: data.peer_id
-        }
-      }));
+      if (ret.data[0][0] !== data.peer_id) {
+        let ref = ret.data[0][1];
+        let doc = await client.query(q.Update(ref, {
+          data: {
+            peer_id: data.peer_id
+          }
+        }));
+      }
     }
 
     return {

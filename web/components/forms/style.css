@@ -20,6 +20,10 @@ button.btn.btn-primary {
   color: var(--color-font-light);
 }
 
+button.btn.btn-primary-dark {
+  color: var(--color-font);
+}
+
 button.btn.btn-primary:disabled, button.btn.btn-primary:disabled:hover {
   background-color: var(--color-dark-gray);
 }
@@ -36,6 +40,10 @@ button.btn.btn-accent {
 
 button.btn.btn-accent:hover {
   background-color: var(--color-accent-secondary);
+}
+
+button.btn.btn-accent:disabled, button.btn.btn-accent:disabled:hover {
+  background-color: var(--color-dark-gray);
 }
 
 button.btn.loading {

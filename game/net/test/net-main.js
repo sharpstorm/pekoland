@@ -18,7 +18,10 @@ timeout(networkManager
   .setup()
 , 5000)
   .then(() => console.log('setup successful'))
-  .catch(() => console.log('setup unsuccessful'));
+  .catch(() => {
+    alert('Could not connect to partner! Please Try Again!');
+    window.close();
+  });
 
 networkManager.on('connected', () => {
   console.log('Connected to remote');
@@ -28,6 +31,10 @@ networkManager.on('clientConnected', (conn) => {
 });
 networkManager.on('modeChanged', (mode) => {
   console.log(`Currently in ${ mode === NetworkManager.Mode.SERVER ? 'server' : 'client' } mode`);
+});
+networkManager.on('connectionFailed', () => {
+  alert('Could not connect to partner! Please Try Again!');
+  window.close();
 });
 networkManager.on('initialized', () => {
   if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {

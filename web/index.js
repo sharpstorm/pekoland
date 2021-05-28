@@ -6,6 +6,7 @@ import HomeView from './components/view-home';
 import NetlifyIdentityContext, { useIdentityContext } from 'react-netlify-identity-auth';
 import { RouteAnimatorSwitch } from './components/animator/animator-switch';
 import { AnimCrossFade } from './components/animator/animations';
+import LaunchGameView from './components/view-launch-game';
 
 function App() {
   const identity = useIdentityContext();
@@ -25,6 +26,7 @@ function App() {
       <RouteAnimatorSwitch animator={AnimCrossFade} path='/:p' fastForward={fastForward} onChange={() => setFastForward(false)}>
         <Route exact path={'/login(/register|/forget|/reset|/confirm)?'} component={FrontPageView}/>
         <Route exact path='/home' component={HomeView} />
+        <Route exact path='/game' component={LaunchGameView} />
         <Redirect from='*' to='/' />
       </RouteAnimatorSwitch>
     </main>
