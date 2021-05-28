@@ -41,7 +41,7 @@ export default function handleGamePacket(data, conn) {
   }
   else if(opCode == 'chat'){
     let player = PlayerManager.getInstance().getPlayer(data.name);
-    player.currentSpeech = data.message;
+    player.updateMessage(data.message);
     NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('chat-echo', data), conn.peer);
   }
 }
