@@ -7,8 +7,6 @@ export default class ChatManager{
     this.self = undefined;
     this.bigChatBox = [];
     this.textField = '';
-    let speech = new Image();
-    speech.src = 'Images/speech.png'
   }
 
   getSelf() {

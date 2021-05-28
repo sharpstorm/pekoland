@@ -24,7 +24,7 @@ function drawer() {
       
     PlayerManager.getInstance().getPlayers().forEach(player => {
       player.drawAt(ctx, player.x, player.y, 50, 50);
-      player.moveTo(player.newX, player.newY);
+      player.animate();
     });
     counter = 0;  //FPS
   }

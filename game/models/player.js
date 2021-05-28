@@ -16,20 +16,8 @@ export default class Player {
     this.direction = Player.Direction.DOWN;
     this.isAnimating = false;
     this.currentFrame = 6;
-    this.chat = new Chat();
-    
+    this.chat = new Chat(); 
   }
-
-  updateX(X) {
-    this.oldX = this.x;
-    this.newX = X;
-  }
-
-  updateY(Y) {
-    this.oldY = this.y;
-    this.newY = Y;
-  }
-
 
   drawAt(ctx, x, y, width, height) {
     ctx.strokeStyle = 'black';
@@ -42,64 +30,34 @@ export default class Player {
     this.chat.drawAt(ctx, this.x + 40, this.y-30);  //Hard Coded
   }
 
-
-  moveTo(newX, newY){
-    if (this.newX > this.oldX){
-      
-      if(this.currentFrame < 6){
-        this.x += (this.newX - this.oldX)/6;
-        this.currentFrame = this.currentFrame + 1;
-      }
-      if(this.currentFrame >= 6){
-        this.x = Math.round(this.x);
-        this.newX = this.x;
-        this.oldX = this.x;
-        this.isAnimating = false;
-      }
-    }
-
-    else if (this.newX < this.oldX){
-      if(this.currentFrame < 6){
-        this.x += (this.newX - this.oldX)/6;
-        this.currentFrame = this.currentFrame + 1;
-      }
-      if(this.currentFrame >= 6){
-        this.x = Math.round(this.x);
-        this.newX = this.x;
-        this.oldX = this.x;
-        this.isAnimating = false;
-      }
-    }
-
-    else if (this.newY < this.oldY){
-      if(this.currentFrame < 6){
-        this.y += (this.newY - this.oldY)/6;
-        this.currentFrame = this.currentFrame + 1;
-      }
-      if(this.currentFrame >= 6){
-        this.y = Math.round(this.y);
-        this.newY = 0;
-        this.oldY = this.y;
-        this.isAnimating = false;
-      }
-    }
-
-    else if (this.newY > this.oldY){
-      if(this.currentFrame < 6){
-        this.y += (this.newY - this.oldY)/6;
-        this.currentFrame = this.currentFrame + 1;
-      }
-      if(this.currentFrame >= 6){
-        this.y = Math.round(this.y);
-        this.newY = 0;
-        this.oldY = this.y;
-        this.isAnimating = false;
-      }
-    }
+  moveTo(newX, newY) {
+    this.oldX = this.x;
+    this.oldY = this.y;
+    this.newX = newX;
+    this.newY = newY;
   }
-  
-}
 
+  animate() {
+    if (!this.isAnimating) return;
+
+    if (this.currentFrame < 6) {
+      if (Math.abs(this.newX - this.x) > 0.00001) {
+        this.x += (this.newX - this.oldX) / 6;
+        this.currentFrame++;
+        return;
+      } else if (Math.abs(this.newY - this.y) > 0.00001) {
+        this.y += (this.newY - this.oldY) / 6;
+        this.currentFrame++;
+        return;
+      }
+    }
+    this.x = this.newX;
+    this.y = this.newY;
+    this.oldX = this.x;
+    this.oldY = this.y;
+    this.isAnimating = false;
+  }
+}
 
 
 Player.Direction = {

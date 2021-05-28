@@ -10,83 +10,72 @@ const ctx = document.getElementById('game').getContext('2d');
 let joystickEventHandlers = [];
 let chatEventHandlers = [];
 
+let canvas = document.createElement('canvas');
+canvas.id = 'collision';
+canvas.width = 1000;
+canvas.height = 500;
+let map = new Image();
+//map.src = 'Images/house.jpg';
+map.src = 'Images/house1_colli.png';
 
- 
-  var canvas = document.createElement('canvas');
-  canvas.id = 'collision';
-  canvas.width = 1000;
-  canvas.height = 500;
-  let map = new Image();
-  //map.src = 'Images/house.jpg';
-  map.src = 'Images/house1_colli.png';
-  
-  map.onload = () => {
-    canvas.getContext('2d').drawImage(map,0,0,1551,779,0,0,1000,500);
-  }
+map.onload = () => {
+  canvas.getContext('2d').drawImage(map,0,0,1551,779,0,0,1000,500);
+}
 
 function joystickWorker(e) {
   let event = window.event ? window.event : e;
 
   if(event.keyCode === 37 || event.keyCode === 38 || event.keyCode === 39 || event.keyCode === 40){
-  if (playerManager.getSelf().isAnimating) {
-    return;
-  }
+    if (playerManager.getSelf().isAnimating) {
+      return;
+    }
 
-  let deltaY = 0;
-  let deltaX = 0;
-  let sprite = undefined;
-  let direction;
+    let deltaY = 0;
+    let deltaX = 0;
+    let direction;
 
-  if (event.keyCode === 38) {
-    deltaY = -50;
-    playerManager.getSelf().updateY(playerManager.getSelf().y + deltaY);
-    direction = Player.Direction.UP;
-  } else if (event.keyCode === 40) {
-    deltaY = 50;
-    playerManager.getSelf().updateY(playerManager.getSelf().y + deltaY);
-    direction = Player.Direction.DOWN;
-  } else if (event.keyCode === 37) {
-    deltaX = -50;
-    playerManager.getSelf().updateX(playerManager.getSelf().x + deltaX);
-    direction = Player.Direction.LEFT;
-  } else if (event.keyCode === 39) {
-    deltaX = 50;
-    playerManager.getSelf().updateX(playerManager.getSelf().x + deltaX);
-    direction = Player.Direction.RIGHT;
-  } else {
-    return;
-  }
+    if (event.keyCode === 38) {
+      deltaY = -50;
+      direction = Player.Direction.UP;
+    } else if (event.keyCode === 40) {
+      deltaY = 50;
+      direction = Player.Direction.DOWN;
+    } else if (event.keyCode === 37) {
+      deltaX = -50;
+      direction = Player.Direction.LEFT;
+    } else if (event.keyCode === 39) {
+      deltaX = 50;
+      direction = Player.Direction.RIGHT;
+    } else {
+      return;
+    }
 
-  // Collision Detection
+    let self = playerManager.getSelf();
 
-  //BUT IN JOYSTICK FOR NOW
-  //canvas.getContext('2d').drawImage(map,0,0,1551,779,0,0,1000,500);
-  playerManager.getSelf().isAnimating = true;
-
-  let lala = canvas.getContext('2d').getImageData(playerManager.getSelf().x + 25 + deltaX, playerManager.getSelf().y + 25 + deltaY, 1, 1).data;
-  if (lala[3] === 255 && lala[0] === 0 && lala[1] === 0 && lala[2] === 0) {
-    console.log(ctx.getImageData(playerManager.getSelf().x + 25 + deltaX, playerManager.getSelf().y + 25 + deltaY, 1, 1).data);
-    // Collide, no move
-    playerManager.getSelf().isAnimating = false;
-    playerManager.getSelf().newX = playerManager.getSelf().oldX;
-    playerManager.getSelf().newY = playerManager.getSelf().oldY;
-    deltaX = 0;
-    deltaY = 0;
+    // Collision Detection
+    //BUT IN JOYSTICK FOR NOW
+    //canvas.getContext('2d').drawImage(map,0,0,1551,779,0,0,1000,500);
+    let lala = canvas.getContext('2d').getImageData(self.x + 25 + deltaX, self.y + 25 + deltaY, 1, 1).data;
+    if (lala[3] === 255 && lala[0] === 0 && lala[1] === 0 && lala[2] === 0) {
+      // console.log(ctx.getImageData(self.x + 25 + deltaX, self.y + 25 + deltaY, 1, 1).data);
+      // Collide, no move
+      deltaX = 0;
+      deltaY = 0;
+    }
     
+    self.direction = direction;
+    self.currentFrame = 0;
+    if (deltaX !== 0 || deltaY !== 0) {
+      self.isAnimating = true;
+      self.moveTo(self.x + deltaX, self.y + deltaY);
+    }
+
+    joystickEventHandlers.forEach(x => x({
+      id: direction,
+      deltaX,
+      deltaY
+    }));
   }
-
-
-  playerManager.getSelf().direction = direction;
-  
-  playerManager.getSelf().currentFrame = 0;
-
-  joystickEventHandlers.forEach(x => x({
-    id: direction,
-    deltaX,
-    deltaY
-  }));
-
-}
 }
 
 function chatWorker(e){
