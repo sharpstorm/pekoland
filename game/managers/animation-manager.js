@@ -198,7 +198,7 @@ function addChatEventHandler(handler) {
 }
 
 function removeChatEventHandler(handler) {
-  chatEventHandlers = joystickEventHandlers.filter(x => x !== handler);
+  chatEventHandlers = chatEventHandlers.filter(x => x !== handler);
 }
 
 
@@ -231,8 +231,8 @@ function chatWorker(){
 }, false);}*/
 
 function chatWorkyy(e){
-  console.log(e);
-  console.log('sdf');
+  //console.log(e);
+  //console.log('sdf');
   if(e.key.length === 1 && ChatManager.getInstance().chatting)
   typing(e.key);
 

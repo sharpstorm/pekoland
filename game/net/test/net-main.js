@@ -56,6 +56,7 @@ addJoystickEventHandler((evt) => {
 })
 
 addChatEventHandler((evt) => {
+  console.log(evt);
   if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {
     networkManager.send(buildClientGamePacket('chat', evt));
   } else {

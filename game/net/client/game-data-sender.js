@@ -19,7 +19,7 @@ export default function buildGameDataPacket(opCode, data) {
   else if (opCode === 'chat'){
     return{
       opCode,
-      message: data.content,
+      message: data.msg,
       name: PlayerManager.getInstance().getSelfName(),
     };
   }
