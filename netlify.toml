@@ -17,9 +17,14 @@
   command = "parcel build web/index.html --out-dir game-dev-dist && cp -r game game-dev-dist/game"
 
 [[redirects]]
+  from = "/functions/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
 [functions]
-  directory = "server/"
+  directory = "server/functions"
