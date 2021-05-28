@@ -35,6 +35,8 @@ export default class Player {
     this.oldY = this.y;
     this.newX = newX;
     this.newY = newY;
+    this.isAnimating = true;
+    this.currentFrame = 0;
   }
 
   animate() {

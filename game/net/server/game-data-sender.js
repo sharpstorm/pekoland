@@ -23,8 +23,8 @@ export default function buildGamePacket(opCode, data) {
     return {
       opCode,
       name: data.name,
-      dX: data.dX,
-      dY: data.dY,
+      x: data.x,
+      y: data.y,
       direction: data.direction
     };
   }

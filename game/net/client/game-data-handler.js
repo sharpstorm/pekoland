@@ -23,14 +23,8 @@ export default function handleGamePacket(data, conn) {
     PlayerManager.getInstance().addPlayer(inflatePlayer(data.player));
   } else if (opCode === 'move-echo') {
     let player = PlayerManager.getInstance().getPlayer(data.name);
-    //player.x += data.dX;
-    //player.y += data.dY;
-    player.updateX(player.x + data.dX);
-    player.updateY(player.y + data.dY);
-    //console.log(data.dX);
-    player.currentFrame = 0;
+    player.moveTo(data.x, data.y);
     player.direction = data.direction;
-
   }
   else if (opCode === 'chat-echo'){
     let player = PlayerManager.getInstance().getPlayer(data.name);

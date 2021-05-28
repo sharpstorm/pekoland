@@ -64,16 +64,16 @@ function joystickWorker(e) {
     }
     
     self.direction = direction;
-    self.currentFrame = 0;
     if (deltaX !== 0 || deltaY !== 0) {
-      self.isAnimating = true;
       self.moveTo(self.x + deltaX, self.y + deltaY);
     }
 
     joystickEventHandlers.forEach(x => x({
       id: direction,
       deltaX,
-      deltaY
+      deltaY,
+      x: self.x + deltaX,
+      y: self.y + deltaY
     }));
   }
 }

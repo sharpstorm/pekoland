@@ -11,8 +11,8 @@ export default function buildGameDataPacket(opCode, data) {
       opCode,
       direction: data.id,
       name: PlayerManager.getInstance().getSelfName(),
-      dX: data.deltaX,
-      dY: data.deltaY,
+      x: data.x,
+      y: data.y,
     };
   } 
 

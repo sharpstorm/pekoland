@@ -1,10 +1,8 @@
 import PlayerManager from '../../managers/player-manager.js';
 import SpriteManager from '../../managers/sprite-manager.js';
 import Player from '../../models/player.js';
-import handleClientGamePacket from '../client/game-data-handler.js';
 import buildGamePacket from './game-data-sender.js';
 import NetworkManager from '../network-manager.js';
-import buildGameDataPacket from '../client/game-data-sender.js';
 
 const spawnLocation = [0, 0];
 
@@ -29,12 +27,7 @@ export default function handleGamePacket(data, conn) {
     PlayerManager.getInstance().addPlayer(player);
   } else if (opCode === 'move') {
     let player = PlayerManager.getInstance().getPlayer(data.name);
-    //player.x += data.dX;
-    //player.y += data.dY;
-    player.updateX(player.x + data.dX);
-    player.updateY(player.y + data.dY);
-    //console.log(data.dX);
-    player.currentFrame = 0;
+    player.moveTo(data.x, data.y);
     player.direction = data.direction;
 
     NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('move-echo', data), conn.peer);
