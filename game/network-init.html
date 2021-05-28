@@ -1,0 +1,68 @@
+<html>
+  <body style="text-align: center;">
+    <h1>Start A Connection</h1>
+    Operation Mode: 
+    <select id="select-mode" style="padding: 8px;">
+      <option value="1" selected="selected">Server</option>
+      <option value="2">Client</option>
+    </select>
+    <br/>
+    <input id="inp-name" type="text" style="width: 800px; padding: 8px; margin-top: 8px;" placeholder="name" />
+    <div id="join-opts" style="margin-top: 8px; display: none;">
+      <input id="inp-connection-string" type="text" style="width: 800px; padding: 8px;" placeholder="peer id"/>
+    </div>
+    <br/><br/>
+    <button id="btn-go">Connect</button>
+  </body>
+
+  <script>
+    // Send Message Headers
+    const SENDOP_CONFIG_CHANGED = 'pekoconn-config-changed';
+
+    // Recv Message Headers
+    const RECVOP_CONFIG_REQUEST = 'pekoconn-config-request';
+    const RECVOP_UPDATE_PEERID = 'pekoconn-update-peerid';
+
+    let channel = new BroadcastChannel('pekoland-data');
+    let peerId;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      let opMode, name, connString, windowId;
+      
+      document.getElementById('btn-go').addEventListener('click', () => {
+        opMode = document.getElementById('select-mode').selectedIndex + 1;
+        name = document.getElementById('inp-name').value;
+        if (opMode === 2) {
+          connString = document.getElementById('inp-connection-string').value;
+        }
+        if (name === '') {
+          alert('Name is required');
+        }
+
+        windowId = Date.now().toString();
+        window.open('network.html#' + windowId, '_blank');
+      });
+
+      document.getElementById('select-mode').addEventListener('change', () => {
+        document.getElementById('join-opts').style.display = (document.getElementById('select-mode').selectedIndex === 0) ? 'none' : 'block'
+      });
+
+      channel.onmessage = (evt) => {
+        if (!evt.data || !evt.data.op) return;
+        let data = evt.data;
+
+        if (data.op === RECVOP_CONFIG_REQUEST) {
+          channel.postMessage({
+            op: SENDOP_CONFIG_CHANGED,
+            channel: windowId,
+            opMode,
+            name,
+            partnerString: connString
+          });
+        } else if (data.op === RECVOP_UPDATE_PEERID) {
+          peerId = data.peerId;
+        }
+      }
+    });
+  </script>
+</html>

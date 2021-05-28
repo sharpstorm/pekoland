@@ -1,0 +1,326 @@
+<html>
+    <canvas id="game" width="1000" height="500" style="border:1px solid #000000; margin-top:100px; margin-left:250px; position:fixed;">
+    </canvas>
+
+    <canvas id="game2" width="1000" height="500" style="border:1px solid #000000;margin-top:1000px; display:none;">
+    </canvas>
+
+</html>
+
+<script>
+
+var map = new Image();
+var rabbit = new Image();
+
+map.src = "Images/house.jpg";
+rabbit.src = "Images/rabbit.png";
+
+
+personX = 450;
+personY = 200;
+
+person2X = 500;
+person2Y = 100;
+movePerson2X = 0;
+movePerson2Y = 0;
+
+mapX = -80;
+mapY = 900;
+moveMapX = 0;
+moveMapY = 0;
+
+personSourceX = 0;
+personSourceY = 116;
+
+personSource2X = 0;
+personSource2Y = 116;
+
+personSourceOffset = 0;
+
+spriteCounter = 0;
+
+sCounter = 0;
+sCounter2 = 0;
+animate = 0; //33
+animate2 = 0;
+stopMoving = 1;
+stopMoving2 = 1;
+function joyStickUp(e){
+    var event = window.event ? window.event : e;
+    if(event.keyCode == "40" || event.keyCode == "39" || event.keyCode == "38" || event.keyCode == "37" )
+        stopMoving = 1;
+    if(event.keyCode == "83" || event.keyCode == "87" || event.keyCode == "68" || event.keyCode == "65" )
+        stopMoving2 = 1;
+
+    console.log(event.keyCode);
+}
+
+
+function joyStick(e){
+    var event = window.event ? window.event : e;
+    if(event.keyCode == "40" ){
+        if(stopMoving == 1){
+            personSourceX = 0;
+            sCounter = 0;
+            spriteCounter = 0;
+            personSourceY = 38;
+            animate = 33;
+            //moveY = 10;
+            moveMapY = 10;
+            moveMapX = 0;
+            
+        }
+        stopMoving = 0;
+        if(getPixel("Images/collision.png",personX+25,personY+50+10)[3] == 255){
+            moveMapY = 0;
+        }
+        
+    }
+    else if(event.keyCode == "38"){
+        if(stopMoving == 1){
+            sCounter = 0;
+            personSourceX  = 0;
+            spriteCounter = 0;
+            personSourceY = 116;
+            animate = 33;
+            moveMapY = -10;
+            moveMapX = 0;
+        }
+        stopMoving = 0;
+        if(getPixel("Images/collision.png",personX+25,personY)[3] == 255){
+            moveMapY = 0;
+        }
+     
+        
+    }
+      
+    else if(event.keyCode == "39"){
+        if(stopMoving == 1){
+            sCounter = 0;
+            spriteCounter = 0;
+            personSourceX  = 9;
+            personSourceY = 158;
+            animate = 40;
+            moveMapX = 10;
+            moveMapY = 0;
+        }
+        stopMoving = 0;
+        if(getPixel("Images/collision.png",personX+50,personY+25)[3] == 255){
+            moveMapX = 0;
+        }
+        
+    }
+     
+    else if(event.keyCode == "37"){
+        if(stopMoving == 1){
+            sCounter = 0;
+            spriteCounter = 0;
+            personSourceX  = 2;
+            personSourceY = 77;
+            animate = 40;
+            moveMapX = -10;
+            moveMapY = 0;
+        }
+        stopMoving = 0;
+        if(getPixel("Images/collision.png",personX,personY+25)[3] == 255){
+            moveMapX = 0;
+        }
+        
+    }
+  
+    if(event.keyCode == "83" ){
+        if(stopMoving2 == 1){
+            sCounter2 = 0;
+           
+            personSourceX = 0;
+            personSource2Y = 38;
+            animate2 = 33;
+            movePerson2Y = -5;
+            movePerson2X = 0;
+            stopMoving2 = 0;
+            
+        }
+
+        
+       
+      
+        
+    }
+    else if(event.keyCode == "87"){
+        if(stopMoving2 == 1){
+            sCounter2 = 0;
+         
+            personSource2X = 0;
+            personSource2Y = 116;
+            animate2 = 33;
+            movePerson2Y = 5; 
+            movePerson2X = 0;
+        }
+
+        stopMoving2 = 0;
+        
+    }
+      
+    else if(event.keyCode == "68"){
+        if(stopMoving2 == 1){
+            sCounter2 = 0;
+          
+            personSource2X = 9;
+            personSource2Y = 158;
+            animate2 = 40;
+            movePerson2X = -5; 
+            movePerson2Y = 0;
+        }
+
+        stopMoving2 = 0;
+        
+    }
+     
+    else if(event.keyCode == "65"){
+        if(stopMoving2 == 1){
+            sCounter2 = 0;
+         
+            personSource2X = 2;
+            personSource2Y = 77;
+            animate2 = 40;
+            movePerson2X = 5; 
+            movePerson2Y = 0;
+        }
+
+        stopMoving2 = 0;
+       
+        
+    }
+
+    //console.log(event.keyCode);
+}
+
+function getPixel(url, x, y) {
+  var img = new Image();
+  img.src = url;
+  var canvas = document.getElementById('game2');
+  var context = canvas.getContext('2d');
+  context.clearRect(0,0,1000,500);
+  //context.fillRect(0, 0, 1000, 500);
+  context.drawImage(img, mapX, mapY, 2000,1000,0,0,1000,500);
+  //context.drawImage(rabbit,personSourceX,personSourceY,37.5,40,personX,personY,50,50);
+  
+  return context.getImageData(x, y, 1, 1).data;
+}
+
+function init(){
+    window.requestAnimationFrame(draw);
+}
+
+moveY = 0;
+moveX = 0;
+function draw(){
+    var ctx = document.getElementById('game').getContext('2d');
+     if(personSourceX < 0){
+        if(personSourceY == 158){personSourceX = 10;}
+        else{personSourceX = 0;}
+    }
+
+    if(personSource2X < 0){
+        if(personSource2Y == 158){personSource2X = 10;}
+        else{personSource2X = 0;}
+    }
+    
+    
+    //console.log(ctx.getImageData(personX,personY,1,1).data);
+    //console.log(getPixel("Images/house.jpg",personX,personY));
+    //console.log(getPixel("Images/collision.png",personX,personY));
+    if(spriteCounter > 4){
+        ctx.clearRect(0,0,1000,500);
+        ctx.fillRect(0, 0, 1000, 500);
+        ctx.drawImage(map, mapX, mapY, 2000,1000,0,0,1000,500);
+        ctx.drawImage(rabbit,personSourceX,personSourceY,37.5,40,personX,personY,50,50);
+        ctx.drawImage(rabbit,personSource2X,personSource2Y,37.5,40,person2X,person2Y,50,50);
+        //ctx.fillRect(100, 50, personX, personY);
+        ctx.font = "10px Arial";
+        ctx.strokeText("   Player 1", personX, personY);
+        ctx.font = "10px Arial";
+        ctx.strokeText("   Player 2", person2X, person2Y);
+        //ctx.drawImage(rabbit,personSourceX,120,33,37,100,personY,100,100);
+        personSourceX += animate;
+        personSource2X += animate2;
+        spriteCounter = 0;
+        sCounter ++;
+        sCounter2 ++;
+        personY += moveY;
+        personX += moveX;
+        person2X -= moveMapX/2 + movePerson2X;
+        person2Y -= moveMapY/2 + movePerson2Y;
+        //console.log(getPixel("Images/collision.png",personX,personY+25)[3]);
+        
+        
+        /*
+        if(getPixel("Images/collision.png",personX + 50,personY + moveMapY + 50)[3] == 255){
+                moveMapY = 0;
+        }
+       
+       
+        if(getPixel("Images/collision.png",personX + moveMapX + 50,personY+50)[3] == 255){
+                moveMapX = 0;
+        }*/
+        
+        
+        
+        mapY += moveMapY;
+        mapX += moveMapX;
+    }
+    
+   
+    if(sCounter > 5){
+        sCounter = 0;
+        if(personSourceY == 158){personSourceX = 10;}
+        else{personSourceX = 0;}
+        moveY = 0;
+        moveX = 0;
+        if(stopMoving == 1){
+            moveMapY = 0;
+            moveMapX = 0;
+            animate = 0;
+        }
+        else{
+            if(personSourceY == 158 || personSourceY == 77){animate = 40;}
+            else{animate = 33;}
+        }
+    }
+    else if(sCounter > 2){
+        if(personSourceY == 158 || personSourceY == 77){animate = -40;}
+        else{animate = -33;}
+    }
+    
+    console.log(personSource2X);
+    if(sCounter2 > 5){
+        sCounter2 = 0;
+        if(personSource2Y == 158){personSource2X = 10;}
+        else{personSource2X = 0;}
+        if(stopMoving2 == 1){
+            movePerson2Y = 0;
+            movePerson2X = 0;
+            animate2 = 0;
+        }
+        else{
+            if(personSource2Y == 158 || personSource2Y == 77){animate2 = 40;}
+            else{animate2 = 33;}
+        }
+    }
+    else if(sCounter2 > 2){
+        if(personSource2Y == 158 || personSource2Y == 77){animate2 = -40;}
+        else{animate2 = -33;}
+    }
+
+
+    spriteCounter++;
+    window.requestAnimationFrame(draw);
+}
+
+document.onkeydown = joyStick;
+//document.onkeydown = joyStick2;
+document.onkeyup = joyStickUp;
+
+init();
+
+</script>
