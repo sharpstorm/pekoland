@@ -51,17 +51,17 @@ networkManager.on('initialized', () => {
 
 addJoystickEventHandler((evt) => {
   if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {
-    networkManager.send(buildClientGamePacket('chat', evt));
+    networkManager.send(buildClientGamePacket('move', evt));
   } else {
-    networkManager.send(buildServerGamePacket('chat-echo', buildClientGamePacket('chat', evt)));
+    networkManager.send(buildServerGamePacket('move-echo', buildClientGamePacket('move', evt)));
   }
 })
 
 addChatEventHandler((evt) => {
   if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {
-    networkManager.send(buildClientGamePacket('move', evt));
+    networkManager.send(buildClientGamePacket('chat', evt));
   } else {
-    networkManager.send(buildServerGamePacket('move-echo', buildClientGamePacket('move', evt)));
+    networkManager.send(buildServerGamePacket('chat-echo', buildClientGamePacket('chat', evt)));
   }
 })
 
