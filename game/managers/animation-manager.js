@@ -40,6 +40,10 @@ function drawer() {
       ctx.font = '10px Arial';
       ctx.strokeText("   "+ player.name, player.x, player.y);
       player.drawAt(ctx, player.x, player.y, 50, 50);
+
+      if(player.speechBubbleCounter === 0){
+        chatManager.bigChatBox.push(player.currentSpeech);
+      }
       
       if(player.speechBubbleCounter > 30){
         player.speechBubbleCounter = 0;
@@ -181,7 +185,7 @@ function typing(letter){
 
 function pushMsg(){
   var ctx = document.getElementById('game').getContext('2d');
-  chatManager.bigChatBox.push(playerManager.getSelf().name + ": " + chatboxText);
+  //chatManager.bigChatBox.push(playerManager.getSelf().name + ": " + chatboxText);
   playerManager.getSelf().speechBubble = true;
   //ctx.drawImage(speech,0,0,1551,779,player.x+40,player.y-30,100,50);
   playerManager.getSelf().currentSpeech = chatboxText;
