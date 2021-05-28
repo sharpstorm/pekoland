@@ -25,7 +25,6 @@ export default function LaunchGameView() {
   function launchGame() {
     let wid = Date.now().toString();
     setWindowId(wid);
-    window.open('game/index.html#' + wid, '_blank');
   }
 
   function selectMode(isHost) {
@@ -61,6 +60,30 @@ export default function LaunchGameView() {
     });
   }
 
+  function hookChannelHandler(channel) {
+    channel.onmessage = (evt) => {
+      if (!evt.data || !evt.data.op) return;
+      let data = evt.data;
+
+      if (data.op === RECVOP_CONFIG_REQUEST) {
+        channel.postMessage({
+          op: SENDOP_CONFIG_CHANGED,
+          channel: windowId,
+          opMode: mode,
+          name: identity.user.user_metadata.ign,
+          partnerString: partnerString
+        });
+      } else if (data.op === RECVOP_UPDATE_PEERID) {
+        identity.authorizedFetch('/functions/host-id-write', {
+          method: 'POST',
+          body: JSON.stringify({
+            peer_id: data.peerId
+          })
+        });
+      }
+    };
+  }
+
   function emailValid() {
     return peerEmail.length > 0;
   }
@@ -76,30 +99,16 @@ export default function LaunchGameView() {
     if (identity.ready) {
       if (broadcastChannel === undefined) {
         let channel = new BroadcastChannel('pekoland-data');
-        channel.onmessage = (evt) => {
-          if (!evt.data || !evt.data.op) return;
-          let data = evt.data;
-  
-          if (data.op === RECVOP_CONFIG_REQUEST) {
-            channel.postMessage({
-              op: SENDOP_CONFIG_CHANGED,
-              channel: windowId,
-              opMode: mode,
-              name: identity.user.user_metadata.ign,
-              partnerString: partnerString
-            });
-          } else if (data.op === RECVOP_UPDATE_PEERID) {
-            identity.authorizedFetch('/functions/host-id-write', {
-              method: 'POST',
-              body: JSON.stringify({
-                peer_id: data.peerId
-              })
-            });
-          }
-        }
+        hookChannelHandler(channel);
         setBroadcastChannel(channel);
         console.log('Opened Broadcast Channel');
+      } else {
+        hookChannelHandler(broadcastChannel);
       }
+    }
+
+    if (windowId !== undefined && windowId !== '') {
+      window.open('game/index.html#' + windowId, '_blank');
     }
 
     return () => {
@@ -109,7 +118,7 @@ export default function LaunchGameView() {
         console.log('Closed Broadcast Channel');
       }
     }
-  });
+  }, [windowId]);
 
   return (
     <div className='panel panel-sm panel-dark flexbox flex-col' style={{textAlign: 'center', paddingBottom: '16px'}}>
