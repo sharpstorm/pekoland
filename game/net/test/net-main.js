@@ -12,8 +12,7 @@ import handleServerGamePacket from '../server/game-data-handler.js';
 import buildServerGamePacket from '../server/game-data-sender.js';
 import { timeout } from '../utils.js'
 
-import {addChatEventHandler, removeChatEventHandler } from '../../managers/animation-manager.js';
-import ChatManager from '../../managers/chat-manager.js';
+import {addChatEventHandler, removeChatEventHandler, chatWorkyy} from '../../managers/animation-manager.js';
 
 let networkManager = NetworkManager.getInstance();
 
@@ -43,7 +42,6 @@ networkManager.on('initialized', () => {
     networkManager.setDataHandler(handleServerGamePacket);
 
     const playerManager = PlayerManager.getInstance();
-    const chatManager = ChatManager.getInstance();
     playerManager.addPlayer(new Player(networkManager.configStore.name, SpriteManager.getInstance().getSprite('rabbit-avatar')));
     playerManager.setSelf(networkManager.configStore.name);
   }
@@ -83,6 +81,10 @@ SpriteManager.getInstance().registerSprite('rabbit-avatar', rabbitSprite);
 var map = new Image();
 map.src = 'Images/house.jpg';
 
+
+var ctx = document.getElementById('game');
 document.onkeydown = joystickWorker;
+ctx.addEventListener('keydown', chatWorkyy, false);
+//document.onkeydown = chatWorker;
 
 window.requestAnimationFrame(() => drawer(PlayerManager.getInstance()));

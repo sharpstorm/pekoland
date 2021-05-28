@@ -202,10 +202,13 @@ function removeChatEventHandler(handler) {
 }
 
 
-var ctx = document.getElementById('game');
 
 
-ctx.addEventListener('keydown', function(e) {
+/*
+function chatWorker(){
+  var ctx = document.getElementById('game');
+  ctx.addEventListener('keydown', function(e) {
+
   //console.log(e);
   if(e.key.length === 1 && ChatManager.getInstance().chatting)
   typing(e.key);
@@ -225,7 +228,46 @@ ctx.addEventListener('keydown', function(e) {
   
 
   
-}, false);
+}, false);}*/
+
+function chatWorkyy(e){
+  console.log(e);
+  console.log('sdf');
+  if(e.key.length === 1 && ChatManager.getInstance().chatting)
+  typing(e.key);
+
+  if(e.keyCode === 13 && e.altKey === true){  
+    che = !che;
+    ChatManager.getInstance().chatting = !ChatManager.getInstance().chatting;
+  }
+   
+  if(e.keyCode === 13 && ChatManager.getInstance().chatting && chatboxText != ''){  //nani
+    pushMsg();
+  }
+  
+  if(e.keyCode === 8 && ChatManager.getInstance().chatting){  //nani
+    chatboxText = chatboxText.substring(0, chatboxText.length - 1)
+  }
+}
+
+function chatWorker(e) {
+  let event = window.event ? window.event : e;
+  if(event.key.length === 1 && ChatManager.getInstance().chatting)
+  typing(e.key);
+
+  if(event.keyCode === 13 && event.altKey === true){  
+    che = !che;
+    ChatManager.getInstance().chatting = !ChatManager.getInstance().chatting;
+  }
+   
+  if(event.keyCode === 13 && ChatManager.getInstance().chatting && chatboxText != ''){  //nani
+    pushMsg();
+  }
+  
+  if(event.keyCode === 8 && ChatManager.getInstance().chatting){  //nani
+    chatboxText = chatboxText.substring(0, chatboxText.length - 1)
+  }
+}
 
 export default drawer;
-export {addChatEventHandler, removeChatEventHandler };
+export {addChatEventHandler, removeChatEventHandler, chatWorkyy};
