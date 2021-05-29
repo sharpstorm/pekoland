@@ -1,5 +1,6 @@
 import PlayerManager from '../../managers/player-manager.js';
 import SpriteManager from '../../managers/sprite-manager.js';
+import WorldManager from '../../managers/world-manager.js';
 import Player from '../../models/player.js';
 import buildGamePacket from './game-data-sender.js';
 import NetworkManager from '../network-manager.js';
@@ -15,16 +16,23 @@ export default function handleGamePacket(data, conn) {
     conn.send(buildGamePacket('handshake'));
   } else if (opCode === 'spawn-request') {
     let name = data.data;
+    if (PlayerManager.getInstance().getPlayer(name) !== undefined) {
+      //Reject Connection
+      conn.send(buildGamePacket('spawn-reject', 'Player with same name already in game'));
+      return;
+    }
+
     let player = new Player(name, SpriteManager.getInstance().getSprite('rabbit-avatar'));
-    
     // Update connection
     conn.send(buildGamePacket('spawn-reply', [player, PlayerManager.getInstance().getPlayers()]));
 
     // Broadcast to everyone else
     NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('spawn-player', player), conn.peer);
 
-    // Register User to Server Player Manager
+    // Register User to Server Player Manager and Server World Manager
     PlayerManager.getInstance().addPlayer(player);
+    WorldManager.getInstance().registerPlayer(conn.peer, name);
+
   } else if (opCode === 'move') {
     let player = PlayerManager.getInstance().getPlayer(data.name);
     player.moveTo(data.x, data.y);

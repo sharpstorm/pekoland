@@ -12,13 +12,18 @@ import buildClientGamePacket from './net/client/game-data-sender.js';
 import handleServerGamePacket from './net/server/game-data-handler.js';
 import buildServerGamePacket from './net/server/game-data-sender.js';
 import { timeout } from './net/utils.js'
+import WorldManager from './managers/world-manager.js';
 
 let networkManager = NetworkManager.getInstance();
 
 timeout(networkManager
   .setup()
 , 5000)
-  .then(() => console.log('setup successful'))
+  .then(() => {
+    document.getElementById('connecting-msg').style.display = 'none';
+    document.getElementById('game-container').style.display = 'block';
+    console.log('setup successful');
+  })
   .catch(() => {
     alert('Could not connect to partner! Please Try Again!');
     window.close();
@@ -46,6 +51,13 @@ networkManager.on('initialized', () => {
     });
   } else {
     networkManager.setDataHandler(handleServerGamePacket);
+    networkManager.addCleanupHandler((peerId) => {
+      let name = WorldManager.getInstance().getPlayerName(peerId);
+      if (name !== undefined) {
+        PlayerManager.getInstance().removePlayer(name);
+        networkManager.sendAllExcept(buildServerGamePacket('despawn-player', name), peerId);
+      }
+    });
 
     const playerManager = PlayerManager.getInstance();
     playerManager.addPlayer(new Player(networkManager.configStore.name, SpriteManager.getInstance().getSprite('rabbit-avatar')));

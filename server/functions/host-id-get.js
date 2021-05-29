@@ -42,7 +42,7 @@ exports.handler = async function(event, context) {
   });
 
   try {
-    let ret = await client.query(q.Paginate(q.Match(q.Index('users_to_peer_id'), data.email)));
+    let ret = await client.query(q.Paginate(q.Match(q.Index('users_to_peer_id'), data.email.toLowerCase())));
     if (ret.data.length === 0) {
       return {
         statusCode: 404,
@@ -53,7 +53,7 @@ exports.handler = async function(event, context) {
     return {
       statusCode: 200,
       body: JSON.stringify ({
-        email: data.email, 
+        email: data.email.toLowerCase(), 
         online: !(ret.data[0][0] === ''),
         peer_id: ret.data[0][0]
       })
