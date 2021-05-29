@@ -12,8 +12,10 @@ import buildClientGamePacket from './net/client/game-data-sender.js';
 import handleServerGamePacket from './net/server/game-data-handler.js';
 import buildServerGamePacket from './net/server/game-data-sender.js';
 import { timeout } from './net/utils.js'
+import WorldManager from './managers/world-manager.js';
 
 let networkManager = NetworkManager.getInstance();
+let peerIdToNameMap = {};
 
 timeout(networkManager
   .setup()
@@ -46,6 +48,13 @@ networkManager.on('initialized', () => {
     });
   } else {
     networkManager.setDataHandler(handleServerGamePacket);
+    networkManager.addCleanupHandler((peerId) => {
+      let name = WorldManager.getInstance().getPlayerName(peerId);
+      if (name !== undefined) {
+        PlayerManager.getInstance().removePlayer(name);
+        networkManager.sendAllExcept(buildServerGamePacket('despawn-player', name), peerId);
+      }
+    });
 
     const playerManager = PlayerManager.getInstance();
     playerManager.addPlayer(new Player(networkManager.configStore.name, SpriteManager.getInstance().getSprite('rabbit-avatar')));

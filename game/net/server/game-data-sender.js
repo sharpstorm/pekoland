@@ -14,11 +14,21 @@ export default function buildGamePacket(opCode, data) {
       self: flattenPlayer(data[0]),
       others: data[1].map(x => flattenPlayer(x))
     };
+  } else if (opCode === 'spawn-reject') {
+    return {
+      opCode,
+      msg: data
+    }
   } else if (opCode === 'spawn-player') {
     return {
       opCode,
       player: flattenPlayer(data)
     };
+  } else if (opCode === 'despawn-player') {
+    return {
+      opCode,
+      name: data
+    }
   } else if (opCode === 'move-echo') {
     return {
       opCode,

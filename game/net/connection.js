@@ -63,6 +63,7 @@ Connection.State = {
 class BroadcastConnection {
   constructor() {
     this.connections = {};
+    this.cleanupHandlers = [];
     this.dataHandler = undefined;
   }
 
@@ -82,6 +83,7 @@ class BroadcastConnection {
     if (peerId in this.connections) {
       this.connections[peerId].close();
       delete this.connections[peerId];
+      this.cleanupHandlers.forEach(x => x(peerId));
     }
   }
 
@@ -105,6 +107,12 @@ class BroadcastConnection {
 
   handlerAdapter(conn) {
     return (data => this.dataHandler(data, conn)).bind(this);
+  }
+
+  addCleanupHandler(handler) {
+    let id = this.cleanupHandlers.length;
+    this.cleanupHandlers.push(handler);
+    return id;
   }
 }
 

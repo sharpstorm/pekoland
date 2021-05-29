@@ -18,9 +18,14 @@ export default function handleGamePacket(data, conn) {
     PlayerManager.getInstance().setSelf(self.name);
     data.others.forEach(x => {
       PlayerManager.getInstance().addPlayer(inflatePlayer(x));
-    })
+    });
+  } else if (opCode === 'spawn-reject') {
+    alert(data.msg);
+    window.close();
   } else if (opCode === 'spawn-player') {
     PlayerManager.getInstance().addPlayer(inflatePlayer(data.player));
+  } else if (opCode === 'despawn-player') {
+    PlayerManager.getInstance().removePlayer(data.name);
   } else if (opCode === 'move-echo') {
     let player = PlayerManager.getInstance().getPlayer(data.name);
     player.moveTo(data.x, data.y);
