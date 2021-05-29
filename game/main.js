@@ -19,7 +19,11 @@ let networkManager = NetworkManager.getInstance();
 timeout(networkManager
   .setup()
 , 5000)
-  .then(() => console.log('setup successful'))
+  .then(() => {
+    document.getElementById('connecting-msg').style.display = 'none';
+    document.getElementById('game-container').style.display = 'block';
+    console.log('setup successful');
+  })
   .catch(() => {
     alert('Could not connect to partner! Please Try Again!');
     window.close();
