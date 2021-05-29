@@ -97,29 +97,30 @@ export default function LaunchGameView() {
 
   useEffect(() => {
     if (identity.ready) {
-      if (broadcastChannel === undefined) {
-        let channel = new BroadcastChannel('pekoland-data');
-        hookChannelHandler(channel);
-        setBroadcastChannel(channel);
-        console.log('Opened Broadcast Channel');
-      } else {
+      if (broadcastChannel !== undefined) {
         hookChannelHandler(broadcastChannel);
       }
-    }
 
-    if (windowId !== undefined && windowId !== '') {
-      window.open('game/index.html#' + windowId, '_blank');
-    }
-
-    return () => {
-      if (broadcastChannel !== undefined) {
-        broadcastChannel.close();
-        setBroadcastChannel(undefined);
-        console.log('Closed Broadcast Channel');
+      if (windowId !== undefined && windowId !== '') {
+        window.open('game/index.html#' + windowId, '_blank');
       }
     }
   }, [windowId]);
 
+  useEffect(() => {
+    if (broadcastChannel === undefined && identity.ready) {
+      let channel = new BroadcastChannel('pekoland-data');
+      hookChannelHandler(channel);
+      setBroadcastChannel(channel);
+      console.log('Opened Broadcast Channel');
+      return () => {
+        channel.close();
+        setBroadcastChannel(undefined);
+        console.log('Closed Broadcast Channel');
+      }
+    }
+  }, [identity.ready]);
+  
   return (
     <div className='panel panel-sm panel-dark flexbox flex-col' style={{textAlign: 'center', paddingBottom: '16px'}}>
       <div style={{marginTop: '8px', marginLeft: '8px'}}>
