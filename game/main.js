@@ -15,7 +15,6 @@ import { timeout } from './net/utils.js'
 import WorldManager from './managers/world-manager.js';
 
 let networkManager = NetworkManager.getInstance();
-let peerIdToNameMap = {};
 
 timeout(networkManager
   .setup()
