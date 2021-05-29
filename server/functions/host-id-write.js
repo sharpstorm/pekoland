@@ -42,11 +42,11 @@ exports.handler = async function(event, context) {
   });
 
   try {
-    let ret = await client.query(q.Paginate(q.Match(q.Index('users_to_peer_id'), user.email)));
+    let ret = await client.query(q.Paginate(q.Match(q.Index('users_to_peer_id'), user.email.toLowerCase())));
     if (ret.data.length === 0) {
       let doc = await client.query(q.Create(q.Collection('users'), {
         data: {
-          email: user.email,
+          email: user.email.toLowerCase(),
           peer_id: data.peer_id
         }
       }));
@@ -64,7 +64,7 @@ exports.handler = async function(event, context) {
     return {
       statusCode: 200,
       body: JSON.stringify ({
-        email: user.email, 
+        email: user.email.toLowerCase(), 
         peer_id: data.peer_id
       })
     };

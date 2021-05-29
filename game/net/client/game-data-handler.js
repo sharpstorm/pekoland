@@ -18,9 +18,14 @@ export default function handleGamePacket(data, conn) {
     PlayerManager.getInstance().setSelf(self.name);
     data.others.forEach(x => {
       PlayerManager.getInstance().addPlayer(inflatePlayer(x));
-    })
+    });
+  } else if (opCode === 'spawn-reject') {
+    alert(data.msg);
+    window.close();
   } else if (opCode === 'spawn-player') {
     PlayerManager.getInstance().addPlayer(inflatePlayer(data.player));
+  } else if (opCode === 'despawn-player') {
+    PlayerManager.getInstance().removePlayer(data.name);
   } else if (opCode === 'move-echo') {
     let player = PlayerManager.getInstance().getPlayer(data.name);
     player.moveTo(data.x, data.y);
@@ -33,5 +38,8 @@ export default function handleGamePacket(data, conn) {
 }
 
 function inflatePlayer(data) {
-  return new Player(data.name, SpriteManager.getInstance().getSprite('rabbit-avatar'));
+  let player = new Player(data.name, SpriteManager.getInstance().getSprite('rabbit-avatar'));
+  player.x = data.x;
+  player.y = data.y;
+  return player;
 }

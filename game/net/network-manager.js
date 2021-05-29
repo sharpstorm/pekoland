@@ -53,10 +53,18 @@ export default class NetworkManager {
         this.emitEvent(NetworkManager.Events.CLIENT_CONNECTED, dataConnection);
       }).bind(this));
     }).bind(this));
+
     this.configStore.updateRemote(this.peerId);
     window.onbeforeunload = () => {
       this.configStore.updateRemote('');
     };
+  }
+
+  addCleanupHandler(handler) {
+    if (this.mode === NetworkManager.Mode.SERVER && this.connection !== undefined) {
+      return this.connection.addCleanupHandler(handler);
+    }
+    return undefined;
   }
 
   initConnection() {

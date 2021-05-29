@@ -31,6 +31,12 @@ export default class PlayerManager {
     return this.players[name];
   }
 
+  removePlayer(name) {
+    if (this.players[name] !== undefined) {
+      delete this.players[name];
+    }
+  }
+
   static getInstance() {
     if (instance === undefined) {
       instance = new PlayerManager();
