@@ -38,5 +38,8 @@ export default function handleGamePacket(data, conn) {
 }
 
 function inflatePlayer(data) {
-  return new Player(data.name, SpriteManager.getInstance().getSprite('rabbit-avatar'));
+  let player = new Player(data.name, SpriteManager.getInstance().getSprite('rabbit-avatar'));
+  player.x = data.x;
+  player.y = data.y;
+  return player;
 }

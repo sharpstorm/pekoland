@@ -48,5 +48,9 @@ export default function buildGamePacket(opCode, data) {
 }
 
 function flattenPlayer(playerObj) {
-  return { name: playerObj.name };
+  return { 
+    name: playerObj.name,
+    x: playerObj.x,
+    y: playerObj.y
+  };
 }
