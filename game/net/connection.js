@@ -22,6 +22,10 @@ class Connection {
       timeout(new Promise(((res, rej) => {
         this.conn = this.client.connect(this.target);
         this.conn.on('open', () => {
+          this.conn.on('close', () => {
+            alert('Host has disconnected');
+            window.close();
+          });
           res(this.conn);
         });
       }).bind(this)), CONN_TIMEOUT)
