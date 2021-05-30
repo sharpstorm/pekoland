@@ -3,6 +3,9 @@
 # Introduction
 A virtual space for hanging out and doing fun things with your friends. Pekoland offers the perfect environment to discuss, talk, or simply chill with others online. It combines the functionality of chat applications like Discord with minigames to ensure that users always have something to do in Pekoland.
 
+## Live Demo
+The production (main) branch of the application is available at [https://orbital-2021-pekoland.netlify.app](https://orbital-2021-pekoland.netlify.app)
+
 # Features
 The features of Pekoland revolves around 2 primary aspects, user interaction and user enjoyment. It aims to achieve the following key functionalities:
 
