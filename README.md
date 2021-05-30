@@ -20,7 +20,7 @@ In addition to the primary functionality, management and administration utilitie
 ![Feature Map](./wiki-assets/feature-map.png)
 
 # System Design
-The main design consideration is to reduce the traffic on the server as much as possible. This means that content that are network-intensive in nature (Game Updates, Voice Data) are offloaded to the clients, using Peer-To-Peer networking to achieve inter-client communication. This is to be implemented using the WebRTC protocol.
+The main design consideration is to reduce the traffic on the server as much as possible. This means that content that are network-intensive in nature (Game Updates, Voice Data) are offloaded to the clients, using Peer-To-Peer networking to achieve inter-client communication. This is to be implemented using the WebRTC protocol, using the [PeerJS](https://peerjs.com/) library.
 
 However, in view of the fact that updates still need to be sent to the server for storage in the database, the system will employ a Master-Slave architecture for the clients, with 1 distinct Master-client communicating with the server, and all other Slave-clients communicating solely with that single Master-client.
 
@@ -35,4 +35,5 @@ Server                                        | Web Client | Game Client
 ----------------------------------------------|------------|-------------
 [AWS Lambda](https://aws.amazon.com/lambda/)  | [ReactJS](https://reactjs.org/) | [HTML5 Canvas](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)
 [Fauna DB](https://fauna.com/)                | HTML/CSS/Javascript             | [HTML5 Media](https://developer.mozilla.org/en-US/docs/Web/API/Media_Streams_API)
-&nbsp; | &nbsp; | [WebRTC](https://webrtc.org/)
+[Netlify Identity](https://docs.netlify.com/visitor-access/identity/) | &nbsp; | [WebRTC](https://webrtc.org/)
+&nbsp; | &nbsp; | [PeerJS](https://peerjs.com/)
