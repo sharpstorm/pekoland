@@ -70,6 +70,7 @@ export default function LaunchGameView() {
           op: SENDOP_CONFIG_CHANGED,
           channel: windowId,
           opMode: mode,
+          userId: identity.user.id,
           name: identity.user.user_metadata.ign,
           partnerString: partnerString
         });
