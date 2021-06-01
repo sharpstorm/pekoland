@@ -3,21 +3,21 @@ let instance;
 export default class WorldManager {
 
   constructor() {
-    this.peerIdToNameMap = {};
+    this.peerIdToUidMap = {};
   }
 
-  registerPlayer(peerId, name) {
-    this.peerIdToNameMap[peerId] = name;
+  registerPlayer(peerId, userId) {
+    this.peerIdToUidMap[peerId] = userId;
   }
 
   removePlayer(peerId) {
-    if (this.peerIdToNameMap[peerId] !== undefined) {
-      delete this.peerIdToNameMap[peerId];
+    if (this.peerIdToUidMap[peerId] !== undefined) {
+      delete this.peerIdToUidMap[peerId];
     }
   }
 
-  getPlayerName(peerId) {
-    return this.peerIdToNameMap[peerId];
+  getPlayerId(peerId) {
+    return this.peerIdToUidMap[peerId];
   }
 
   static getInstance() {

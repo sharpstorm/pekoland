@@ -11,34 +11,43 @@ export default function handleGamePacket(data, conn) {
 
   const opCode = data.opCode;
   if (opCode === 'handshake') {
-    conn.send(buildClientGamePacket('spawn-request', NetworkManager.getInstance().configStore.name));
+    conn.send(buildClientGamePacket('spawn-request', {
+      name: NetworkManager.getInstance().configStore.name,
+      userId: NetworkManager.getInstance().configStore.userId
+    }));
+  
   } else if (opCode === 'spawn-reply') {
     let self = inflatePlayer(data.self);
     PlayerManager.getInstance().addPlayer(self);
-    PlayerManager.getInstance().setSelf(self.name);
+    PlayerManager.getInstance().setSelf(self.userId);
     data.others.forEach(x => {
       PlayerManager.getInstance().addPlayer(inflatePlayer(x));
     });
+  
   } else if (opCode === 'spawn-reject') {
     alert(data.msg);
     window.close();
+  
   } else if (opCode === 'spawn-player') {
     PlayerManager.getInstance().addPlayer(inflatePlayer(data.player));
+  
   } else if (opCode === 'despawn-player') {
-    PlayerManager.getInstance().removePlayer(data.name);
+    console.log('de spawn ' + data.userId);
+    PlayerManager.getInstance().removePlayer(data.userId);
+  
   } else if (opCode === 'move-echo') {
-    let player = PlayerManager.getInstance().getPlayer(data.name);
+    let player = PlayerManager.getInstance().getPlayer(data.userId);
     player.moveTo(data.x, data.y);
     player.direction = data.direction;
-  }
-  else if (opCode === 'chat-echo'){
-    let player = PlayerManager.getInstance().getPlayer(data.name);
+
+  } else if (opCode === 'chat-echo') {
+    let player = PlayerManager.getInstance().getPlayer(data.userId);
     player.chat.updateMessage(data.message);
   }
 }
 
 function inflatePlayer(data) {
-  let player = new Player(data.name, SpriteManager.getInstance().getSprite('rabbit-avatar'));
+  let player = new Player(data.userId, data.name, SpriteManager.getInstance().getSprite('rabbit-avatar'));
   player.x = data.x;
   player.y = data.y;
   return player;

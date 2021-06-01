@@ -15,33 +15,36 @@ export default function handleGamePacket(data, conn) {
   if (opCode === 'handshake') {
     conn.send(buildGamePacket('handshake'));
   } else if (opCode === 'spawn-request') {
-    let name = data.data;
-    if (PlayerManager.getInstance().getPlayer(name) !== undefined) {
+    let name = data.name;
+    let userId = data.userId;
+    if (PlayerManager.getInstance().getPlayer(userId) !== undefined) {
       //Reject Connection
-      conn.send(buildGamePacket('spawn-reject', 'Player with same name already in game'));
+      conn.send(buildGamePacket('spawn-reject', 'Your account is already connected in the session!'));
       return;
     }
 
-    let player = new Player(name, SpriteManager.getInstance().getSprite('rabbit-avatar'));
+    let player = new Player(userId, name, SpriteManager.getInstance().getSprite('rabbit-avatar'));
     // Update connection
-    conn.send(buildGamePacket('spawn-reply', [player, PlayerManager.getInstance().getPlayers()]));
+    conn.send(buildGamePacket('spawn-reply', {
+      self: player,
+      others: PlayerManager.getInstance().getPlayers()
+    }));
 
     // Broadcast to everyone else
     NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('spawn-player', player), conn.peer);
 
     // Register User to Server Player Manager and Server World Manager
     PlayerManager.getInstance().addPlayer(player);
-    WorldManager.getInstance().registerPlayer(conn.peer, name);
+    WorldManager.getInstance().registerPlayer(conn.peer, userId);
 
   } else if (opCode === 'move') {
-    let player = PlayerManager.getInstance().getPlayer(data.name);
+    let player = PlayerManager.getInstance().getPlayer(data.userId);
     player.moveTo(data.x, data.y);
     player.direction = data.direction;
 
     NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('move-echo', data), conn.peer);
-  }
-  else if(opCode == 'chat'){
-    let player = PlayerManager.getInstance().getPlayer(data.name);
+  } else if(opCode === 'chat') {
+    let player = PlayerManager.getInstance().getPlayer(data.userId);
     player.chat.updateMessage(data.message);
     NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('chat-echo', data), conn.peer);
   }

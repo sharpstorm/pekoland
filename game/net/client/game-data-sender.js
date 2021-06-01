@@ -1,30 +1,33 @@
 import PlayerManager from '../../managers/player-manager.js'
 
 export default function buildGameDataPacket(opCode, data) {
-  if (opCode === 'handshake' || opCode === 'spawn-request') {
+  if (opCode === 'handshake') {
+    return { opCode, data };
+  
+  } else if (opCode === 'spawn-request') {
     return {
       opCode,
-      data
-    };
+      name: data.name,
+      userId: data.userId
+    }
+  
   } else if (opCode === 'move') {
     return {
       opCode,
       direction: data.id,
-      name: PlayerManager.getInstance().getSelfName(),
+      userId: PlayerManager.getInstance().getSelfId(),
       x: data.x,
-      y: data.y,
+      y: data.y
     };
-  } 
-
-  else if (opCode === 'chat'){
+  
+  } else if (opCode === 'chat'){
     return{
       opCode,
-      message: data.msg,
-      name: PlayerManager.getInstance().getSelfName(),
+      userId: PlayerManager.getInstance().getSelfId(),
+      message: data.msg
     };
-  }
-
-  else {
+  
+  } else {
     console.log('unknown op code: ' + opCode);
   }
 }

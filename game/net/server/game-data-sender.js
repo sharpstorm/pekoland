@@ -11,8 +11,8 @@ export default function buildGamePacket(opCode, data) {
   } else if (opCode === 'spawn-reply') {
     return {
       opCode,
-      self: flattenPlayer(data[0]),
-      others: data[1].map(x => flattenPlayer(x))
+      self: flattenPlayer(data.self),
+      others: data.others.map(x => flattenPlayer(x))
     };
   } else if (opCode === 'spawn-reject') {
     return {
@@ -27,12 +27,12 @@ export default function buildGamePacket(opCode, data) {
   } else if (opCode === 'despawn-player') {
     return {
       opCode,
-      name: data
+      userId: data
     }
   } else if (opCode === 'move-echo') {
     return {
       opCode,
-      name: data.name,
+      userId: data.userId,
       x: data.x,
       y: data.y,
       direction: data.direction
@@ -41,7 +41,7 @@ export default function buildGamePacket(opCode, data) {
   else if (opCode === 'chat-echo'){
     return{
       opCode,
-      name: data.name,
+      userId: data.userId,
       message: data.message,
     };
   }
@@ -49,6 +49,7 @@ export default function buildGamePacket(opCode, data) {
 
 function flattenPlayer(playerObj) {
   return { 
+    userId: playerObj.userId,
     name: playerObj.name,
     x: playerObj.x,
     y: playerObj.y

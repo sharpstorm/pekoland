@@ -9,7 +9,7 @@ const CONN_TIMEOUT = 10000;
 
 class Connection {
   constructor(client, target) {
-    this.id = 
+    this.id = target;
     this.client = client;
     this.target = target;
     this.conn = undefined;
