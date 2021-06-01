@@ -1,4 +1,5 @@
 import PlayerManager from '../../managers/player-manager.js';
+import ChatManager from '../../managers/chat-manager.js';
 import SpriteManager from '../../managers/sprite-manager.js';
 import Player from '../../models/player.js';
 import NetworkManager from '../network-manager.js';
@@ -33,6 +34,7 @@ export default function handleGamePacket(data, conn) {
   }
   else if (opCode === 'chat-echo'){
     let player = PlayerManager.getInstance().getPlayer(data.name);
+    ChatManager.getInstance().bigChatBox.push(data.name + ": " + data.message);
     player.chat.updateMessage(data.message);
   }
 }

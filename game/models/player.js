@@ -1,3 +1,5 @@
+import CameraManager from "../managers/camera-manager.js";
+import PlayerManager from "../managers/player-manager.js";
 import Chat from "../models/chat.js";
 
 export default class Player {
@@ -20,29 +22,68 @@ export default class Player {
   }
 
   drawAt(ctx, x, y, width, height) {
-    ctx.strokeStyle = 'black';
-    ctx.font = '10px Arial';
-    ctx.strokeText("   "+ this.name, this.x, this.y);
+  
+    
     let sprite = this.playerSprite.getSpriteByDirection(Player.DirectionToIntMap[this.direction]).getSpriteAtFrame(this.currentFrame);
     let marginX = (width - sprite.width) / 2;
     let marginY = (height - sprite.height) / 2;
-    ctx.drawImage(sprite.spritesheet, sprite.x, sprite.y, sprite.width, sprite.height, x + marginX, y + marginY, sprite.width, sprite.height);
-    this.chat.drawAt(ctx, this.x + 40, this.y-30);  //Hard Coded
+    if(this.name === PlayerManager.getInstance().getSelf().name){
+      ctx.drawImage(sprite.spritesheet, sprite.x, sprite.y, sprite.width, sprite.height, 450 + marginX, 250 + marginY, sprite.width, sprite.height);
+      this.chat.drawAt(ctx, 450 + 40, 250-30);  //Hard Coded
+      ctx.strokeStyle = 'black';
+      ctx.font = '10px Arial';
+      ctx.strokeText("   "+ this.name, 450, 250);
+    }
+    else{
+      ctx.drawImage(sprite.spritesheet, sprite.x, sprite.y, sprite.width, sprite.height, x + marginX, y + marginY, sprite.width, sprite.height);
+      this.chat.drawAt(ctx, this.x + 40, this.y-30);  //Hard Coded
+      ctx.strokeStyle = 'black';
+      ctx.font = '10px Arial';
+      ctx.strokeText("   "+ this.name, this.x, this.y);
+    }
   }
 
   moveTo(newX, newY) {
-    this.oldX = this.x;
-    this.oldY = this.y;
+      this.oldX = this.x;
+      this.oldY = this.y;
+      this.newX = newX;
+      this.newY = newY;
+      this.isAnimating = true;
+      this.currentFrame = 0;
+  }
+
+  moveImmediate(newX,newY){
+    this.oldX = newX;
+    this.oldY = newY
     this.newX = newX;
     this.newY = newY;
-    this.isAnimating = true;
-    this.currentFrame = 0;
+    this.x = newX;
+    this.y = newY;
+  }
+
+  moveToGrid(x,y){
+    this.oldX = (x-1) * 50;
+    this.oldY = (y-1) * 50
+    this.newX = (x-1) * 50;;
+    this.newY = (y-1) * 50;
+    this.x = (x-1) * 50;;
+    this.y = (y-1) * 50;
+  }
+
+  getGridCoord(){
+    return {x: this.x / 50 + 1, y: this.y / 50 + 1};
   }
 
   animate() {
+    
     if (!this.isAnimating) return;
 
     if (this.currentFrame < 6) {
+      if(CameraManager.getInstance().centering === 1){
+        this.currentFrame++;
+        return;
+      }
+
       if (Math.abs(this.newX - this.x) > 0.00001) {
         this.x += (this.newX - this.oldX) / 6;
         this.currentFrame++;
@@ -60,7 +101,6 @@ export default class Player {
     this.isAnimating = false;
   }
 }
-
 
 Player.Direction = {
   UP: 'up',

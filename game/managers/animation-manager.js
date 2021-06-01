@@ -1,5 +1,7 @@
 import ChatManager from './chat-manager.js';
 import PlayerManager from './player-manager.js';
+import CameraManager from './camera-manager.js';
+import MapManager from './map-manager.js';
 
 let counter = 0;
 let che = false;
@@ -11,21 +13,33 @@ map.src = 'Images/house1.png';
 
 const playerManager = PlayerManager.getInstance();
 const chatManager = ChatManager.getInstance();
+const cameraManager = CameraManager.getInstance();
 
 function drawer() {
+  
   if (counter > 4) {
+
     let ctx = document.getElementById('game').getContext('2d');
+   
     ctx.clearRect(0, 0, 1000, 500);
-    ctx.drawImage(map, 0, 0, 1551, 779, 0, 0, 1000, 500);
+    cameraManager.draw(ctx);
+    if(playerManager.getSelf() != undefined && ctx != undefined){
+      MapManager.getInstance().getCurrentMap().checkCollision(playerManager.getSelf().getGridCoord().x, playerManager.getSelf().getGridCoord().y,ctx);
+    }
+    
     if (ChatManager.getInstance().chatting)
       drawExpandedTextBox();
     else
       drawTextBox();
-      
+
     PlayerManager.getInstance().getPlayers().forEach(player => {
       player.drawAt(ctx, player.x, player.y, 50, 50);
       player.animate();
     });
+
+    cameraManager.animate();
+
+    
     counter = 0;  //FPS
   }
   counter++;
@@ -37,7 +51,7 @@ function drawGrids(height, width, gridLength) {
   for (let i = 0; i < height; i += gridLength) {
     for (let ii = 0; ii < width; ii += gridLength) {
       ctx.beginPath();
-      ctx.strokeStyle = 'black';
+      ctx.strokeStyle = 'red';
       ctx.lineWidth = '1';
       ctx.rect(i, ii, gridLength, gridLength);
       ctx.stroke();
