@@ -1,7 +1,8 @@
 import Chat from "../models/chat.js";
 
 export default class Player {
-  constructor(name, playerSprite) {
+  constructor(userId, name, playerSprite) {
+    this.userId = userId;
     this.name = name;
     this.playerSprite = playerSprite;
 

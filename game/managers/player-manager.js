@@ -8,11 +8,11 @@ export default class PlayerManager {
   }
 
   addPlayer(player) {
-    this.players[player.name] = player;
+    this.players[player.userId] = player;
   }
 
-  setSelf(playerName) {
-    this.self = playerName;
+  setSelf(userId) {
+    this.self = userId;
   }
 
   getSelf() {
@@ -20,6 +20,10 @@ export default class PlayerManager {
   }
 
   getSelfName() {
+    return this.players[this.self].name;
+  }
+
+  getSelfId() {
     return this.self;
   }
 
@@ -27,13 +31,13 @@ export default class PlayerManager {
     return Object.values(this.players);
   }
 
-  getPlayer(name) {
-    return this.players[name];
+  getPlayer(userId) {
+    return this.players[userId];
   }
 
-  removePlayer(name) {
-    if (this.players[name] !== undefined) {
-      delete this.players[name];
+  removePlayer(userId) {
+    if (this.players[userId] !== undefined) {
+      delete this.players[userId];
     }
   }
 

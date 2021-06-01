@@ -14,6 +14,7 @@ export default class ConfigStore {
       this.subchannelId = window.location.hash.substring(1);
       window.location.hash = '';
     } 
+    this.userId = undefined;
     this.name = undefined;
     this.peerConnectionString = undefined;
     this.opMode = undefined;
@@ -32,6 +33,7 @@ export default class ConfigStore {
 
       if (data.op === RECVOP_CONFIG_CHANGED) {
         this.peerConnectionString = data.partnerString;
+        this.userId = data.userId;
         this.name = data.name;
         this.opMode = (data.opMode === ConfigStore.Mode.SERVER) ? ConfigStore.Mode.SERVER : ConfigStore.Mode.CLIENT;
 
