@@ -74,25 +74,19 @@ export default class Player {
     return {x: this.x / 50 + 1, y: this.y / 50 + 1};
   }
 
-  animate() {
+  animate(majorUpdate) {
     
     if (!this.isAnimating) return;
-
     if (this.currentFrame < 6) {
-      if(CameraManager.getInstance().centering === 1){
-        this.currentFrame++;
-        return;
-      }
-
       if (Math.abs(this.newX - this.x) > 0.00001) {
-        this.x += (this.newX - this.oldX) / 6;
-        this.currentFrame++;
-        return;
+        this.x += (this.newX - this.oldX) / 24;
       } else if (Math.abs(this.newY - this.y) > 0.00001) {
-        this.y += (this.newY - this.oldY) / 6;
-        this.currentFrame++;
-        return;
+        this.y += (this.newY - this.oldY) / 24;
       }
+      if (majorUpdate) {
+        this.currentFrame++;
+      }
+      return;
     }
     this.x = this.newX;
     this.y = this.newY;

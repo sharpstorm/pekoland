@@ -18,6 +18,9 @@ export default class CameraManager {
 
 
   draw(ctx) {
+    if (this.map === undefined) {
+      return;
+    }
     ctx.drawImage(this.map.MapImage, this.x, this.y, this.map.getGridLength() * 20, this.map.getGridLength() * 10, 0, 0, 1000, 500);
   }
 
@@ -41,10 +44,10 @@ export default class CameraManager {
 
   animate(){
     if (Math.abs(this.newX - this.x) > 0.00001) {
-      this.x += (this.newX - this.oldX) / 6;
+      this.x += (this.newX - this.oldX) / 24;
       return;
     } else if (Math.abs(this.newY - this.y) > 0.00001) {
-      this.y += (this.newY - this.oldY) / 6;
+      this.y += (this.newY - this.oldY) / 24;
       return;
     }
 

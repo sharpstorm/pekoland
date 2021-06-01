@@ -15,34 +15,32 @@ const playerManager = PlayerManager.getInstance();
 const chatManager = ChatManager.getInstance();
 const cameraManager = CameraManager.getInstance();
 
-function drawer() {
-  
-  if (counter > 4) {
-
-    let ctx = document.getElementById('game').getContext('2d');
-   
-    ctx.clearRect(0, 0, 1000, 500);
-    cameraManager.draw(ctx);
-    if(playerManager.getSelf() != undefined && ctx != undefined){
-      MapManager.getInstance().getCurrentMap().checkCollision(playerManager.getSelf().getGridCoord().x, playerManager.getSelf().getGridCoord().y,ctx);
-    }
-    
-    if (ChatManager.getInstance().chatting)
-      drawExpandedTextBox();
-    else
-      drawTextBox();
-
-    PlayerManager.getInstance().getPlayers().forEach(player => {
-      player.drawAt(ctx, player.x, player.y, 50, 50);
-      player.animate();
-    });
-
-    cameraManager.animate();
-
-    
-    counter = 0;  //FPS
+let lastUpdate = 0;
+function drawer(timestamp) {
+  let majorUpdate = false;
+  if (timestamp - lastUpdate > 66) {
+    lastUpdate = timestamp;
+    majorUpdate = true;
   }
-  counter++;
+
+  let ctx = document.getElementById('game').getContext('2d');
+  ctx.clearRect(0, 0, 1000, 500);
+  cameraManager.draw(ctx);
+  cameraManager.animate();
+  if(playerManager.getSelf() != undefined && ctx != undefined){
+    //MapManager.getInstance().getCurrentMap().checkCollision(playerManager.getSelf().getGridCoord().x, playerManager.getSelf().getGridCoord().y,ctx);
+  }
+  
+  if (ChatManager.getInstance().chatting)
+    drawExpandedTextBox();
+  else
+    drawTextBox();
+
+  PlayerManager.getInstance().getPlayers().forEach(player => {
+    player.drawAt(ctx, player.x, player.y, 50, 50);
+    player.animate(majorUpdate);
+  });
+
   window.requestAnimationFrame(drawer);
 }
 
