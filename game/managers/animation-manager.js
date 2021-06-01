@@ -16,17 +16,19 @@ const chatManager = ChatManager.getInstance();
 const cameraManager = CameraManager.getInstance();
 
 let lastUpdate = 0;
+let lastMajorUpdate = 0;
 function drawer(timestamp) {
   let majorUpdate = false;
-  if (timestamp - lastUpdate > 66) {
-    lastUpdate = timestamp;
+  let delta = timestamp - lastUpdate;
+  if (timestamp - lastMajorUpdate > 66) {
+    lastMajorUpdate = timestamp;
     majorUpdate = true;
   }
 
   let ctx = document.getElementById('game').getContext('2d');
   ctx.clearRect(0, 0, 1000, 500);
   cameraManager.draw(ctx);
-  cameraManager.animate();
+  cameraManager.animate(delta);
   if(playerManager.getSelf() != undefined && ctx != undefined){
     //MapManager.getInstance().getCurrentMap().checkCollision(playerManager.getSelf().getGridCoord().x, playerManager.getSelf().getGridCoord().y,ctx);
   }
@@ -38,9 +40,10 @@ function drawer(timestamp) {
 
   PlayerManager.getInstance().getPlayers().forEach(player => {
     player.drawAt(ctx, player.x, player.y, 50, 50);
-    player.animate(majorUpdate);
+    player.animate(delta, majorUpdate);
   });
 
+  lastUpdate = timestamp;
   window.requestAnimationFrame(drawer);
 }
 

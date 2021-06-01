@@ -60,14 +60,14 @@ function joystickWorker(e) {
 
     self.direction = direction;
     if (deltaX !== 0 || deltaY !== 0) {
-      if(CameraManager.getInstance().centering === 0)  //CENTERING PROPERTY TO BE REMOVED
+      /*if(CameraManager.getInstance().centering === 0)  //CENTERING PROPERTY TO BE REMOVED
         self.moveTo(self.x + deltaX, self.y + deltaY);
-      else{
+      else{*/
         self.isAnimating = true;
         self.currentFrame = 0;
-        CameraManager.getInstance().moveCameraToGrid( CameraManager.getInstance().getCameraGridCoord().x + (deltaX / 50),  CameraManager.getInstance().getCameraGridCoord().y + + (deltaY / 50));
+        CameraManager.getInstance().moveCameraToGrid( CameraManager.getInstance().getCameraGridCoord().x + (deltaX / 50),  CameraManager.getInstance().getCameraGridCoord().y + (deltaY / 50));
         self.moveTo(self.x + deltaX, self.y + deltaY);
-      }
+      //}
         
     }
 

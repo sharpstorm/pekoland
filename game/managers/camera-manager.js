@@ -15,8 +15,6 @@ export default class CameraManager {
     this.newY = 0;
   }
 
-
-
   draw(ctx) {
     if (this.map === undefined) {
       return;
@@ -39,15 +37,20 @@ export default class CameraManager {
   }
 
   getCameraGridCoord(){
-    return {x : this.x / this.map.getGridLength(), y: this.y / this.map.getGridLength()};
+    return {x : this.newX / this.map.getGridLength(), y: this.newY / this.map.getGridLength()};
   }
 
-  animate(){
-    if (Math.abs(this.newX - this.x) > 0.00001) {
-      this.x += (this.newX - this.oldX) / 24;
+  animate(delta) {
+    if (this.newX - this.x === 0 && this.newY - this.y === 0) return;
+
+    let stdDeltaX = (this.newX - this.oldX) / 24;
+    let stdDeltaY = (this.newY - this.oldY) / 24;
+
+    if (Math.abs(this.newX - this.x) > Math.abs(stdDeltaX)) {
+      this.x += stdDeltaX * (delta / 16.66667);
       return;
-    } else if (Math.abs(this.newY - this.y) > 0.00001) {
-      this.y += (this.newY - this.oldY) / 24;
+    } else if (Math.abs(this.newY - this.y) > Math.abs(stdDeltaY)) {
+      this.y += stdDeltaY * (delta / 16.66667);
       return;
     }
 

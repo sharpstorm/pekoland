@@ -74,14 +74,14 @@ export default class Player {
     return {x: this.x / 50 + 1, y: this.y / 50 + 1};
   }
 
-  animate(majorUpdate) {
+  animate(delta, majorUpdate) {
     
     if (!this.isAnimating) return;
     if (this.currentFrame < 6) {
       if (Math.abs(this.newX - this.x) > 0.00001) {
-        this.x += (this.newX - this.oldX) / 24;
+        this.x += (this.newX - this.oldX) / 24 * (delta / 16.66667);
       } else if (Math.abs(this.newY - this.y) > 0.00001) {
-        this.y += (this.newY - this.oldY) / 24;
+        this.y += (this.newY - this.oldY) / 24 * (delta / 16.66667);
       }
       if (majorUpdate) {
         this.currentFrame++;
