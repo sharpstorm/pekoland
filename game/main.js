@@ -52,16 +52,16 @@ networkManager.on('initialized', () => {
   } else {
     networkManager.setDataHandler(handleServerGamePacket);
     networkManager.addCleanupHandler((peerId) => {
-      let name = WorldManager.getInstance().getPlayerName(peerId);
-      if (name !== undefined) {
-        PlayerManager.getInstance().removePlayer(name);
-        networkManager.sendAllExcept(buildServerGamePacket('despawn-player', name), peerId);
+      let userId = WorldManager.getInstance().getPlayerId(peerId);
+      if (userId !== undefined) {
+        PlayerManager.getInstance().removePlayer(userId);
+        networkManager.getConnection().sendAllExcept(buildServerGamePacket('despawn-player', userId), peerId);
       }
     });
 
     const playerManager = PlayerManager.getInstance();
-    playerManager.addPlayer(new Player(networkManager.configStore.name, SpriteManager.getInstance().getSprite('rabbit-avatar')));
-    playerManager.setSelf(networkManager.configStore.name);
+    playerManager.addPlayer(new Player(networkManager.configStore.userId, networkManager.configStore.name, SpriteManager.getInstance().getSprite('rabbit-avatar')));
+    playerManager.setSelf(networkManager.configStore.userId);
   }
 });
 
