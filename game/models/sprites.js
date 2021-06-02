@@ -6,6 +6,12 @@ class Sprite {
     this.width = width;
     this.height = height;
   }
+
+  drawAt(ctx, x, y, width, height) {
+    if (width === undefined) width = this.width;
+    if (height === undefined) height = this.height;
+    ctx.drawImage(this.spritesheet, this.x, this.y, this.width, this.height, x, y, width, height);
+  }
 }
 
 class AnimatableSprite {
@@ -51,4 +57,80 @@ class AvatarSprite {
   }
 }
 
-export { Sprite as default, AnimatableSprite, AvatarSprite };
+class SlicedSprite {
+  // See https://docs.unity3d.com/Manual/9SliceSprites.html for how slices are arranged
+  constructor(a, b, c, d, e, f, g, h, i) {
+    this.sliceA = a;
+    this.sliceB = b;
+    this.sliceC = c;
+    this.sliceD = d;
+    this.sliceE = e;
+    this.sliceF = f;
+    this.sliceG = g;
+    this.sliceH = h;
+    this.sliceI = i;
+
+    this.interpolateMode = SlicedSprite.STRETCH;
+  }
+
+  drawAt(ctx, x, y, width, height) {
+    let widthDiff = width - (this.sliceA.width + this.sliceC.width);
+    if (widthDiff < 0) {
+      widthDiff = 0;
+    }
+
+    let heightDiff = height - (this.sliceA.height + this.sliceG.height);
+    if (heightDiff < 0) {
+      heightDiff = 0;
+    }
+
+    // Draw 4 Corners
+    this.sliceA.drawAt(ctx, x, y);
+    this.sliceC.drawAt(ctx, x + this.sliceA.width + widthDiff, y);
+    this.sliceG.drawAt(ctx, x, y + this.sliceA.height + heightDiff);
+    this.sliceI.drawAt(ctx, x + this.sliceA.width + widthDiff, y + this.sliceA.height + heightDiff);
+
+    if (widthDiff > 0) {
+      this.sliceB.drawAt(ctx, x + this.sliceA.width, y, widthDiff, this.sliceB.height);
+      this.sliceH.drawAt(ctx, x + this.sliceA.width, y + this.sliceA.height + heightDiff, widthDiff, this.sliceH.height);
+    }
+
+    if (heightDiff > 0) {
+      this.sliceD.drawAt(ctx, x, y + this.sliceA.height, this.sliceD.width, heightDiff);
+      this.sliceF.drawAt(ctx, x + this.sliceA.width + widthDiff, y + this.sliceA.height, this.sliceF.width, heightDiff);
+    }
+
+    if (heightDiff > 0 && widthDiff > 0) {
+      this.sliceE.drawAt(ctx, x + this.sliceA.width, y + this.sliceA.height, widthDiff, heightDiff);
+    }
+  }
+
+  // partsArray should be provided as an array of 4-tuples, with [x, y, width, height]
+  static from(spritesheet, partsArray) {
+    if (partsArray.length < 9) {
+      throw 'Invalid Parts Array';
+    }
+
+    let arr = [];
+    for (let i = 0; i < 9; i++) {
+      let curPart = partsArray[i];
+      if (curPart.length < 4) {
+        throw `Invalid Part ${i}`;
+      }
+      arr.push(new Sprite(spritesheet, curPart[0], curPart[1], curPart[2], curPart[3]));
+    }
+
+    return new SlicedSprite(arr[0], arr[1], arr[2], arr[3], arr[4], arr[5], arr[6], arr[7], arr[8]);
+  }
+}
+
+SlicedSprite.STRETCH = 0;
+//SlicedSprite.TILE = 1; // TODO: Support Tiling
+
+class TiledSprite {
+  constructor() {
+
+  }
+}
+
+export { Sprite as default, AnimatableSprite, AvatarSprite, SlicedSprite, TiledSprite };
