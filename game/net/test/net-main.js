@@ -14,7 +14,7 @@ import buildClientGamePacket from '../client/game-data-sender.js';
 import handleServerGamePacket from '../server/game-data-handler.js';
 import buildServerGamePacket from '../server/game-data-sender.js';
 import { timeout } from '../utils.js'
-import CameraManager from '../../managers/camera-manager.js';
+
 
 let networkManager = NetworkManager.getInstance();
 
@@ -51,14 +51,12 @@ networkManager.on('initialized', () => {
     networkManager.setDataHandler(handleServerGamePacket);
     const playerManager = PlayerManager.getInstance();
     playerManager.addPlayer(new Player(networkManager.configStore.name, SpriteManager.getInstance().getSprite('rabbit-avatar')));
-    playerManager.setSelf(networkManager.configStore.name);   
-    playerManager.getSelf().moveToGrid(10,6);
-    //console.log(playerManager.getSelf().getGridCoord())
-    
+    playerManager.setSelf(networkManager.configStore.name);     
   }
 });
 
 addJoystickEventHandler((evt) => {
+  //console.log(evt);
   if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {
     networkManager.send(buildClientGamePacket('move', evt));
   } else {
@@ -93,9 +91,8 @@ map.src = 'Images/biggerHouseColli.png';
 let colli = new Image();
 colli.src = 'Images/biggerHouseColli.png';
 colli.onload = function() {
-  let map1 = new Map(map,colli);
+  let map1 = new Map(map,colli,2326, 1700, 30, 20);
   MapManager.getInstance().registerMap('testMap', map1);
-  CameraManager.getInstance().map = MapManager.getInstance().getMap('testMap');
 };
 
 

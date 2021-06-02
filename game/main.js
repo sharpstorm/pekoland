@@ -13,6 +13,7 @@ import handleServerGamePacket from './net/server/game-data-handler.js';
 import buildServerGamePacket from './net/server/game-data-sender.js';
 import { timeout } from './net/utils.js'
 import WorldManager from './managers/world-manager.js';
+import Context from './models/context.js'
 
 let networkManager = NetworkManager.getInstance();
 

@@ -1,4 +1,3 @@
-import CameraManager from "../managers/camera-manager.js";
 import PlayerManager from "../managers/player-manager.js";
 import Chat from "../models/chat.js";
 
@@ -7,12 +6,12 @@ export default class Player {
     this.name = name;
     this.playerSprite = playerSprite;
 
-    this.x = 0;
-    this.y = 0;
-    this.newX = 0;
-    this.newY = 0;
-    this.oldX = 0;
-    this.oldY = 0;
+    this.x = 450;
+    this.y = 250;
+    this.newX = 450;
+    this.newY = 250;
+    this.oldX = 450;
+    this.oldY = 250;
     this.moveX = 0;
     this.moveY = 0;
     this.direction = Player.Direction.DOWN;
@@ -21,9 +20,7 @@ export default class Player {
     this.chat = new Chat(); 
   }
 
-  drawAt(ctx, x, y, width, height) {
-  
-    
+  drawAt(ctx, x, y, width, height, context) {
     let sprite = this.playerSprite.getSpriteByDirection(Player.DirectionToIntMap[this.direction]).getSpriteAtFrame(this.currentFrame);
     let marginX = (width - sprite.width) / 2;
     let marginY = (height - sprite.height) / 2;
@@ -35,11 +32,11 @@ export default class Player {
       ctx.strokeText("   "+ this.name, 450, 250);
     }
     else{
-      ctx.drawImage(sprite.spritesheet, sprite.x, sprite.y, sprite.width, sprite.height, x + marginX, y + marginY, sprite.width, sprite.height);
+      ctx.drawImage(sprite.spritesheet, sprite.x, sprite.y, sprite.width, sprite.height, this.x  - context.getGridCoord().x * 50  + marginX, this.y  - context.getGridCoord().y * 50 + marginY, sprite.width, sprite.height);
       this.chat.drawAt(ctx, this.x + 40, this.y-30);  //Hard Coded
       ctx.strokeStyle = 'black';
       ctx.font = '10px Arial';
-      ctx.strokeText("   "+ this.name, this.x, this.y);
+      ctx.strokeText("   "+ this.name, this.x  - context.getGridCoord().x * 50, this.y  - context.getGridCoord().y * 50);
     }
   }
 
@@ -71,11 +68,10 @@ export default class Player {
   }
 
   getGridCoord(){
-    return {x: this.x / 50 + 1, y: this.y / 50 + 1};
+    return {x: this.x / 50 + 1, y: this.y / 50 + 1};   //TO CHECK AGAIN. HARD CODED 50.
   }
 
   animate(delta, majorUpdate) {
-    
     if (!this.isAnimating) return;
     if (this.currentFrame < 6) {
       if (Math.abs(this.newX - this.x) > 0.00001) {
@@ -95,6 +91,7 @@ export default class Player {
     this.isAnimating = false;
   }
 }
+
 
 Player.Direction = {
   UP: 'up',

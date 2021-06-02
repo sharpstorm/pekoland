@@ -8,11 +8,7 @@ export default class ChatManager{
     this.bigChatBox = [];
     this.textField = '';
   }
-
-  getSelf() {
-    return (this.self === undefined) ? undefined : this.players[this.self];
-  }
-
+  
   getChats(){
     return this.bigChatBox;
   }

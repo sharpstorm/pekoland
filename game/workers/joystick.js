@@ -1,9 +1,8 @@
 import ChatManager from '../managers/chat-manager.js';
 import PlayerManager from '../managers/player-manager.js';
-import aa from '../managers/animation-manager.js';
 import Player from '../models/player.js';
-import CameraManager from '../managers/camera-manager.js';
 import MapManager from '../managers/map-manager.js';
+import Context from '../models/context.js'
 
 const playerManager = PlayerManager.getInstance();
 const chatManager = ChatManager.getInstance();
@@ -60,15 +59,10 @@ function joystickWorker(e) {
 
     self.direction = direction;
     if (deltaX !== 0 || deltaY !== 0) {
-      /*if(CameraManager.getInstance().centering === 0)  //CENTERING PROPERTY TO BE REMOVED
-        self.moveTo(self.x + deltaX, self.y + deltaY);
-      else{*/
         self.isAnimating = true;
         self.currentFrame = 0;
-        CameraManager.getInstance().moveCameraToGrid( CameraManager.getInstance().getCameraGridCoord().x + (deltaX / 50),  CameraManager.getInstance().getCameraGridCoord().y + (deltaY / 50));
-        self.moveTo(self.x + deltaX, self.y + deltaY);
-      //}
-        
+        Context.getInstance().moveContextToGrid( Context.getInstance().getGridCoord().x + (deltaX / 50),  Context.getInstance().getGridCoord().y + (deltaY / 50));
+        self.moveTo(self.x + deltaX, self.y + deltaY);  
     }
 
     joystickEventHandlers.forEach(x => x({
@@ -79,6 +73,7 @@ function joystickWorker(e) {
       y: self.y + deltaY
     }));
   }
+
 }
 
 function chatWorker(e){

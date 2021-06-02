@@ -1,7 +1,7 @@
 import ChatManager from './chat-manager.js';
 import PlayerManager from './player-manager.js';
-import CameraManager from './camera-manager.js';
 import MapManager from './map-manager.js';
+import Context from '../models/context.js'
 
 let counter = 0;
 let che = false;
@@ -13,7 +13,6 @@ map.src = 'Images/house1.png';
 
 const playerManager = PlayerManager.getInstance();
 const chatManager = ChatManager.getInstance();
-const cameraManager = CameraManager.getInstance();
 
 let lastUpdate = 0;
 let lastMajorUpdate = 0;
@@ -27,10 +26,10 @@ function drawer(timestamp) {
 
   let ctx = document.getElementById('game').getContext('2d');
   ctx.clearRect(0, 0, 1000, 500);
-  cameraManager.draw(ctx);
-  cameraManager.animate(delta);
-  if(playerManager.getSelf() != undefined && ctx != undefined){
-    //MapManager.getInstance().getCurrentMap().checkCollision(playerManager.getSelf().getGridCoord().x, playerManager.getSelf().getGridCoord().y,ctx);
+
+  Context.getInstance().animate(delta);
+  if(MapManager.getInstance().getCurrentMap() != undefined){
+    MapManager.getInstance().getCurrentMap().draw(ctx, Context.getInstance());
   }
   
   if (ChatManager.getInstance().chatting)
@@ -39,7 +38,7 @@ function drawer(timestamp) {
     drawTextBox();
 
   PlayerManager.getInstance().getPlayers().forEach(player => {
-    player.drawAt(ctx, player.x, player.y, 50, 50);
+    player.drawAt(ctx, player.x, player.y, 50, 50,Context.getInstance());
     player.animate(delta, majorUpdate);
   });
 
