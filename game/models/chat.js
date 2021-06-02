@@ -1,5 +1,4 @@
-const speechSprite = new Image();
-speechSprite.src = 'Images/speech.png';
+import SpriteManager from '../managers/sprite-manager.js';
 
 export default class Chat {
   constructor() {
@@ -29,11 +28,12 @@ export default class Chat {
     if (this.speechBubble) {
       //console.log('her');
       //console.log(this.speechBubbleCounter);
-
-      ctx.drawImage(speechSprite, 0, 0, 1551, 779, x, y, 100, 50);
       ctx.font = '15px Arial';
-      ctx.fillStyle = "rgba(0, 0, 0, 1)";
-      ctx.fillText(this.currentSpeech, x + 20, y + 30);  //Hard coded for now
+      ctx.fillStyle = 'rgba(0, 0, 0, 1)';
+      let dimens = ctx.measureText(this.currentSpeech);
+      console.log(dimens);
+      SpriteManager.getInstance().getSprite('chat-bubble').drawAt(ctx, x, y, dimens.width + 10, dimens.fontBoundingBoxAscent + dimens.fontBoundingBoxDescent + 15);
+      ctx.fillText(this.currentSpeech, x + 5, y + 20);  //Hard coded for now
       this.speechBubbleCounter++;
     }
   }
