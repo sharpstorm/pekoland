@@ -22,15 +22,16 @@ export default class Player {
   }
 
   drawAt(ctx, x, y, width, height, cameraContext) {
-    let sprite = this.playerSprite.getSpriteByDirection(Player.DirectionToIntMap[this.direction]).getSpriteAtFrame(this.currentFrame);
-    let marginX = (width - sprite.width) / 2;
-    let marginY = (height - sprite.height) / 2;
-
-    ctx.drawImage(sprite.spritesheet, sprite.x, sprite.y, sprite.width, sprite.height, this.x - cameraContext.getGridCoord().x * 50 + marginX, this.y - cameraContext.getGridCoord().y * 50 + marginY, sprite.width, sprite.height);
-    this.chat.drawAt(ctx, this.x + 40, this.y-30);  //Hard Coded
     ctx.strokeStyle = 'black';
     ctx.font = '10px Arial';
     ctx.strokeText('   ' + this.name, this.x  - cameraContext.getGridCoord().x * 50, this.y - cameraContext.getGridCoord().y * 50);
+    
+    let sprite = this.playerSprite.getSpriteByDirection(Player.DirectionToIntMap[this.direction]).getSpriteAtFrame(this.currentFrame);
+    let marginX = (width - sprite.width) / 2;
+    let marginY = (height - sprite.height) / 2;
+    
+    ctx.drawImage(sprite.spritesheet, sprite.x, sprite.y, sprite.width, sprite.height, this.x - cameraContext.getGridCoord().x * 50 + marginX, this.y - cameraContext.getGridCoord().y * 50 + marginY, sprite.width, sprite.height);
+    this.chat.drawAt(ctx, this.x - cameraContext.getGridCoord().x * 50 + marginX + 40, this.y - cameraContext.getGridCoord().y * 50 + marginY - 30); //Hard Coded
   }
 
   moveTo(newX, newY) {

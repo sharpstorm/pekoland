@@ -6,4 +6,14 @@ function timeout(prom, time) {
   ]).finally(() => clearTimeout(timer));
 }
 
-export { timeout };
+function loadAsset(url) {
+  return timeout(new Promise((resolve) => {
+    let asset = new Image();
+    asset.onload = () => {
+      resolve(asset);
+    }
+    asset.src = url;
+  }), 5000);
+}
+
+export { timeout, loadAsset };
