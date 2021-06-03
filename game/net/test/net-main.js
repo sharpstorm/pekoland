@@ -1,6 +1,8 @@
 import PlayerSprite from '../../managers/sprite-manager.js';
 import Player from '../../models/player.js';
+import Map from '../../models/map.js'
 import PlayerManager from '../../managers/player-manager.js';
+import MapManager from '../../managers/map-manager.js';
 import { joystickWorker, joystickUpWorker, addJoystickEventHandler, removeJoystickEventHandler } from '../../workers/joystick.js';
 import {addChatEventHandler, removeChatEventHandler, chatWorker} from '../../workers/joystick.js';
 import drawer from '../../managers/animation-manager.js';
@@ -12,6 +14,7 @@ import buildClientGamePacket from '../client/game-data-sender.js';
 import handleServerGamePacket from '../server/game-data-handler.js';
 import buildServerGamePacket from '../server/game-data-sender.js';
 import { timeout } from '../utils.js'
+
 
 let networkManager = NetworkManager.getInstance();
 
@@ -46,14 +49,14 @@ networkManager.on('initialized', () => {
     });
   } else {
     networkManager.setDataHandler(handleServerGamePacket);
-
     const playerManager = PlayerManager.getInstance();
     playerManager.addPlayer(new Player(networkManager.configStore.name, SpriteManager.getInstance().getSprite('rabbit-avatar')));
-    playerManager.setSelf(networkManager.configStore.name);
+    playerManager.setSelf(networkManager.configStore.name);     
   }
 });
 
 addJoystickEventHandler((evt) => {
+  //console.log(evt);
   if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {
     networkManager.send(buildClientGamePacket('move', evt));
   } else {
@@ -62,7 +65,7 @@ addJoystickEventHandler((evt) => {
 })
 
 addChatEventHandler((evt) => {
-  console.log(evt);
+  //console.log(evt);
   if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {
     networkManager.send(buildClientGamePacket('chat', evt));
   } else {
@@ -80,6 +83,19 @@ let rabbitSprite = new AvatarSprite(
   AnimatableSprite.generateFromTiledFrames(rabbitSheet, 0, 79, 36, 36, 40, 0, 7),
 );
 SpriteManager.getInstance().registerSprite('rabbit-avatar', rabbitSprite);
+
+//Map
+let map = new Image();
+//map.src = 'Images/biggerHouse.png';
+map.src = 'Images/biggerHouseColli.png';
+let colli = new Image();
+colli.src = 'Images/biggerHouseColli.png';
+colli.onload = function() {
+  let map1 = new Map(map,colli,2326, 1700, 30, 20);
+  MapManager.getInstance().registerMap('testMap', map1);
+};
+
+
 
 document.addEventListener('keydown',joystickWorker);
 document.addEventListener('keydown',chatWorker);

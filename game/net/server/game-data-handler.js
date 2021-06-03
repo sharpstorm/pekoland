@@ -1,4 +1,5 @@
 import PlayerManager from '../../managers/player-manager.js';
+import ChatManager from '../../managers/chat-manager.js';
 import SpriteManager from '../../managers/sprite-manager.js';
 import WorldManager from '../../managers/world-manager.js';
 import Player from '../../models/player.js';
@@ -62,6 +63,7 @@ function handleMove(data, conn) {
 
 function handleChat(data, conn) {
   let player = PlayerManager.getInstance().getPlayer(data.userId);
+  ChatManager.getInstance().bigChatBox.push(player.name + ": " + data.message);
   player.chat.updateMessage(data.message);
   NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('chat-echo', data), conn.peer);
 }

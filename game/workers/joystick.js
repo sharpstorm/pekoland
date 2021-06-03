@@ -1,7 +1,8 @@
 import ChatManager from '../managers/chat-manager.js';
 import PlayerManager from '../managers/player-manager.js';
-import aa from '../managers/animation-manager.js';
 import Player from '../models/player.js';
+import MapManager from '../managers/map-manager.js';
+import CameraContext from '../managers/camera-context.js'
 
 const playerManager = PlayerManager.getInstance();
 const chatManager = ChatManager.getInstance();
@@ -18,9 +19,6 @@ let map = new Image();
 //map.src = 'Images/house.jpg';
 map.src = 'Images/house1_colli.png';
 
-map.onload = () => {
-  canvas.getContext('2d').drawImage(map,0,0,1551,779,0,0,1000,500);
-}
 
 function joystickWorker(e) {
   let event = window.event ? window.event : e;
@@ -52,20 +50,19 @@ function joystickWorker(e) {
 
     let self = playerManager.getSelf();
 
-    // Collision Detection
-    //BUT IN JOYSTICK FOR NOW
-    //canvas.getContext('2d').drawImage(map,0,0,1551,779,0,0,1000,500);
-    let lala = canvas.getContext('2d').getImageData(self.x + 25 + deltaX, self.y + 25 + deltaY, 1, 1).data;
-    if (lala[3] === 255 && lala[0] === 0 && lala[1] === 0 && lala[2] === 0) {
-      // console.log(ctx.getImageData(self.x + 25 + deltaX, self.y + 25 + deltaY, 1, 1).data);
-      // Collide, no move
+
+  
+    if (MapManager.getInstance().getCurrentMap().checkCollision(playerManager.getSelf().getGridCoord().x + deltaX / 50,  playerManager.getSelf().getGridCoord().y + deltaY / 50)){
       deltaX = 0;
       deltaY = 0;
     }
-    
+
     self.direction = direction;
     if (deltaX !== 0 || deltaY !== 0) {
-      self.moveTo(self.x + deltaX, self.y + deltaY);
+        self.isAnimating = true;
+        self.currentFrame = 0;
+        CameraContext.getInstance().moveContextToGrid( CameraContext.getInstance().getGridCoord().x + (deltaX / 50),  CameraContext.getInstance().getGridCoord().y + (deltaY / 50));
+        self.moveTo(self.x + deltaX, self.y + deltaY);  
     }
 
     joystickEventHandlers.forEach(x => x({
@@ -76,9 +73,10 @@ function joystickWorker(e) {
       y: self.y + deltaY
     }));
   }
+
 }
 
-function chatWorker(e){
+function chatWorker(e) {
   if (e.key.length === 1 && ChatManager.getInstance().chatting)
   typing(e.key);
 
@@ -95,17 +93,18 @@ function chatWorker(e){
   }
 }
 
-function typing(letter){
+function typing(letter) {
   chatManager.textField += letter;
 }
 
-function pushMsg(){
+function pushMsg() {
   playerManager.getSelf().chat.speechBubbleCounter  = 0;
   playerManager.getSelf().chat.speechBubble = true;
   playerManager.getSelf().chat.currentSpeech = ChatManager.getInstance().textField;
   chatManager.bigChatBox.push(playerManager.getSelf().name + ": " + playerManager.getSelf().chat.currentSpeech);
   chatManager.textField = '';
   chatEventHandlers.forEach(x => x({
+    name: playerManager.getSelf().name,
     msg: playerManager.getSelf().chat.currentSpeech,
   }));
 }

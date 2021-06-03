@@ -16,10 +16,6 @@ export default class Chat {
   }
 
   drawAt(ctx, x, y) {
-    /*
-    if(this.speechBubbleCounter === 1){
-        chatManager.bigChatBox.push(player.name + ": " + player.currentSpeech);
-      }*/
     if (this.speechBubbleCounter > 30) {
       this.speechBubbleCounter = 0;
       this.speechBubble = false;
@@ -33,7 +29,7 @@ export default class Chat {
         let cachedCtx = this.cachedSprite.getContext('2d');
         cachedCtx.font = '15px Arial';
         let dimens = cachedCtx.measureText(this.currentSpeech);
-
+        
         this.cachedSprite.width = dimens.width + 10;
         this.cachedSprite.height = dimens.fontBoundingBoxAscent + dimens.fontBoundingBoxDescent + 15;
         cachedCtx.font = '15px Arial';

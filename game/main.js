@@ -1,6 +1,7 @@
-import PlayerSprite from './managers/sprite-manager.js';
 import Player from './models/player.js';
+import Map from '../../models/map.js'
 import PlayerManager from './managers/player-manager.js';
+import MapManager from '../../managers/map-manager.js';
 import { joystickWorker, joystickUpWorker, addJoystickEventHandler, removeJoystickEventHandler } from './workers/joystick.js';
 import {addChatEventHandler, removeChatEventHandler, chatWorker} from './workers/joystick.js';
 import drawer from './managers/animation-manager.js';
@@ -108,6 +109,17 @@ loadAsset('Images/chat-bubble.png')
   ]);
   SpriteManager.getInstance().registerSprite('chat-bubble', sprite);
 });
+
+//Map
+let map = new Image();
+//map.src = 'Images/biggerHouse.png';
+map.src = 'Images/biggerHouseColli.png';
+let colli = new Image();
+colli.src = 'Images/biggerHouseColli.png';
+colli.onload = function() {
+  let map1 = new Map(map,colli,2326, 1700, 30, 20);
+  MapManager.getInstance().registerMap('testMap', map1);
+};
 
 document.addEventListener('keydown',joystickWorker);
 document.addEventListener('keydown',chatWorker);
