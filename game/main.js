@@ -1,6 +1,7 @@
-import PlayerSprite from './managers/sprite-manager.js';
 import Player from './models/player.js';
+import Map from '../../models/map.js'
 import PlayerManager from './managers/player-manager.js';
+import MapManager from '../../managers/map-manager.js';
 import { joystickWorker, joystickUpWorker, addJoystickEventHandler, removeJoystickEventHandler } from './workers/joystick.js';
 import {addChatEventHandler, removeChatEventHandler, chatWorker} from './workers/joystick.js';
 import drawer from './managers/animation-manager.js';
@@ -13,7 +14,6 @@ import handleServerGamePacket from './net/server/game-data-handler.js';
 import buildServerGamePacket from './net/server/game-data-sender.js';
 import { timeout } from './net/utils.js'
 import WorldManager from './managers/world-manager.js';
-import Context from './models/context.js'
 
 let networkManager = NetworkManager.getInstance();
 
@@ -93,6 +93,17 @@ let rabbitSprite = new AvatarSprite(
   AnimatableSprite.generateFromTiledFrames(rabbitSheet, 0, 79, 36, 36, 40, 0, 7),
 );
 SpriteManager.getInstance().registerSprite('rabbit-avatar', rabbitSprite);
+
+//Map
+let map = new Image();
+//map.src = 'Images/biggerHouse.png';
+map.src = 'Images/biggerHouseColli.png';
+let colli = new Image();
+colli.src = 'Images/biggerHouseColli.png';
+colli.onload = function() {
+  let map1 = new Map(map,colli,2326, 1700, 30, 20);
+  MapManager.getInstance().registerMap('testMap', map1);
+};
 
 document.addEventListener('keydown',joystickWorker);
 document.addEventListener('keydown',chatWorker);
