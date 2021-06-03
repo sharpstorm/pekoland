@@ -4,7 +4,7 @@ import PlayerManager from './managers/player-manager.js';
 import MapManager from './managers/map-manager.js';
 import { joystickWorker, joystickUpWorker, addJoystickEventHandler, removeJoystickEventHandler } from './workers/joystick.js';
 import {addChatEventHandler, removeChatEventHandler, chatWorker} from './workers/joystick.js';
-import drawer from './managers/animation-manager.js';
+import Renderer from './managers/animation-manager.js';
 import Sprite, {AnimatableSprite, AvatarSprite, SlicedSprite} from './models/sprites.js';
 import SpriteManager from './managers/sprite-manager.js';
 import NetworkManager from './net/network-manager.js';
@@ -124,4 +124,5 @@ colli.onload = function() {
 document.addEventListener('keydown',joystickWorker);
 document.addEventListener('keydown',chatWorker);
 
-window.requestAnimationFrame(() => drawer(PlayerManager.getInstance()));
+Renderer.init();
+window.requestAnimationFrame(Renderer.render.bind(Renderer));

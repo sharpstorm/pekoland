@@ -3,47 +3,82 @@ import PlayerManager from './player-manager.js';
 import MapManager from './map-manager.js';
 import CameraContext from './camera-context.js'
 
-let counter = 0;
-let che = false;
-let chatboxText = '';
-let bigChatBox = [];
-let map = new Image();
-//map.src = 'Images/house.jpg';
-map.src = 'Images/house1.png';
-
-const playerManager = PlayerManager.getInstance();
 const chatManager = ChatManager.getInstance();
 
-let lastUpdate = 0;
-let lastMajorUpdate = 0;
-function drawer(timestamp) {
-  let majorUpdate = false;
-  let delta = timestamp - lastUpdate;
-  if (timestamp - lastMajorUpdate > 66) {
-    lastMajorUpdate = timestamp;
-    majorUpdate = true;
+let instance;
+class Renderer {
+  constructor() {
+    this.lastUpdate = 0;
+    this.lastMajorUpdate = 0;
+    this.haltRender = false;
+    this.canvas = document.getElementById('game');
+    this.ctx = this.canvas.getContext('2d');
+    this.dimens = {
+      width: this.canvas.width,
+      height: this.canvas.height
+    };
   }
 
-  let ctx = document.getElementById('game').getContext('2d');
-  ctx.clearRect(0, 0, 1000, 500);
+  init() {
+    this.canvas.width = document.documentElement.clientWidth;
+    this.canvas.height = document.documentElement.clientHeight;
 
-  CameraContext.getInstance().animate(delta);
-  if(MapManager.getInstance().getCurrentMap() != undefined){
-    MapManager.getInstance().getCurrentMap().draw(ctx, CameraContext.getInstance());
+    this.dimens = {
+      width: this.canvas.width,
+      height: this.canvas.height
+    };
+
+    window.addEventListener('resize', (() => {
+      this.canvas.width = document.documentElement.clientWidth;
+      this.canvas.height = document.documentElement.clientHeight;
+    }).bind(this));
   }
-  
-  if (ChatManager.getInstance().chatting)
-    drawExpandedTextBox();
-  else
-    drawTextBox();
 
-  PlayerManager.getInstance().getPlayers().forEach(player => {
-    player.drawAt(ctx, player.x, player.y, 50, 50,CameraContext.getInstance());
-    player.animate(delta, majorUpdate);
-  });
+  render(timestamp) {
+    let majorUpdate = false;
+    let delta = timestamp - this.lastUpdate;
 
-  lastUpdate = timestamp;
-  window.requestAnimationFrame(drawer);
+    if (timestamp - this.lastMajorUpdate > 66) {
+      this.lastMajorUpdate = timestamp;
+      majorUpdate = true;
+    }
+
+    let ctx = this.ctx;
+    ctx.clearRect(0, 0, this.dimens.width, this.dimens.height);
+
+    // Draw using current camera context
+    let camContext = CameraContext.getInstance();
+    if (MapManager.getInstance().getCurrentMap() !== undefined) {
+      MapManager.getInstance().getCurrentMap().draw(ctx, camContext);
+    }
+
+    PlayerManager.getInstance().getPlayers().forEach(player => {
+      player.drawAt(ctx, player.x, player.y, 50, 50, camContext);
+      player.animate(delta, majorUpdate);
+    });
+
+    // Draw UI
+    if (chatManager.chatting) {
+      drawExpandedTextBox(ctx);
+    } else {
+      drawTextBox(ctx);
+    }
+
+    // Update Camera
+    camContext.animate(delta);
+
+    this.lastUpdate = timestamp;
+    if (!this.haltRender) {
+      window.requestAnimationFrame(this.render.bind(this));
+    }
+  }
+
+  static getInstance() {
+    if (instance === undefined) {
+      instance = new Renderer();
+    }
+    return instance;
+  }
 }
 
 function drawGrids(height, width, gridLength) {
@@ -59,9 +94,8 @@ function drawGrids(height, width, gridLength) {
   }
 }
 
-function drawTextBox(){
-  ChatManager.getInstance().chatting = false;  
-  let ctx = document.getElementById('game').getContext('2d');
+function drawTextBox(ctx) {
+  chatManager.chatting = false;  
   ctx.strokeStyle = 'white';
   ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
   ctx.lineWidth = 1;
@@ -84,10 +118,9 @@ function drawTextBox(){
   ctx.fillText('All', 18, 497);
 }
 
-function drawExpandedTextBox() {
-  ChatManager.getInstance().chatting = true;
+function drawExpandedTextBox(ctx) {
+  chatManager.chatting = true;
 
-  const ctx = document.getElementById('game').getContext('2d');
   ctx.strokeStyle = 'black';
   ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
   ctx.lineWidth = 1;
@@ -113,13 +146,12 @@ function drawExpandedTextBox() {
   ctx.fillText('All', 18, 497);
   
   //typing words
-  ctx.fillText(ChatManager.getInstance().textField, 60, 497);
+  ctx.fillText(chatManager.textField, 60, 497);
 
   //chat history
   for (let i = 0; i < chatManager.bigChatBox.length; i++) {
     ctx.fillText(chatManager.bigChatBox[i], 5, 345 + (i * 15));
   }
-  
 }
 
-export default drawer;
+export default Renderer.getInstance();
