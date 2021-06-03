@@ -1,5 +1,7 @@
 import ChatManager from './chat-manager.js';
 import PlayerManager from './player-manager.js';
+import MapManager from './map-manager.js';
+import CameraContext from './camera-context.js'
 
 let counter = 0;
 let che = false;
@@ -12,23 +14,35 @@ map.src = 'Images/house1.png';
 const playerManager = PlayerManager.getInstance();
 const chatManager = ChatManager.getInstance();
 
-function drawer() {
-  if (counter > 4) {
-    let ctx = document.getElementById('game').getContext('2d');
-    ctx.clearRect(0, 0, 1000, 500);
-    ctx.drawImage(map, 0, 0, 1551, 779, 0, 0, 1000, 500);
-    if (ChatManager.getInstance().chatting)
-      drawExpandedTextBox();
-    else
-      drawTextBox();
-      
-    PlayerManager.getInstance().getPlayers().forEach(player => {
-      player.drawAt(ctx, player.x, player.y, 50, 50);
-      player.animate();
-    });
-    counter = 0;  //FPS
+let lastUpdate = 0;
+let lastMajorUpdate = 0;
+function drawer(timestamp) {
+  let majorUpdate = false;
+  let delta = timestamp - lastUpdate;
+  if (timestamp - lastMajorUpdate > 66) {
+    lastMajorUpdate = timestamp;
+    majorUpdate = true;
   }
-  counter++;
+
+  let ctx = document.getElementById('game').getContext('2d');
+  ctx.clearRect(0, 0, 1000, 500);
+
+  CameraContext.getInstance().animate(delta);
+  if(MapManager.getInstance().getCurrentMap() != undefined){
+    MapManager.getInstance().getCurrentMap().draw(ctx, CameraContext.getInstance());
+  }
+  
+  if (ChatManager.getInstance().chatting)
+    drawExpandedTextBox();
+  else
+    drawTextBox();
+
+  PlayerManager.getInstance().getPlayers().forEach(player => {
+    player.drawAt(ctx, player.x, player.y, 50, 50,CameraContext.getInstance());
+    player.animate(delta, majorUpdate);
+  });
+
+  lastUpdate = timestamp;
   window.requestAnimationFrame(drawer);
 }
 
@@ -37,23 +51,13 @@ function drawGrids(height, width, gridLength) {
   for (let i = 0; i < height; i += gridLength) {
     for (let ii = 0; ii < width; ii += gridLength) {
       ctx.beginPath();
-      ctx.strokeStyle = 'black';
+      ctx.strokeStyle = 'red';
       ctx.lineWidth = '1';
       ctx.rect(i, ii, gridLength, gridLength);
       ctx.stroke();
     }
   }
 }
-
-function draggable() {
-  console.log(getPixel())
-}
-
-function getPixel(x, y) {
-  let ctx = document.getElementById('game').getContext('2d');
-  return context.getImageData(x, y, 1, 1).data;
-}
-
 
 function drawTextBox(){
   ChatManager.getInstance().chatting = false;  

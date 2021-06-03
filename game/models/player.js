@@ -1,4 +1,5 @@
-import Chat from "../models/chat.js";
+import PlayerManager from '../managers/player-manager.js';
+import Chat from '../models/chat.js';
 
 export default class Player {
   constructor(userId, name, playerSprite) {
@@ -6,12 +7,12 @@ export default class Player {
     this.name = name;
     this.playerSprite = playerSprite;
 
-    this.x = 0;
-    this.y = 0;
-    this.newX = 0;
-    this.newY = 0;
-    this.oldX = 0;
-    this.oldY = 0;
+    this.x = 450;
+    this.y = 250;
+    this.newX = 450;
+    this.newY = 250;
+    this.oldX = 450;
+    this.oldY = 250;
     this.moveX = 0;
     this.moveY = 0;
     this.direction = Player.Direction.DOWN;
@@ -20,39 +21,61 @@ export default class Player {
     this.chat = new Chat(); 
   }
 
-  drawAt(ctx, x, y, width, height) {
-    ctx.strokeStyle = 'black';
-    ctx.font = '10px Arial';
-    ctx.strokeText("   "+ this.name, this.x, this.y);
+  drawAt(ctx, x, y, width, height, cameraContext) {
     let sprite = this.playerSprite.getSpriteByDirection(Player.DirectionToIntMap[this.direction]).getSpriteAtFrame(this.currentFrame);
     let marginX = (width - sprite.width) / 2;
     let marginY = (height - sprite.height) / 2;
-    ctx.drawImage(sprite.spritesheet, sprite.x, sprite.y, sprite.width, sprite.height, x + marginX, y + marginY, sprite.width, sprite.height);
+
+    ctx.drawImage(sprite.spritesheet, sprite.x, sprite.y, sprite.width, sprite.height, this.x - cameraContext.getGridCoord().x * 50 + marginX, this.y - cameraContext.getGridCoord().y * 50 + marginY, sprite.width, sprite.height);
     this.chat.drawAt(ctx, this.x + 40, this.y-30);  //Hard Coded
+    ctx.strokeStyle = 'black';
+    ctx.font = '10px Arial';
+    ctx.strokeText('   ' + this.name, this.x  - cameraContext.getGridCoord().x * 50, this.y - cameraContext.getGridCoord().y * 50);
   }
 
   moveTo(newX, newY) {
-    this.oldX = this.x;
-    this.oldY = this.y;
-    this.newX = newX;
-    this.newY = newY;
-    this.isAnimating = true;
-    this.currentFrame = 0;
+      this.oldX = this.x;
+      this.oldY = this.y;
+      this.newX = newX;
+      this.newY = newY;
+      this.isAnimating = true;
+      this.currentFrame = 0;
   }
 
-  animate() {
-    if (!this.isAnimating) return;
+  moveImmediate(newX,newY) {
+    this.oldX = newX;
+    this.oldY = newY
+    this.newX = newX;
+    this.newY = newY;
+    this.x = newX;
+    this.y = newY;
+  }
 
+  moveToGrid(x,y) {
+    this.oldX = (x - 1) * 50;
+    this.oldY = (y - 1) * 50
+    this.newX = (x - 1) * 50;;
+    this.newY = (y - 1) * 50;
+    this.x = (x - 1) * 50;;
+    this.y = (y - 1) * 50;
+  }
+
+  getGridCoord() {
+    return {x: this.x / 50 + 1, y: this.y / 50 + 1};   //TO CHECK AGAIN. HARD CODED 50.
+  }
+
+  animate(delta, majorUpdate) {
+    if (!this.isAnimating) return;
     if (this.currentFrame < 6) {
       if (Math.abs(this.newX - this.x) > 0.00001) {
-        this.x += (this.newX - this.oldX) / 6;
-        this.currentFrame++;
-        return;
+        this.x += (this.newX - this.oldX) / 24 * (delta / 16.66667);
       } else if (Math.abs(this.newY - this.y) > 0.00001) {
-        this.y += (this.newY - this.oldY) / 6;
-        this.currentFrame++;
-        return;
+        this.y += (this.newY - this.oldY) / 24 * (delta / 16.66667);
       }
+      if (majorUpdate) {
+        this.currentFrame++;
+      }
+      return;
     }
     this.x = this.newX;
     this.y = this.newY;
