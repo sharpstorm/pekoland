@@ -16,7 +16,7 @@ export default class Chat {
   }
 
   drawAt(ctx, x, y) {
-    if (this.speechBubbleCounter > 30) {
+    if (this.speechBubbleCounter > 120) {
       this.speechBubbleCounter = 0;
       this.speechBubble = false;
       this.currentSpeech = '';
