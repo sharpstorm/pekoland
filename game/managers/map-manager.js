@@ -22,11 +22,11 @@ export default class MapManager {
     return this.maps[id];
   }
 
-  setMap(id){
+  setMap(id) {
     this.currentMapID = id;
   }
   
-  getCurrentMap(){
+  getCurrentMap() {
     return this.maps[this.currentMapID];
   }
 

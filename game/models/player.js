@@ -1,5 +1,5 @@
-import PlayerManager from "../managers/player-manager.js";
-import Chat from "../models/chat.js";
+import PlayerManager from '../managers/player-manager.js';
+import Chat from '../models/chat.js';
 
 export default class Player {
   constructor(userId, name, playerSprite) {
@@ -42,7 +42,7 @@ export default class Player {
       this.currentFrame = 0;
   }
 
-  moveImmediate(newX,newY){
+  moveImmediate(newX,newY) {
     this.oldX = newX;
     this.oldY = newY
     this.newX = newX;
@@ -51,16 +51,16 @@ export default class Player {
     this.y = newY;
   }
 
-  moveToGrid(x,y){
-    this.oldX = (x-1) * 50;
-    this.oldY = (y-1) * 50
-    this.newX = (x-1) * 50;;
-    this.newY = (y-1) * 50;
-    this.x = (x-1) * 50;;
-    this.y = (y-1) * 50;
+  moveToGrid(x,y) {
+    this.oldX = (x - 1) * 50;
+    this.oldY = (y - 1) * 50
+    this.newX = (x - 1) * 50;;
+    this.newY = (y - 1) * 50;
+    this.x = (x - 1) * 50;;
+    this.y = (y - 1) * 50;
   }
 
-  getGridCoord(){
+  getGridCoord() {
     return {x: this.x / 50 + 1, y: this.y / 50 + 1};   //TO CHECK AGAIN. HARD CODED 50.
   }
 

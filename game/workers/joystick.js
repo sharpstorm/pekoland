@@ -76,7 +76,7 @@ function joystickWorker(e) {
 
 }
 
-function chatWorker(e){
+function chatWorker(e) {
   if (e.key.length === 1 && ChatManager.getInstance().chatting)
   typing(e.key);
 
@@ -93,18 +93,18 @@ function chatWorker(e){
   }
 }
 
-function typing(letter){
+function typing(letter) {
   chatManager.textField += letter;
 }
 
-function pushMsg(){
+function pushMsg() {
   playerManager.getSelf().chat.speechBubbleCounter  = 0;
   playerManager.getSelf().chat.speechBubble = true;
   playerManager.getSelf().chat.currentSpeech = ChatManager.getInstance().textField;
   chatManager.bigChatBox.push(playerManager.getSelf().name + ": " + playerManager.getSelf().chat.currentSpeech);
   chatManager.textField = '';
   chatEventHandlers.forEach(x => x({
-    name: playerManager.getSelf.name,
+    name: playerManager.getSelf().name,
     msg: playerManager.getSelf().chat.currentSpeech,
   }));
 }
