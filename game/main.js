@@ -1,7 +1,7 @@
 import Player from './models/player.js';
-import Map from '../../models/map.js'
+import Map from './models/map.js'
 import PlayerManager from './managers/player-manager.js';
-import MapManager from '../../managers/map-manager.js';
+import MapManager from './managers/map-manager.js';
 import { joystickWorker, joystickUpWorker, addJoystickEventHandler, removeJoystickEventHandler } from './workers/joystick.js';
 import {addChatEventHandler, removeChatEventHandler, chatWorker} from './workers/joystick.js';
 import drawer from './managers/animation-manager.js';
