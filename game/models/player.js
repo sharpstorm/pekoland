@@ -21,24 +21,16 @@ export default class Player {
     this.chat = new Chat(); 
   }
 
-  drawAt(ctx, x, y, width, height, context) {
+  drawAt(ctx, x, y, width, height, cameraContext) {
     let sprite = this.playerSprite.getSpriteByDirection(Player.DirectionToIntMap[this.direction]).getSpriteAtFrame(this.currentFrame);
     let marginX = (width - sprite.width) / 2;
     let marginY = (height - sprite.height) / 2;
-    if(this.name === PlayerManager.getInstance().getSelf().name){
-      ctx.drawImage(sprite.spritesheet, sprite.x, sprite.y, sprite.width, sprite.height, 450 + marginX, 250 + marginY, sprite.width, sprite.height);
-      this.chat.drawAt(ctx, 450 + 40, 250-30);  //Hard Coded
-      ctx.strokeStyle = 'black';
-      ctx.font = '10px Arial';
-      ctx.strokeText("   "+ this.name, 450, 250);
-    }
-    else{
-      ctx.drawImage(sprite.spritesheet, sprite.x, sprite.y, sprite.width, sprite.height, this.x  - context.getGridCoord().x * 50  + marginX, this.y  - context.getGridCoord().y * 50 + marginY, sprite.width, sprite.height);
-      this.chat.drawAt(ctx, this.x + 40, this.y-30);  //Hard Coded
-      ctx.strokeStyle = 'black';
-      ctx.font = '10px Arial';
-      ctx.strokeText("   "+ this.name, this.x  - context.getGridCoord().x * 50, this.y  - context.getGridCoord().y * 50);
-    }
+
+    ctx.drawImage(sprite.spritesheet, sprite.x, sprite.y, sprite.width, sprite.height, this.x - cameraContext.getGridCoord().x * 50 + marginX, this.y - cameraContext.getGridCoord().y * 50 + marginY, sprite.width, sprite.height);
+    this.chat.drawAt(ctx, this.x + 40, this.y-30);  //Hard Coded
+    ctx.strokeStyle = 'black';
+    ctx.font = '10px Arial';
+    ctx.strokeText('   ' + this.name, this.x  - cameraContext.getGridCoord().x * 50, this.y - cameraContext.getGridCoord().y * 50);
   }
 
   moveTo(newX, newY) {
