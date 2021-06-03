@@ -23,12 +23,12 @@ export default class Player {
   drawAt(ctx, x, y, width, height) {
     ctx.strokeStyle = 'black';
     ctx.font = '10px Arial';
-    ctx.strokeText("   "+ this.name, this.x, this.y);
+    ctx.strokeText('   ' + this.name, this.x, this.y);
     let sprite = this.playerSprite.getSpriteByDirection(Player.DirectionToIntMap[this.direction]).getSpriteAtFrame(this.currentFrame);
     let marginX = (width - sprite.width) / 2;
     let marginY = (height - sprite.height) / 2;
     ctx.drawImage(sprite.spritesheet, sprite.x, sprite.y, sprite.width, sprite.height, x + marginX, y + marginY, sprite.width, sprite.height);
-    this.chat.drawAt(ctx, this.x + 40, this.y-30);  //Hard Coded
+    this.chat.drawAt(ctx, this.x + 40, this.y - 30); //Hard Coded
   }
 
   moveTo(newX, newY) {

@@ -5,6 +5,8 @@ export default class Chat {
     this.speechBubble = false;
     this.speechBubbleCounter = 0;
     this.currentSpeech = '';
+    this.cachedSprite = undefined;
+    this.cachedText = undefined;
   }
 
   updateMessage(m) {
@@ -19,21 +21,24 @@ export default class Chat {
         chatManager.bigChatBox.push(player.name + ": " + player.currentSpeech);
       }*/
     if (this.speechBubbleCounter > 30) {
-      //console.log('heree');
-      //console.log(this.speechBubbleCounter);
       this.speechBubbleCounter = 0;
       this.speechBubble = false;
-    }
+      this.currentSpeech = '';
+      this.cachedSprite = undefined;
+      this.cachedText = undefined;
 
-    if (this.speechBubble) {
-      //console.log('her');
-      //console.log(this.speechBubbleCounter);
-      ctx.font = '15px Arial';
-      ctx.fillStyle = 'rgba(0, 0, 0, 1)';
-      let dimens = ctx.measureText(this.currentSpeech);
-      console.log(dimens);
-      SpriteManager.getInstance().getSprite('chat-bubble').drawAt(ctx, x, y, dimens.width + 10, dimens.fontBoundingBoxAscent + dimens.fontBoundingBoxDescent + 15);
-      ctx.fillText(this.currentSpeech, x + 5, y + 20);  //Hard coded for now
+    } else if (this.speechBubble) {
+      if (this.cachedSprite === undefined || this.cachedText !== this.currentSpeech) {
+        this.cachedSprite = document.createElement('canvas');
+        let cachedCtx = this.cachedSprite.getContext('2d');
+        cachedCtx.font = '15px Arial';
+        cachedCtx.fillStyle = 'rgba(0, 0, 0, 1)';
+        let dimens = cachedCtx.measureText(this.currentSpeech);
+        SpriteManager.getInstance().getSprite('chat-bubble').drawAt(cachedCtx, 0, 0, dimens.width + 10, dimens.fontBoundingBoxAscent + dimens.fontBoundingBoxDescent + 15);
+        cachedCtx.fillText(this.currentSpeech, 5, 20);
+        this.cachedText = this.currentSpeech;
+      }
+      ctx.drawImage(this.cachedSprite, x, y);
       this.speechBubbleCounter++;
     }
   }
