@@ -2,7 +2,7 @@ import ChatManager from '../managers/chat-manager.js';
 import PlayerManager from '../managers/player-manager.js';
 import Player from '../models/player.js';
 import MapManager from '../managers/map-manager.js';
-import CameraContext from '../managers/cameracontext.js'
+import CameraContext from '../managers/camera-context.js'
 
 const playerManager = PlayerManager.getInstance();
 const chatManager = ChatManager.getInstance();

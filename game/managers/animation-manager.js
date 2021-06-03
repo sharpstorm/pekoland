@@ -1,7 +1,7 @@
 import ChatManager from './chat-manager.js';
 import PlayerManager from './player-manager.js';
 import MapManager from './map-manager.js';
-import CameraContext from './cameracontext.js'
+import CameraContext from './camera-context.js'
 
 let counter = 0;
 let che = false;
