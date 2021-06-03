@@ -101,7 +101,26 @@ class SlicedSprite {
     }
 
     if (heightDiff > 0 && widthDiff > 0) {
-      this.sliceE.drawAt(ctx, x + this.sliceA.width, y + this.sliceA.height, widthDiff, heightDiff);
+      if (this.interpolateMode === SlicedSprite.TILE) {
+        let rowImage = document.createElement('canvas');
+        rowImage.height = this.sliceE.height;
+        rowImage.width = widthDiff;
+        let ctxX = rowImage.getContext('2d');
+
+        for (let cX = 0; cX < widthDiff; cX += this.sliceE.width) {
+          this.sliceE.drawAt(ctxX, cX, 0);
+        }
+
+        for (let cY = y + this.sliceA.height; cY < y + this.sliceA.height + heightDiff; cY += this.sliceE.height) {
+          let drawHeight = this.sliceE.height;
+          if (cY + this.sliceE.height > y + this.sliceA.height + heightDiff) {
+            drawHeight = y + this.sliceA.height + heightDiff - cY;
+          }
+          ctx.drawImage(rowImage, 0, 0, widthDiff, drawHeight, x + this.sliceA.width, cY, widthDiff, drawHeight);
+        }
+      } else {
+        this.sliceE.drawAt(ctx, x + this.sliceA.width, y + this.sliceA.height, widthDiff, heightDiff);
+      }
     }
   }
 
@@ -125,11 +144,31 @@ class SlicedSprite {
 }
 
 SlicedSprite.STRETCH = 0;
-//SlicedSprite.TILE = 1; // TODO: Support Tiling
+SlicedSprite.TILE = 1;
 
 class TiledSprite {
-  constructor() {
+  constructor(baseSprite, tileWidth, tileHeight) {
+    this.sprite = baseSprite;
+    this.tileWidth = tileWidth;
+    this.tileHeight = tileHeight;
+  }
 
+  drawAt(ctx, x, y, width, height) {
+    let rowImage = document.createElement('canvas');
+    rowImage.width = width;
+    rowImage.height = this.tileHeight;
+    let ctxX = rowImage.getContext('2d');
+
+    for (let cX = 0; cX < width; cX += this.tileWidth) {
+      this.sprite.drawAt(ctxX, cX, 0, this.tileWidth, this.tileHeight);
+    }
+    for (let cY = y; cY < y + height; cY += this.tileHeight) {
+      let drawHeight = this.tileHeight;
+      if (cY + this.tileHeight > y + height) {
+        drawHeight = y + height - cY;
+      }
+      ctx.drawImage(rowImage, 0, 0, width, drawHeight, x, cY, width, drawHeight);
+    }
   }
 }
 

@@ -1,4 +1,4 @@
-import Sprite, {AnimatableSprite, AvatarSprite, SlicedSprite} from '../models/sprites.js';
+import Sprite, {AnimatableSprite, AvatarSprite, SlicedSprite, TiledSprite} from '../models/sprites.js';
 import NetworkManager from '../net/network-manager.js';
 import { timeout, loadAsset } from '../net/utils.js'
 
@@ -16,7 +16,11 @@ loadAsset('../Images/SliceTest.jpg')
     [53, 472, 420, 52],
     [473, 472, 52, 52]
   ]);
+  sprite.interpolateMode = SlicedSprite.TILE;
+
+  let tiledSprite = new TiledSprite(new Sprite(x, 0, 0, 525, 525), 100, 100);
 
   let ctx = document.getElementById('game').getContext('2d');
-  sprite.drawAt(ctx, 0, 0, 625, 500);
+  sprite.drawAt(ctx, 20, 20, 900, 300);
+  tiledSprite.drawAt(ctx, 20, 370, 870, 80);
 });
