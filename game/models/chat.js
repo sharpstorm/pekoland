@@ -32,8 +32,13 @@ export default class Chat {
         this.cachedSprite = document.createElement('canvas');
         let cachedCtx = this.cachedSprite.getContext('2d');
         cachedCtx.font = '15px Arial';
-        cachedCtx.fillStyle = 'rgba(0, 0, 0, 1)';
         let dimens = cachedCtx.measureText(this.currentSpeech);
+
+        this.cachedSprite.width = dimens.width + 10;
+        this.cachedSprite.height = dimens.fontBoundingBoxAscent + dimens.fontBoundingBoxDescent + 15;
+        cachedCtx.font = '15px Arial';
+        cachedCtx.fillStyle = 'rgba(0, 0, 0, 1)';
+
         SpriteManager.getInstance().getSprite('chat-bubble').drawAt(cachedCtx, 0, 0, dimens.width + 10, dimens.fontBoundingBoxAscent + dimens.fontBoundingBoxDescent + 15);
         cachedCtx.fillText(this.currentSpeech, 5, 20);
         this.cachedText = this.currentSpeech;
