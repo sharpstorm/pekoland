@@ -1,7 +1,7 @@
 import ChatManager from './chat-manager.js';
 import PlayerManager from './player-manager.js';
 import MapManager from './map-manager.js';
-import Context from '../models/context.js'
+import CameraContext from './cameracontext.js'
 
 let counter = 0;
 let che = false;
@@ -27,9 +27,9 @@ function drawer(timestamp) {
   let ctx = document.getElementById('game').getContext('2d');
   ctx.clearRect(0, 0, 1000, 500);
 
-  Context.getInstance().animate(delta);
+  CameraContext.getInstance().animate(delta);
   if(MapManager.getInstance().getCurrentMap() != undefined){
-    MapManager.getInstance().getCurrentMap().draw(ctx, Context.getInstance());
+    MapManager.getInstance().getCurrentMap().draw(ctx, CameraContext.getInstance());
   }
   
   if (ChatManager.getInstance().chatting)
@@ -38,7 +38,7 @@ function drawer(timestamp) {
     drawTextBox();
 
   PlayerManager.getInstance().getPlayers().forEach(player => {
-    player.drawAt(ctx, player.x, player.y, 50, 50,Context.getInstance());
+    player.drawAt(ctx, player.x, player.y, 50, 50,CameraContext.getInstance());
     player.animate(delta, majorUpdate);
   });
 
@@ -58,16 +58,6 @@ function drawGrids(height, width, gridLength) {
     }
   }
 }
-
-function draggable() {
-  console.log(getPixel())
-}
-
-function getPixel(x, y) {
-  let ctx = document.getElementById('game').getContext('2d');
-  return context.getImageData(x, y, 1, 1).data;
-}
-
 
 function drawTextBox(){
   ChatManager.getInstance().chatting = false;  

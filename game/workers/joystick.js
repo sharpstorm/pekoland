@@ -2,7 +2,7 @@ import ChatManager from '../managers/chat-manager.js';
 import PlayerManager from '../managers/player-manager.js';
 import Player from '../models/player.js';
 import MapManager from '../managers/map-manager.js';
-import Context from '../models/context.js'
+import CameraContext from '../managers/cameracontext.js'
 
 const playerManager = PlayerManager.getInstance();
 const chatManager = ChatManager.getInstance();
@@ -61,7 +61,7 @@ function joystickWorker(e) {
     if (deltaX !== 0 || deltaY !== 0) {
         self.isAnimating = true;
         self.currentFrame = 0;
-        Context.getInstance().moveContextToGrid( Context.getInstance().getGridCoord().x + (deltaX / 50),  Context.getInstance().getGridCoord().y + (deltaY / 50));
+        CameraContext.getInstance().moveContextToGrid( CameraContext.getInstance().getGridCoord().x + (deltaX / 50),  CameraContext.getInstance().getGridCoord().y + (deltaY / 50));
         self.moveTo(self.x + deltaX, self.y + deltaY);  
     }
 

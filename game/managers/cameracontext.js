@@ -5,7 +5,7 @@ import MapManager from '../managers/map-manager.js';
 
 let instance
 
-export default class Context{
+export default class CameraContext{
     constructor(){
         this.x = 0;
         this.y = 0;
@@ -56,7 +56,7 @@ export default class Context{
 
     static getInstance() {
         if (instance === undefined) {
-          instance = new Context();
+          instance = new CameraContext();
         }
         return instance;
     }
