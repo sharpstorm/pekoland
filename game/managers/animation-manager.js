@@ -187,6 +187,9 @@ class CameraContext {
   }
 
   updateViewport(dimens) {
+    // Recenter
+    this.x -= (dimens.width - this.viewportWidth) / 2;
+    this.y -= (dimens.height - this.viewportHeight) / 2;
     this.viewportWidth = dimens.width;
     this.viewportHeight = dimens.height;
   }
