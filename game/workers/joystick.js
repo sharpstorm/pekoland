@@ -40,7 +40,7 @@ function joystickWorker(e) {
 
     let self = playerManager.getSelf();
 
-    if (MapManager.getInstance().getCurrentMap().checkCollision(playerManager.getSelf().getGridCoord().x + deltaX / 50,  playerManager.getSelf().getGridCoord().y + deltaY / 50)){
+    if (MapManager.getInstance().getCurrentMap().checkCollision(playerManager.getSelf().x + deltaX,  playerManager.getSelf().y + deltaY)) {
       deltaX = 0;
       deltaY = 0;
     }
