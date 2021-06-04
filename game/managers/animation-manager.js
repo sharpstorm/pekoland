@@ -1,7 +1,6 @@
 import ChatManager from './chat-manager.js';
 import PlayerManager from './player-manager.js';
 import MapManager from './map-manager.js';
-import CameraContext from './camera-context.js'
 
 const chatManager = ChatManager.getInstance();
 
@@ -17,20 +16,29 @@ class Renderer {
       width: this.canvas.width,
       height: this.canvas.height
     };
+
+    this.cameraContext = new CameraContext(this.dimens.width, this.dimens.height);
   }
 
   init() {
-    this.canvas.width = document.documentElement.clientWidth;
-    this.canvas.height = document.documentElement.clientHeight;
-
     this.dimens = {
-      width: this.canvas.width,
-      height: this.canvas.height
+      width: document.documentElement.clientWidth,
+      height: document.documentElement.clientHeight
     };
 
+    this.canvas.width = this.dimens.width;
+    this.canvas.height = this.dimens.height;
+    this.cameraContext.updateViewport(this.dimens);
+
     window.addEventListener('resize', (() => {
-      this.canvas.width = document.documentElement.clientWidth;
-      this.canvas.height = document.documentElement.clientHeight;
+      this.dimens = {
+        width: document.documentElement.clientWidth,
+        height: document.documentElement.clientHeight
+      };
+
+      this.canvas.width = this.dimens.width;
+      this.canvas.height = this.dimens.height;
+      this.cameraContext.updateViewport(this.dimens);
     }).bind(this));
   }
 
@@ -47,7 +55,7 @@ class Renderer {
     ctx.clearRect(0, 0, this.dimens.width, this.dimens.height);
 
     // Draw using current camera context
-    let camContext = CameraContext.getInstance();
+    let camContext = this.cameraContext;
     if (MapManager.getInstance().getCurrentMap() !== undefined) {
       MapManager.getInstance().getCurrentMap().draw(ctx, camContext);
     }
@@ -58,11 +66,11 @@ class Renderer {
     });
 
     // Draw UI
-    if (chatManager.chatting) {
+    /* if (chatManager.chatting) {
       drawExpandedTextBox(ctx);
     } else {
       drawTextBox(ctx);
-    }
+    } */
 
     // Update Camera
     camContext.animate(delta);
@@ -71,6 +79,18 @@ class Renderer {
     if (!this.haltRender) {
       window.requestAnimationFrame(this.render.bind(this));
     }
+  }
+
+  getCameraContext() {
+    return this.cameraContext;
+  }
+
+  nudgeCamera(deltaX, deltaY) {
+    this.moveCamera(this.cameraContext.x + deltaX, this.cameraContext.y + deltaY);
+  }
+
+  moveCamera(x, y) {
+    this.cameraContext.moveContext(x, y);
   }
 
   static getInstance() {
@@ -151,6 +171,63 @@ function drawExpandedTextBox(ctx) {
   //chat history
   for (let i = 0; i < chatManager.bigChatBox.length; i++) {
     ctx.fillText(chatManager.bigChatBox[i], 5, 345 + (i * 15));
+  }
+}
+
+class CameraContext {
+  constructor(viewportWidth, viewportHeight) {
+    this.x = 0;
+    this.y = 0;
+    this.oldX = 0;
+    this.oldY = 0;
+    this.newX = 0;
+    this.newY = 0;
+    this.viewportWidth = 0;
+    this.viewportHeight = 0;
+  }
+
+  updateViewport(dimens) {
+    this.viewportWidth = dimens.width;
+    this.viewportHeight = dimens.height;
+  }
+
+  animate(delta) {
+    if (this.newX - this.x === 0 && this.newY - this.y === 0) return;
+    
+    let stdDeltaX = (this.newX - this.oldX) / 24;
+    let stdDeltaY = (this.newY - this.oldY) / 24;
+    
+    if (Math.abs(this.newX - this.x) > Math.abs(stdDeltaX)) {
+      this.x += stdDeltaX * (delta / 16.66667);
+      return;
+    } else if (Math.abs(this.newY - this.y) > Math.abs(stdDeltaY)) {
+      this.y += stdDeltaY * (delta / 16.66667);
+      return;
+    }
+    
+    this.x = this.newX;
+    this.y = this.newY;
+    this.oldX = this.x;
+    this.oldY = this.y;
+  }
+
+  moveContext(newX, newY) {
+    this.oldX = this.x;
+    this.oldY = this.y;
+    this.newX = newX;
+    this.newY = newY;
+  }
+
+  moveContextToGrid(newX, newY) {
+    this.oldX = this.x; 
+    this.oldY = this.y;
+    this.newX = newX * MapManager.getInstance().getCurrentMap().getGridLength();
+    this.newY = newY * MapManager.getInstance().getCurrentMap().getGridLength();
+  }
+
+  centerOn(x, y) {
+    this.x = x - this.viewportWidth / 2;
+    this.y = y - this.viewportHeight / 2;
   }
 }
 

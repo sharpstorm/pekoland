@@ -2,23 +2,13 @@ import ChatManager from '../managers/chat-manager.js';
 import PlayerManager from '../managers/player-manager.js';
 import Player from '../models/player.js';
 import MapManager from '../managers/map-manager.js';
-import CameraContext from '../managers/camera-context.js'
+import Renderer from '../managers/animation-manager.js';
 
 const playerManager = PlayerManager.getInstance();
 const chatManager = ChatManager.getInstance();
-const ctx = document.getElementById('game').getContext('2d');
 
 let joystickEventHandlers = [];
 let chatEventHandlers = [];
-
-let canvas = document.createElement('canvas');
-canvas.id = 'collision';
-canvas.width = 1000;
-canvas.height = 500;
-let map = new Image();
-//map.src = 'Images/house.jpg';
-map.src = 'Images/house1_colli.png';
-
 
 function joystickWorker(e) {
   let event = window.event ? window.event : e;
@@ -50,8 +40,6 @@ function joystickWorker(e) {
 
     let self = playerManager.getSelf();
 
-
-  
     if (MapManager.getInstance().getCurrentMap().checkCollision(playerManager.getSelf().getGridCoord().x + deltaX / 50,  playerManager.getSelf().getGridCoord().y + deltaY / 50)){
       deltaX = 0;
       deltaY = 0;
@@ -61,7 +49,7 @@ function joystickWorker(e) {
     if (deltaX !== 0 || deltaY !== 0) {
         self.isAnimating = true;
         self.currentFrame = 0;
-        CameraContext.getInstance().moveContextToGrid( CameraContext.getInstance().getGridCoord().x + (deltaX / 50),  CameraContext.getInstance().getGridCoord().y + (deltaY / 50));
+        Renderer.nudgeCamera(deltaX, deltaY);
         self.moveTo(self.x + deltaX, self.y + deltaY);  
     }
 

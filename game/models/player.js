@@ -1,4 +1,3 @@
-import PlayerManager from '../managers/player-manager.js';
 import Chat from '../models/chat.js';
 
 export default class Player {
@@ -24,14 +23,14 @@ export default class Player {
   drawAt(ctx, x, y, width, height, cameraContext) {
     ctx.strokeStyle = 'black';
     ctx.font = '10px Arial';
-    ctx.strokeText('   ' + this.name, this.x  - cameraContext.getGridCoord().x * 50, this.y - cameraContext.getGridCoord().y * 50);
+    ctx.strokeText('   ' + this.name, this.x - cameraContext.x, this.y - cameraContext.y);
     
     let sprite = this.playerSprite.getSpriteByDirection(Player.DirectionToIntMap[this.direction]).getSpriteAtFrame(this.currentFrame);
     let marginX = (width - sprite.width) / 2;
     let marginY = (height - sprite.height) / 2;
     
-    ctx.drawImage(sprite.spritesheet, sprite.x, sprite.y, sprite.width, sprite.height, this.x - cameraContext.getGridCoord().x * 50 + marginX, this.y - cameraContext.getGridCoord().y * 50 + marginY, sprite.width, sprite.height);
-    this.chat.drawAt(ctx, this.x - cameraContext.getGridCoord().x * 50 + marginX + 40, this.y - cameraContext.getGridCoord().y * 50 + marginY - 30); //Hard Coded
+    ctx.drawImage(sprite.spritesheet, sprite.x, sprite.y, sprite.width, sprite.height, this.x - cameraContext.x + marginX, this.y - cameraContext.y + marginY, sprite.width, sprite.height);
+    this.chat.drawAt(ctx, this.x - cameraContext.x + marginX + 40, this.y - cameraContext.y + marginY - 30); //Hard Coded
   }
 
   moveTo(newX, newY) {

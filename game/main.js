@@ -63,6 +63,7 @@ networkManager.on('initialized', () => {
     const playerManager = PlayerManager.getInstance();
     playerManager.addPlayer(new Player(networkManager.configStore.userId, networkManager.configStore.name, SpriteManager.getInstance().getSprite('rabbit-avatar')));
     playerManager.setSelf(networkManager.configStore.userId);
+    Renderer.getCameraContext().centerOn(playerManager.getSelf().x, playerManager.getSelf().y);
   }
 });
 
