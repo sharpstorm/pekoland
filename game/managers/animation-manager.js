@@ -66,11 +66,7 @@ class Renderer {
     });
 
     // Draw UI
-    /* if (chatManager.chatting) {
-      drawExpandedTextBox(ctx);
-    } else {
-      drawTextBox(ctx);
-    } */
+    drawTextBox(ctx, camContext, chatManager.chatting);
 
     // Update Camera
     camContext.animate(delta);
@@ -114,63 +110,41 @@ function drawGrids(height, width, gridLength) {
   }
 }
 
-function drawTextBox(ctx) {
-  chatManager.chatting = false;  
-  ctx.strokeStyle = 'white';
+function drawTextBox(ctx, camContext, expanded) {
+  ctx.strokeStyle = '#FFF';
   ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
   ctx.lineWidth = 1;
   ctx.font = '15px Arial';
 
   ctx.beginPath();
-  ctx.rect(0, 485, 500, 15);
+  ctx.rect(0, camContext.viewportHeight - 20, 500, 20);
   ctx.stroke();
   ctx.fill();
 
-  //Plus sign behind
-  ctx.fillRect(485, 485, 15, 15);
-  ctx.strokeStyle = 'white';
-  ctx.strokeText('+', 488.5, 497.5);
-
-  //To who
-  ctx.fillRect(0, 485, 50, 15);
-  ctx.font = 'normal 10px Arial';
-  ctx.fillStyle = 'rgba(255, 255, 255, 1)';
-  ctx.fillText('All', 18, 497);
-}
-
-function drawExpandedTextBox(ctx) {
-  chatManager.chatting = true;
-
-  ctx.strokeStyle = 'black';
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-  ctx.lineWidth = 1;
-  ctx.font = '15px Arial';
-
-  ctx.beginPath();
-  ctx.rect(0, 485, 500, 15);
-  ctx.stroke();
-  ctx.fill();
-  //Expand top for prev chat
-  ctx.fillRect(0, 330, 500, 150);
-  ctx.fillRect(0, 480, 500, 5);
+  if (expanded === true) {
+    //Expand top for prev chat
+    ctx.fillRect(0, camContext.viewportHeight - 170, 500, 150);
+  }
 
   //Plus sign behind
-  ctx.fillRect(485, 485, 15, 15);
-  ctx.strokeStyle = 'white';
-  ctx.strokeText('-', 490.5, 497);
+  ctx.fillRect(480, camContext.viewportHeight - 20, 20, 20);
+  ctx.strokeStyle = '#FFF';
+  ctx.strokeText('+', 487, camContext.viewportHeight - 3);
 
   //To who
-  ctx.fillRect(0, 485, 50, 15);
+  ctx.fillRect(0, camContext.viewportHeight - 20, 50, 20);
   ctx.font = 'normal 10px Arial';
-  ctx.fillStyle = 'rgba(255, 255, 255, 1)';
-  ctx.fillText('All', 18, 497);
-  
-  //typing words
-  ctx.fillText(chatManager.textField, 60, 497);
+  ctx.fillStyle = '#FFF';
+  ctx.fillText('All', 18, camContext.viewportHeight - 5);
 
-  //chat history
-  for (let i = 0; i < chatManager.bigChatBox.length; i++) {
-    ctx.fillText(chatManager.bigChatBox[i], 5, 345 + (i * 15));
+  if (expanded === true) {
+    //typing words
+    ctx.fillText(chatManager.textField, 60, camContext.viewportHeight - 5);
+
+    //chat history
+    chatManager.bigChatBox.forEach((x, idx) => {
+      ctx.fillText(x, 5, camContext.viewportHeight - 155 + (idx * 15));
+    })
   }
 }
 
