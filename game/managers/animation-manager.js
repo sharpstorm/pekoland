@@ -11,7 +11,9 @@ class Renderer {
     this.lastMajorUpdate = 0;
     this.haltRender = false;
     this.canvas = document.getElementById('game');
-    this.ctx = this.canvas.getContext('2d');
+    this.uiCanvas = document.getElementById('ui');
+    this.ctx = this.canvas.getContext('2d', { alpha: false });
+    this.uiCtx = this.uiCanvas.getContext('2d');
     this.dimens = {
       width: this.canvas.width,
       height: this.canvas.height
@@ -26,18 +28,15 @@ class Renderer {
       height: document.documentElement.clientHeight
     };
 
-    this.canvas.width = this.dimens.width;
-    this.canvas.height = this.dimens.height;
+    this.synchronizeCanvasSize();
     this.cameraContext.updateViewport(this.dimens);
-
     window.addEventListener('resize', (() => {
       this.dimens = {
         width: document.documentElement.clientWidth,
         height: document.documentElement.clientHeight
       };
 
-      this.canvas.width = this.dimens.width;
-      this.canvas.height = this.dimens.height;
+      this.synchronizeCanvasSize();
       this.cameraContext.updateViewport(this.dimens);
     }).bind(this));
   }
@@ -52,7 +51,8 @@ class Renderer {
     }
 
     let ctx = this.ctx;
-    ctx.clearRect(0, 0, this.dimens.width, this.dimens.height);
+    ctx.fillStyle = '#333';
+    ctx.fillRect(0, 0, this.dimens.width, this.dimens.height);
 
     // Draw using current camera context
     let camContext = this.cameraContext;
@@ -66,7 +66,8 @@ class Renderer {
     });
 
     // Draw UI
-    drawTextBox(ctx, camContext, chatManager.chatting);
+    this.uiCtx.clearRect(0, 0, this.dimens.width, this.dimens.height);
+    drawTextBox(this.uiCtx, camContext, chatManager.chatting);
 
     // Update Camera
     camContext.animate(delta);
@@ -87,6 +88,13 @@ class Renderer {
 
   moveCamera(x, y) {
     this.cameraContext.moveContext(x, y);
+  }
+
+  synchronizeCanvasSize() {
+    this.canvas.width = this.dimens.width;
+    this.canvas.height = this.dimens.height;
+    this.uiCanvas.width = this.dimens.width;
+    this.uiCanvas.height = this.dimens.height;
   }
 
   static getInstance() {
