@@ -1,6 +1,13 @@
 <html>
   <head>
     <style>
+      body {
+        background-color: #333;
+        font-size: 1.5rem;
+        color: #FFF;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
       #game-container > canvas {
         position: absolute;
         left: 0;
@@ -8,10 +15,75 @@
         top: 0;
         bottom: 0;
       }
+
+      #connecting-msg {
+        margin: auto;
+        width: 100%;
+        height: 100%;
+        max-width: 600px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .lds-ellipsis {
+        display: inline-block;
+        position: relative;
+        margin: 0 auto;
+        width: 160px;
+        height: 160px;
+      }
+      
+      .lds-ellipsis div {
+        position: absolute;
+        top: 66px;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: #FFF;
+        animation-timing-function: cubic-bezier(0, 1, 1, 0);
+      }
+      .lds-ellipsis div:nth-child(1) {
+        left: 8px;
+        animation: lds-ellipsis1 0.6s infinite;
+      }
+      .lds-ellipsis div:nth-child(2) {
+        left: 8px;
+        animation: lds-ellipsis2 0.6s infinite;
+      }
+      .lds-ellipsis div:nth-child(3) {
+        left: 72px;
+        animation: lds-ellipsis2 0.6s infinite;
+      }
+      .lds-ellipsis div:nth-child(4) {
+        left: 136px;
+        animation: lds-ellipsis3 0.6s infinite;
+      }
+      @keyframes lds-ellipsis1 {
+        0% { transform: scale(0); }
+        100% { transform: scale(1); }
+      }
+      @keyframes lds-ellipsis3 {
+        0% { transform: scale(1); }
+        100% { transform: scale(0); }
+      }
+      @keyframes lds-ellipsis2 {
+        0% { transform: translate(0, 0); }
+        100% { transform: translate(64px, 0); }
+      }
     </style>
   </head>
   <body style="margin: 0;">
-    <h1 id="connecting-msg">Connecting...</h1>
+    <div id="connecting-msg">
+      <h1>Loading</h1>
+      <div class="lds-ellipsis">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>
+    </div>
     <div id="game-container" style="width: 100vw; height: 100vh; display: none;">
       <canvas tabindex='1' id="game" width="1000" height="500"
         style="width:100%; max-height: 100%; height: auto; object-fit:contain;"></canvas>
