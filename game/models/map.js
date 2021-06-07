@@ -1,3 +1,5 @@
+import GameConstants from '../game-constants.js';
+
 export default class Map {
     constructor(MapImage, CollisionMap, mapWidth, mapHeight, widthGrids, heightGrids) {
       this.MapImage = MapImage;
@@ -47,7 +49,7 @@ export default class Map {
         drawOffsetY -= camContext.y;
       }
 
-      let scale = this.getUnitLength() / 50;
+      let scale = this.getUnitLength() / GameConstants.UNIT;
       ctx.drawImage(this.MapImage, scale * (camContext.x + drawOffsetX), scale * (camContext.y + drawOffsetY), scale * camContext.viewportWidth, scale * camContext.viewportHeight, 
         drawOffsetX, drawOffsetY, camContext.viewportWidth, camContext.viewportHeight);
     }
@@ -57,7 +59,7 @@ export default class Map {
     }
 
     checkCollision(playerX, playerY) {
-      return this.collisionMatrix[Math.floor(playerX / 50)][Math.floor(playerY / 50)] === 1;
+      return this.collisionMatrix[Math.floor(playerX / GameConstants.UNIT)][Math.floor(playerY / GameConstants.UNIT)] === 1;
     }
 }
   

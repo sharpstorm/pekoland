@@ -1,4 +1,5 @@
 import Chat from '../models/chat.js';
+import GameConstants from '../game-constants.js';
 
 export default class Player {
   constructor(userId, name, playerSprite) {
@@ -6,12 +7,12 @@ export default class Player {
     this.name = name;
     this.playerSprite = playerSprite;
 
-    this.x = 450;
-    this.y = 250;
-    this.newX = 450;
-    this.newY = 250;
-    this.oldX = 450;
-    this.oldY = 250;
+    this.x = 400;
+    this.y = 1000;
+    this.newX = 400;
+    this.newY = 1000;
+    this.oldX = 400;
+    this.oldY = 1000;
     this.moveX = 0;
     this.moveY = 0;
     this.direction = Player.Direction.DOWN;
@@ -22,14 +23,16 @@ export default class Player {
 
   drawAt(ctx, x, y, width, height, cameraContext) {
     ctx.strokeStyle = 'black';
-    ctx.font = '10px Arial';
+    ctx.font = '12px Arial';
     ctx.strokeText('   ' + this.name, this.x - cameraContext.x, this.y - cameraContext.y);
     
     let sprite = this.playerSprite.getSpriteByDirection(Player.DirectionToIntMap[this.direction]).getSpriteAtFrame(this.currentFrame);
-    let marginX = (width - sprite.width) / 2;
-    let marginY = (height - sprite.height) / 2;
     
-    ctx.drawImage(sprite.spritesheet, sprite.x, sprite.y, sprite.width, sprite.height, this.x - cameraContext.x + marginX, this.y - cameraContext.y + marginY, sprite.width, sprite.height);
+    let spriteScale = Math.min((0.6 * width) / sprite.width, (0.6 * height) / sprite.height); // Player should be 80% of box
+    let marginX = Math.round((width - spriteScale * sprite.width) / 2);
+    let marginY = Math.round((height - spriteScale * sprite.height) / 2);
+
+    sprite.drawAt(ctx, this.x - cameraContext.x + marginX, this.y - cameraContext.y + marginY, spriteScale * sprite.width, spriteScale * sprite.height);
     this.chat.drawAt(ctx, this.x - cameraContext.x + marginX + 40, this.y - cameraContext.y + marginY - 30); //Hard Coded
   }
 
@@ -52,16 +55,16 @@ export default class Player {
   }
 
   moveToGrid(x,y) {
-    this.oldX = (x - 1) * 50;
-    this.oldY = (y - 1) * 50
-    this.newX = (x - 1) * 50;;
-    this.newY = (y - 1) * 50;
-    this.x = (x - 1) * 50;;
-    this.y = (y - 1) * 50;
+    this.oldX = (x - 1) * GameConstants.UNIT;
+    this.oldY = (y - 1) * GameConstants.UNIT
+    this.newX = (x - 1) * GameConstants.UNIT;;
+    this.newY = (y - 1) * GameConstants.UNIT;
+    this.x = (x - 1) * GameConstants.UNIT;;
+    this.y = (y - 1) * GameConstants.UNIT;
   }
 
   getGridCoord() {
-    return {x: this.x / 50 + 1, y: this.y / 50 + 1};   //TO CHECK AGAIN. HARD CODED 50.
+    return {x: this.x / GameConstants.UNIT + 1, y: this.y / GameConstants.UNIT + 1};
   }
 
   animate(delta, majorUpdate) {

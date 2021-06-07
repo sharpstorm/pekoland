@@ -3,6 +3,7 @@ import PlayerManager from '../managers/player-manager.js';
 import Player from '../models/player.js';
 import MapManager from '../managers/map-manager.js';
 import Renderer from '../managers/animation-manager.js';
+import GameConstants from '../game-constants.js';
 
 const playerManager = PlayerManager.getInstance();
 const chatManager = ChatManager.getInstance();
@@ -23,16 +24,16 @@ function joystickWorker(e) {
     let direction;
 
     if (event.keyCode === 38) {
-      deltaY = -50;
+      deltaY = -GameConstants.UNIT;
       direction = Player.Direction.UP;
     } else if (event.keyCode === 40) {
-      deltaY = 50;
+      deltaY = GameConstants.UNIT;
       direction = Player.Direction.DOWN;
     } else if (event.keyCode === 37) {
-      deltaX = -50;
+      deltaX = -GameConstants.UNIT;
       direction = Player.Direction.LEFT;
     } else if (event.keyCode === 39) {
-      deltaX = 50;
+      deltaX = GameConstants.UNIT;
       direction = Player.Direction.RIGHT;
     } else {
       return;

@@ -1,6 +1,7 @@
 import ChatManager from './chat-manager.js';
 import PlayerManager from './player-manager.js';
 import MapManager from './map-manager.js';
+import GameConstants from '../game-constants.js';
 
 const chatManager = ChatManager.getInstance();
 
@@ -63,7 +64,7 @@ class Renderer {
     }
 
     PlayerManager.getInstance().getPlayers().forEach(player => {
-      player.drawAt(ctx, player.x, player.y, 50, 50, camContext);
+      player.drawAt(ctx, player.x, player.y, GameConstants.UNIT, GameConstants.UNIT, camContext);
       player.animate(delta, majorUpdate);
     });
 
