@@ -1,12 +1,24 @@
 <html>
+  <head>
+    <style>
+      #game-container > canvas {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+      }
+    </style>
+  </head>
   <body style="margin: 0;">
     <h1 id="connecting-msg">Connecting...</h1>
-    <div id="game-container" style="width: 100vw; height: 80vh; display: none;">
+    <div id="game-container" style="width: 100vw; height: 100vh; display: none;">
       <canvas tabindex='1' id="game" width="1000" height="500"
+        style="width:100%; max-height: 100%; height: auto; object-fit:contain;"></canvas>
+      <canvas tabindex='1' id="ui" width="1000" height="500"
         style="width:100%; max-height: 100%; height: auto; object-fit:contain;"></canvas>
     </div>
   </body>
-
 </html>
 
 <script src="net/peerjs.min.js"></script>

@@ -4,7 +4,7 @@ import PlayerManager from './managers/player-manager.js';
 import MapManager from './managers/map-manager.js';
 import { joystickWorker, joystickUpWorker, addJoystickEventHandler, removeJoystickEventHandler } from './workers/joystick.js';
 import {addChatEventHandler, removeChatEventHandler, chatWorker} from './workers/joystick.js';
-import drawer from './managers/animation-manager.js';
+import Renderer from './managers/animation-manager.js';
 import Sprite, {AnimatableSprite, AvatarSprite, SlicedSprite} from './models/sprites.js';
 import SpriteManager from './managers/sprite-manager.js';
 import NetworkManager from './net/network-manager.js';
@@ -63,6 +63,7 @@ networkManager.on('initialized', () => {
     const playerManager = PlayerManager.getInstance();
     playerManager.addPlayer(new Player(networkManager.configStore.userId, networkManager.configStore.name, SpriteManager.getInstance().getSprite('rabbit-avatar')));
     playerManager.setSelf(networkManager.configStore.userId);
+    Renderer.getCameraContext().centerOn(playerManager.getSelf().x, playerManager.getSelf().y);
   }
 });
 
@@ -112,16 +113,16 @@ loadAsset('Images/chat-bubble.png')
 
 //Map
 let map = new Image();
-//map.src = 'Images/biggerHouse.png';
-map.src = 'Images/biggerHouseColli.png';
+map.src = 'Images/template1.png';
 let colli = new Image();
-colli.src = 'Images/biggerHouseColli.png';
+colli.src = 'Images/template1_collision.png';
 colli.onload = function() {
-  let map1 = new Map(map,colli,2326, 1700, 30, 20);
+  let map1 = new Map(map, colli, 3300, 1200, 66, 24);
   MapManager.getInstance().registerMap('testMap', map1);
 };
 
 document.addEventListener('keydown',joystickWorker);
 document.addEventListener('keydown',chatWorker);
 
-window.requestAnimationFrame(() => drawer(PlayerManager.getInstance()));
+Renderer.init();
+window.requestAnimationFrame(Renderer.render.bind(Renderer));
