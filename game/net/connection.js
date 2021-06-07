@@ -1,4 +1,4 @@
-import { timeout } from './utils.js';
+import { timeout } from '../utils.js';
 
 const configuration = {
   iceServers: [{urls: 'stun:stun.l.google.com:19302'}]

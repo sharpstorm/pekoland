@@ -1,34 +1,19 @@
 import Player from './models/player.js';
-import Map from './models/map.js'
 import PlayerManager from './managers/player-manager.js';
-import MapManager from './managers/map-manager.js';
 import { joystickWorker, joystickUpWorker, addJoystickEventHandler, removeJoystickEventHandler } from './workers/joystick.js';
 import {addChatEventHandler, removeChatEventHandler, chatWorker} from './workers/joystick.js';
 import Renderer from './managers/animation-manager.js';
-import Sprite, {AnimatableSprite, AvatarSprite, SlicedSprite} from './models/sprites.js';
 import SpriteManager from './managers/sprite-manager.js';
 import NetworkManager from './net/network-manager.js';
 import handleClientGamePacket from './net/client/game-data-handler.js';
 import buildClientGamePacket from './net/client/game-data-sender.js';
 import handleServerGamePacket from './net/server/game-data-handler.js';
 import buildServerGamePacket from './net/server/game-data-sender.js';
-import { timeout, loadAsset } from './net/utils.js'
+import { timeout } from './utils.js'
 import WorldManager from './managers/world-manager.js';
+import loadAssets from './workers/asset-loader.js';
 
 let networkManager = NetworkManager.getInstance();
-
-timeout(networkManager
-  .setup()
-, 5000)
-  .then(() => {
-    document.getElementById('connecting-msg').style.display = 'none';
-    document.getElementById('game-container').style.display = 'block';
-    console.log('setup successful');
-  })
-  .catch(() => {
-    alert('Could not connect to partner! Please Try Again!');
-    window.close();
-  });
 
 networkManager.on('connected', () => {
   console.log('Connected to remote');
@@ -82,47 +67,22 @@ addChatEventHandler((evt) => {
   } else {
     networkManager.send(buildServerGamePacket('chat-echo', buildClientGamePacket('chat', evt)));
   }
-})
-
-//Rabbit
-let rabbitSheet = new Image();
-rabbitSheet.src = 'Images/rabbit.png';
-let rabbitSprite = new AvatarSprite(
-  AnimatableSprite.generateFromTiledFrames(rabbitSheet, 7, 118, 24, 36, 33, 0, 7),
-  AnimatableSprite.generateFromTiledFrames(rabbitSheet, 0, 159, 36, 36, 40, 0, 7),
-  AnimatableSprite.generateFromTiledFrames(rabbitSheet, 7, 38, 24, 36, 33, 0, 7),
-  AnimatableSprite.generateFromTiledFrames(rabbitSheet, 0, 79, 36, 36, 40, 0, 7),
-);
-SpriteManager.getInstance().registerSprite('rabbit-avatar', rabbitSprite);
-
-loadAsset('Images/chat-bubble.png')
-.then(x => {
-  let sprite = SlicedSprite.from(x, [
-    [0, 0, 14, 5],
-    [14, 0, 9, 5],
-    [23, 0, 5, 5],
-    [0, 5, 14, 11],
-    [14, 5, 9, 11],
-    [23, 5, 5, 11],
-    [0, 16, 14, 10],
-    [14, 16, 9, 10],
-    [23, 16, 5, 10]
-  ]);
-  SpriteManager.getInstance().registerSprite('chat-bubble', sprite);
 });
 
-//Map
-let map = new Image();
-map.src = 'Images/template1.png';
-let colli = new Image();
-colli.src = 'Images/template1_collision.png';
-colli.onload = function() {
-  let map1 = new Map(map, colli, 3300, 1200, 66, 24);
-  MapManager.getInstance().registerMap('testMap', map1);
-};
+let netSetupPromise = timeout(networkManager.setup(), 5000);
+let assetSetupPromise = loadAssets();
+Promise.all([netSetupPromise, assetSetupPromise])
+.then(() => {
+  console.log('setup successful');
 
-document.addEventListener('keydown',joystickWorker);
-document.addEventListener('keydown',chatWorker);
-
-Renderer.init();
-window.requestAnimationFrame(Renderer.render.bind(Renderer));
+  document.addEventListener('keydown',joystickWorker);
+  document.addEventListener('keydown',chatWorker);
+  document.getElementById('connecting-msg').style.display = 'none';
+  document.getElementById('game-container').style.display = 'block';
+  Renderer.init();
+  window.requestAnimationFrame(Renderer.render.bind(Renderer));
+})
+.catch(() => {
+  alert('Could not connect to partner! Please Try Again!');
+  window.close();
+});

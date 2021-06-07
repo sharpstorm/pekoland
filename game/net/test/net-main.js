@@ -13,7 +13,7 @@ import handleClientGamePacket from '../client/game-data-handler.js';
 import buildClientGamePacket from '../client/game-data-sender.js';
 import handleServerGamePacket from '../server/game-data-handler.js';
 import buildServerGamePacket from '../server/game-data-sender.js';
-import { timeout } from '../utils.js'
+import { timeout } from '../../utils.js'
 
 
 let networkManager = NetworkManager.getInstance();
