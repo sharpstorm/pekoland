@@ -1,3 +1,3 @@
 export default {
-  UNIT: 100
+  UNIT: 100,
 };

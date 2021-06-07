@@ -8,8 +8,9 @@ export default class MapManager {
 
   registerMap(id, map) {
     this.maps[id] = map;
-    if(this.currentMapID === undefined)
+    if (this.currentMapID === undefined) {
       this.currentMapID = id;
+    }
   }
 
   removeMap(id) {
@@ -25,7 +26,7 @@ export default class MapManager {
   setMap(id) {
     this.currentMapID = id;
   }
-  
+
   getCurrentMap() {
     return this.maps[this.currentMapID];
   }

@@ -8,9 +8,8 @@ class Sprite {
   }
 
   drawAt(ctx, x, y, width, height) {
-    if (width === undefined) width = this.width;
-    if (height === undefined) height = this.height;
-    ctx.drawImage(this.spritesheet, this.x, this.y, this.width, this.height, x, y, width, height);
+    ctx.drawImage(this.spritesheet, this.x, this.y, this.width, this.height, x, y,
+      (width === undefined) ? this.width : width, (height === undefined) ? this.width : height);
   }
 }
 
@@ -28,8 +27,8 @@ class AnimatableSprite {
   }
 
   static generateFromTiledFrames(spritesheet, x, y, width, height, deltaX, deltaY, frameCount) {
-    let frames = [];
-    for (let i = 0; i < frameCount; i++) {
+    const frames = [];
+    for (let i = 0; i < frameCount; i += 1) {
       frames.push(new Sprite(spritesheet, x + (i * deltaX), y + (i * deltaY), width, height));
     }
     return new AnimatableSprite(frames);
@@ -45,15 +44,10 @@ class AvatarSprite {
   }
 
   getSpriteByDirection(direction) {
-    if (direction === 0) {
-      return this.up;
-    } else if (direction === 1) {
-      return this.right;
-    } else if (direction === 2) {
-      return this.down;
-    } else if (direction === 3) {
-      return this.left;
+    if (direction === 0 || direction === 1 || direction === 2 || direction === 3) {
+      return [this.up, this.right, this.down, this.left][direction];
     }
+    return undefined;
   }
 }
 
@@ -92,34 +86,39 @@ class SlicedSprite {
 
     if (widthDiff > 0) {
       this.sliceB.drawAt(ctx, x + this.sliceA.width, y, widthDiff, this.sliceB.height);
-      this.sliceH.drawAt(ctx, x + this.sliceA.width, y + this.sliceA.height + heightDiff, widthDiff, this.sliceH.height);
+      this.sliceH.drawAt(ctx, x + this.sliceA.width, y + this.sliceA.height + heightDiff,
+        widthDiff, this.sliceH.height);
     }
 
     if (heightDiff > 0) {
       this.sliceD.drawAt(ctx, x, y + this.sliceA.height, this.sliceD.width, heightDiff);
-      this.sliceF.drawAt(ctx, x + this.sliceA.width + widthDiff, y + this.sliceA.height, this.sliceF.width, heightDiff);
+      this.sliceF.drawAt(ctx, x + this.sliceA.width + widthDiff, y + this.sliceA.height,
+        this.sliceF.width, heightDiff);
     }
 
     if (heightDiff > 0 && widthDiff > 0) {
       if (this.interpolateMode === SlicedSprite.TILE) {
-        let rowImage = document.createElement('canvas');
+        const rowImage = document.createElement('canvas');
         rowImage.height = this.sliceE.height;
         rowImage.width = widthDiff;
-        let ctxX = rowImage.getContext('2d');
+        const ctxX = rowImage.getContext('2d');
 
         for (let cX = 0; cX < widthDiff; cX += this.sliceE.width) {
           this.sliceE.drawAt(ctxX, cX, 0);
         }
 
+        // eslint-disable-next-line max-len
         for (let cY = y + this.sliceA.height; cY < y + this.sliceA.height + heightDiff; cY += this.sliceE.height) {
           let drawHeight = this.sliceE.height;
           if (cY + this.sliceE.height > y + this.sliceA.height + heightDiff) {
             drawHeight = y + this.sliceA.height + heightDiff - cY;
           }
-          ctx.drawImage(rowImage, 0, 0, widthDiff, drawHeight, x + this.sliceA.width, cY, widthDiff, drawHeight);
+          ctx.drawImage(rowImage, 0, 0, widthDiff, drawHeight, x + this.sliceA.width, cY,
+            widthDiff, drawHeight);
         }
       } else {
-        this.sliceE.drawAt(ctx, x + this.sliceA.width, y + this.sliceA.height, widthDiff, heightDiff);
+        this.sliceE.drawAt(ctx, x + this.sliceA.width, y + this.sliceA.height,
+          widthDiff, heightDiff);
       }
     }
   }
@@ -127,14 +126,14 @@ class SlicedSprite {
   // partsArray should be provided as an array of 4-tuples, with [x, y, width, height]
   static from(spritesheet, partsArray) {
     if (partsArray.length < 9) {
-      throw 'Invalid Parts Array';
+      throw new Error('Invalid Parts Array');
     }
 
-    let arr = [];
-    for (let i = 0; i < 9; i++) {
-      let curPart = partsArray[i];
+    const arr = [];
+    for (let i = 0; i < 9; i += 1) {
+      const curPart = partsArray[i];
       if (curPart.length < 4) {
-        throw `Invalid Part ${i}`;
+        throw new Error(`Invalid Part ${i}`);
       }
       arr.push(new Sprite(spritesheet, curPart[0], curPart[1], curPart[2], curPart[3]));
     }
@@ -154,10 +153,10 @@ class TiledSprite {
   }
 
   drawAt(ctx, x, y, width, height) {
-    let rowImage = document.createElement('canvas');
+    const rowImage = document.createElement('canvas');
     rowImage.width = width;
     rowImage.height = this.tileHeight;
-    let ctxX = rowImage.getContext('2d');
+    const ctxX = rowImage.getContext('2d');
 
     for (let cX = 0; cX < width; cX += this.tileWidth) {
       this.sprite.drawAt(ctxX, cX, 0, this.tileWidth, this.tileHeight);
@@ -172,4 +171,10 @@ class TiledSprite {
   }
 }
 
-export { Sprite as default, AnimatableSprite, AvatarSprite, SlicedSprite, TiledSprite };
+export {
+  Sprite as default,
+  AnimatableSprite,
+  AvatarSprite,
+  SlicedSprite,
+  TiledSprite,
+};

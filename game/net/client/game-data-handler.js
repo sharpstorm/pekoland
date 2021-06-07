@@ -1,3 +1,6 @@
+/* eslint-disable quote-props */
+/* eslint-disable no-unused-vars */
+
 import PlayerManager from '../../managers/player-manager.js';
 import ChatManager from '../../managers/chat-manager.js';
 import SpriteManager from '../../managers/sprite-manager.js';
@@ -5,40 +8,25 @@ import Player from '../../models/player.js';
 import NetworkManager from '../network-manager.js';
 import buildClientGamePacket from './game-data-sender.js';
 
-const handlers = {
-  'handshake': handleHandshake,
-  'spawn-reply': handleSpawnReply,
-  'spawn-reject': handleSpawnReject,
-  'spawn-player': handleSpawnPlayer,
-  'despawn-player': handleDespawnPlayer,
-  'move-echo': handleMoveEcho,
-  'chat-echo': handleChatEcho
-};
-
-// Conn will always be the server
-export default function handleGamePacket(data, conn) {
-  console.log(data);
-  if (!data.opCode) return;
-
-  const opCode = data.opCode;
-  if (opCode in handlers) {
-    return handlers[opCode](data, conn);
-  }
-  console.log('[ClientHandler] Unknown Op Code: ' + opCode);
+function inflatePlayer(data) {
+  const player = new Player(data.userId, data.name, SpriteManager.getInstance().getSprite('rabbit-avatar'));
+  player.x = data.x;
+  player.y = data.y;
+  return player;
 }
 
 function handleHandshake(data, conn) {
   conn.send(buildClientGamePacket('spawn-request', {
     name: NetworkManager.getInstance().configStore.name,
-    userId: NetworkManager.getInstance().configStore.userId
+    userId: NetworkManager.getInstance().configStore.userId,
   }));
 }
 
 function handleSpawnReply(data, conn) {
-  let self = inflatePlayer(data.self);
+  const self = inflatePlayer(data.self);
   PlayerManager.getInstance().addPlayer(self);
   PlayerManager.getInstance().setSelf(self.userId);
-  data.others.forEach(x => {
+  data.others.forEach((x) => {
     PlayerManager.getInstance().addPlayer(inflatePlayer(x));
   });
 }
@@ -57,20 +45,36 @@ function handleDespawnPlayer(data, conn) {
 }
 
 function handleMoveEcho(data, conn) {
-  let player = PlayerManager.getInstance().getPlayer(data.userId);
+  const player = PlayerManager.getInstance().getPlayer(data.userId);
   player.moveTo(data.x, data.y);
   player.direction = data.direction;
 }
 
 function handleChatEcho(data, conn) {
-  let player = PlayerManager.getInstance().getPlayer(data.userId);
-  ChatManager.getInstance().bigChatBox.push(player.name + ': ' + data.message);
+  const player = PlayerManager.getInstance().getPlayer(data.userId);
+  ChatManager.getInstance().bigChatBox.push(`${player.name}: ${data.message}`);
   player.chat.updateMessage(data.message);
 }
 
-function inflatePlayer(data) {
-  let player = new Player(data.userId, data.name, SpriteManager.getInstance().getSprite('rabbit-avatar'));
-  player.x = data.x;
-  player.y = data.y;
-  return player;
+const handlers = {
+  'handshake': handleHandshake,
+  'spawn-reply': handleSpawnReply,
+  'spawn-reject': handleSpawnReject,
+  'spawn-player': handleSpawnPlayer,
+  'despawn-player': handleDespawnPlayer,
+  'move-echo': handleMoveEcho,
+  'chat-echo': handleChatEcho,
+};
+
+// Conn will always be the server
+export default function handleGamePacket(data, conn) {
+  console.log(data);
+  if (!data.opCode) return;
+
+  const { opCode } = data;
+  if (opCode in handlers) {
+    handlers[opCode](data, conn);
+    return;
+  }
+  console.log(`[ClientHandler] Unknown Op Code: ${opCode}`);
 }

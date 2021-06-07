@@ -1,4 +1,4 @@
-import Chat from '../models/chat.js';
+import Chat from './chat.js';
 import GameConstants from '../game-constants.js';
 
 export default class Player {
@@ -18,65 +18,74 @@ export default class Player {
     this.direction = Player.Direction.DOWN;
     this.isAnimating = false;
     this.currentFrame = 6;
-    this.chat = new Chat(); 
+    this.chat = new Chat();
   }
 
   drawAt(ctx, x, y, width, height, cameraContext) {
     ctx.strokeStyle = 'black';
     ctx.font = '12px Arial';
-    ctx.strokeText('   ' + this.name, this.x - cameraContext.x, this.y - cameraContext.y);
-    
-    let sprite = this.playerSprite.getSpriteByDirection(Player.DirectionToIntMap[this.direction]).getSpriteAtFrame(this.currentFrame);
-    
-    let spriteScale = Math.min((0.6 * width) / sprite.width, (0.6 * height) / sprite.height); // Player should be 80% of box
-    let marginX = Math.round((width - spriteScale * sprite.width) / 2);
-    let marginY = Math.round((height - spriteScale * sprite.height) / 2);
+    ctx.strokeText(`   ${this.name}`, this.x - cameraContext.x, this.y - cameraContext.y);
 
-    sprite.drawAt(ctx, this.x - cameraContext.x + marginX, this.y - cameraContext.y + marginY, spriteScale * sprite.width, spriteScale * sprite.height);
-    this.chat.drawAt(ctx, this.x - cameraContext.x + marginX + 40, this.y - cameraContext.y + marginY - 30); //Hard Coded
+    const sprite = this.playerSprite.getSpriteByDirection(Player.DirectionToIntMap[this.direction])
+      .getSpriteAtFrame(this.currentFrame);
+
+    // Player should be 80% of box
+    const spriteScale = Math.min((0.6 * width) / sprite.width, (0.6 * height) / sprite.height);
+    const marginX = Math.round((width - spriteScale * sprite.width) / 2);
+    const marginY = Math.round((height - spriteScale * sprite.height) / 2);
+
+    sprite.drawAt(ctx,
+      this.x - cameraContext.x + marginX,
+      this.y - cameraContext.y + marginY,
+      spriteScale * sprite.width,
+      spriteScale * sprite.height);
+
+    this.chat.drawAt(ctx,
+      this.x - cameraContext.x + marginX + 40,
+      this.y - cameraContext.y + marginY - 30);
   }
 
   moveTo(newX, newY) {
-      this.oldX = this.x;
-      this.oldY = this.y;
-      this.newX = newX;
-      this.newY = newY;
-      this.isAnimating = true;
-      this.currentFrame = 0;
+    this.oldX = this.x;
+    this.oldY = this.y;
+    this.newX = newX;
+    this.newY = newY;
+    this.isAnimating = true;
+    this.currentFrame = 0;
   }
 
-  moveImmediate(newX,newY) {
+  moveImmediate(newX, newY) {
     this.oldX = newX;
-    this.oldY = newY
+    this.oldY = newY;
     this.newX = newX;
     this.newY = newY;
     this.x = newX;
     this.y = newY;
   }
 
-  moveToGrid(x,y) {
+  moveToGrid(x, y) {
     this.oldX = (x - 1) * GameConstants.UNIT;
-    this.oldY = (y - 1) * GameConstants.UNIT
-    this.newX = (x - 1) * GameConstants.UNIT;;
+    this.oldY = (y - 1) * GameConstants.UNIT;
+    this.newX = (x - 1) * GameConstants.UNIT;
     this.newY = (y - 1) * GameConstants.UNIT;
-    this.x = (x - 1) * GameConstants.UNIT;;
+    this.x = (x - 1) * GameConstants.UNIT;
     this.y = (y - 1) * GameConstants.UNIT;
   }
 
   getGridCoord() {
-    return {x: this.x / GameConstants.UNIT + 1, y: this.y / GameConstants.UNIT + 1};
+    return { x: this.x / GameConstants.UNIT + 1, y: this.y / GameConstants.UNIT + 1 };
   }
 
   animate(delta, majorUpdate) {
     if (!this.isAnimating) return;
     if (this.currentFrame < 6) {
       if (Math.abs(this.newX - this.x) > 0.00001) {
-        this.x += (this.newX - this.oldX) / 24 * (delta / 16.66667);
+        this.x += ((this.newX - this.oldX) / 24) * (delta / 16.66667);
       } else if (Math.abs(this.newY - this.y) > 0.00001) {
-        this.y += (this.newY - this.oldY) / 24 * (delta / 16.66667);
+        this.y += ((this.newY - this.oldY) / 24) * (delta / 16.66667);
       }
       if (majorUpdate) {
-        this.currentFrame++;
+        this.currentFrame += 1;
       }
       return;
     }
@@ -88,17 +97,16 @@ export default class Player {
   }
 }
 
-
 Player.Direction = {
   UP: 'up',
   RIGHT: 'right',
   DOWN: 'down',
-  LEFT: 'left'
-}
+  LEFT: 'left',
+};
 
 Player.DirectionToIntMap = {
-  'up': 0,
-  'right': 1,
-  'down': 2,
-  'left': 3
-}
+  up: 0,
+  right: 1,
+  down: 2,
+  left: 3,
+};

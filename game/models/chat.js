@@ -22,16 +22,16 @@ export default class Chat {
       this.currentSpeech = '';
       this.cachedSprite = undefined;
       this.cachedText = undefined;
-
     } else if (this.speechBubble) {
       if (this.cachedSprite === undefined || this.cachedText !== this.currentSpeech) {
         this.cachedSprite = document.createElement('canvas');
-        let cachedCtx = this.cachedSprite.getContext('2d');
+        const cachedCtx = this.cachedSprite.getContext('2d');
         cachedCtx.font = '15px Arial';
-        let dimens = cachedCtx.measureText(this.currentSpeech);
-        
+        const dimens = cachedCtx.measureText(this.currentSpeech);
+
         this.cachedSprite.width = dimens.width + 10;
-        this.cachedSprite.height = dimens.fontBoundingBoxAscent + dimens.fontBoundingBoxDescent + 15;
+        this.cachedSprite.height = dimens.fontBoundingBoxAscent
+          + dimens.fontBoundingBoxDescent + 15;
         cachedCtx.font = '15px Arial';
         cachedCtx.fillStyle = 'rgba(0, 0, 0, 1)';
 
@@ -40,7 +40,7 @@ export default class Chat {
         this.cachedText = this.currentSpeech;
       }
       ctx.drawImage(this.cachedSprite, x, y);
-      this.speechBubbleCounter++;
+      this.speechBubbleCounter += 1;
     }
   }
 }

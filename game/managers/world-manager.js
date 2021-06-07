@@ -1,7 +1,6 @@
 let instance;
 
 export default class WorldManager {
-
   constructor() {
     this.peerIdToUidMap = {};
   }

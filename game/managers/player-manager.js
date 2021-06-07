@@ -1,7 +1,6 @@
 let instance;
 
 export default class PlayerManager {
-
   constructor() {
     this.players = {};
     this.self = undefined;

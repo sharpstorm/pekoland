@@ -12,9 +12,10 @@ let joystickEventHandlers = [];
 let chatEventHandlers = [];
 
 function joystickWorker(e) {
-  let event = window.event ? window.event : e;
+  const event = window.event ? window.event : e;
 
-  if(event.keyCode === 37 || event.keyCode === 38 || event.keyCode === 39 || event.keyCode === 40){
+  if (event.keyCode === 37 || event.keyCode === 38
+    || event.keyCode === 39 || event.keyCode === 40) {
     if (playerManager.getSelf().isAnimating) {
       return;
     }
@@ -39,46 +40,29 @@ function joystickWorker(e) {
       return;
     }
 
-    let self = playerManager.getSelf();
+    const self = playerManager.getSelf();
 
-    if (MapManager.getInstance().getCurrentMap().checkCollision(playerManager.getSelf().x + deltaX,  playerManager.getSelf().y + deltaY)) {
+    if (MapManager.getInstance().getCurrentMap()
+      .checkCollision(playerManager.getSelf().x + deltaX, playerManager.getSelf().y + deltaY)) {
       deltaX = 0;
       deltaY = 0;
     }
 
     self.direction = direction;
     if (deltaX !== 0 || deltaY !== 0) {
-        self.isAnimating = true;
-        self.currentFrame = 0;
-        Renderer.nudgeCamera(deltaX, deltaY);
-        self.moveTo(self.x + deltaX, self.y + deltaY);  
+      self.isAnimating = true;
+      self.currentFrame = 0;
+      Renderer.nudgeCamera(deltaX, deltaY);
+      self.moveTo(self.x + deltaX, self.y + deltaY);
     }
 
-    joystickEventHandlers.forEach(x => x({
+    joystickEventHandlers.forEach((x) => x({
       id: direction,
       deltaX,
       deltaY,
       x: self.x + deltaX,
-      y: self.y + deltaY
+      y: self.y + deltaY,
     }));
-  }
-
-}
-
-function chatWorker(e) {
-  if (e.key.length === 1 && ChatManager.getInstance().chatting)
-  typing(e.key);
-
-  if (e.keyCode === 13 && e.altKey === true) {  
-    ChatManager.getInstance().chatting = !ChatManager.getInstance().chatting;
-  }
-   
-  if (e.keyCode === 13 && ChatManager.getInstance().chatting && chatManager.textField != '') {  //nani
-    pushMsg();
-  }
-  
-  if (e.keyCode === 8 && ChatManager.getInstance().chatting) {  //nani
-    chatManager.textField = chatManager.textField.substring(0, chatManager.textField.length - 1)
   }
 }
 
@@ -87,22 +71,38 @@ function typing(letter) {
 }
 
 function pushMsg() {
-  playerManager.getSelf().chat.speechBubbleCounter  = 0;
+  playerManager.getSelf().chat.speechBubbleCounter = 0;
   playerManager.getSelf().chat.speechBubble = true;
   playerManager.getSelf().chat.currentSpeech = ChatManager.getInstance().textField;
-  chatManager.bigChatBox.push(playerManager.getSelf().name + ": " + playerManager.getSelf().chat.currentSpeech);
+  chatManager.bigChatBox.push(`${playerManager.getSelf().name}: ${playerManager.getSelf().chat.currentSpeech}`);
   chatManager.textField = '';
-  chatEventHandlers.forEach(x => x({
+  chatEventHandlers.forEach((x) => x({
     name: playerManager.getSelf().name,
     msg: playerManager.getSelf().chat.currentSpeech,
   }));
 }
 
+function chatWorker(e) {
+  if (e.key.length === 1 && ChatManager.getInstance().chatting) {
+    typing(e.key);
+  }
 
-function joystickUpWorker(e) {
-  var event = window.event ? window.event : e;
-  //if(event.keyCode == "40" || event.keyCode == "39" || event.keyCode == "38" || event.keyCode == "37" )
+  if (e.keyCode === 13 && e.altKey === true) {
+    ChatManager.getInstance().chatting = !ChatManager.getInstance().chatting;
+  }
 
+  if (e.keyCode === 13 && ChatManager.getInstance().chatting && chatManager.textField !== '') { // nani
+    pushMsg();
+  }
+
+  if (e.keyCode === 8 && ChatManager.getInstance().chatting) { // nani
+    chatManager.textField = chatManager.textField.substring(0, chatManager.textField.length - 1);
+  }
+}
+
+function joystickUpWorker(evt) {
+  // const event = window.event ? window.event : e;
+  return evt;
 }
 
 function addJoystickEventHandler(handler) {
@@ -110,7 +110,7 @@ function addJoystickEventHandler(handler) {
 }
 
 function removeJoystickEventHandler(handler) {
-  joystickEventHandlers = joystickEventHandlers.filter(x => x !== handler);
+  joystickEventHandlers = joystickEventHandlers.filter((x) => x !== handler);
 }
 
 function addChatEventHandler(handler) {
@@ -118,9 +118,18 @@ function addChatEventHandler(handler) {
 }
 
 function removeChatEventHandler(handler) {
-  chatEventHandlers = chatEventHandlers.filter(x => x !== handler);
+  chatEventHandlers = chatEventHandlers.filter((x) => x !== handler);
 }
 
+export {
+  joystickWorker,
+  joystickUpWorker,
+  addJoystickEventHandler,
+  removeJoystickEventHandler,
+};
 
-export {joystickWorker, joystickUpWorker, addJoystickEventHandler, removeJoystickEventHandler};
-export {addChatEventHandler, removeChatEventHandler, chatWorker};
+export {
+  addChatEventHandler,
+  removeChatEventHandler,
+  chatWorker,
+};

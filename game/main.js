@@ -1,7 +1,11 @@
 import Player from './models/player.js';
 import PlayerManager from './managers/player-manager.js';
-import { joystickWorker, addJoystickEventHandler } from './workers/joystick.js';
-import { addChatEventHandler, chatWorker } from './workers/joystick.js';
+import {
+  joystickWorker,
+  addJoystickEventHandler,
+  addChatEventHandler,
+  chatWorker,
+} from './workers/joystick.js';
 import Renderer from './managers/animation-manager.js';
 import SpriteManager from './managers/sprite-manager.js';
 import NetworkManager from './net/network-manager.js';
@@ -9,20 +13,20 @@ import handleClientGamePacket from './net/client/game-data-handler.js';
 import buildClientGamePacket from './net/client/game-data-sender.js';
 import handleServerGamePacket from './net/server/game-data-handler.js';
 import buildServerGamePacket from './net/server/game-data-sender.js';
-import { timeout } from './utils.js'
+import { timeout } from './utils.js';
 import WorldManager from './managers/world-manager.js';
 import loadAssets from './workers/asset-loader.js';
 
-let networkManager = NetworkManager.getInstance();
+const networkManager = NetworkManager.getInstance();
 
 networkManager.on('connected', () => {
   console.log('Connected to remote');
 });
-networkManager.on('clientConnected', (conn) => {
+networkManager.on('clientConnected', () => {
   console.log('Remote has connected');
 });
 networkManager.on('modeChanged', (mode) => {
-  console.log(`Currently in ${ mode === NetworkManager.Mode.SERVER ? 'server' : 'client' } mode`);
+  console.log(`Currently in ${mode === NetworkManager.Mode.SERVER ? 'server' : 'client'} mode`);
 });
 networkManager.on('connectionFailed', () => {
   alert('Could not connect to partner! Please Try Again!');
@@ -38,7 +42,7 @@ networkManager.on('initialized', () => {
   } else {
     networkManager.setDataHandler(handleServerGamePacket);
     networkManager.addCleanupHandler((peerId) => {
-      let userId = WorldManager.getInstance().getPlayerId(peerId);
+      const userId = WorldManager.getInstance().getPlayerId(peerId);
       if (userId !== undefined) {
         PlayerManager.getInstance().removePlayer(userId);
         networkManager.getConnection().sendAllExcept(buildServerGamePacket('despawn-player', userId), peerId);
@@ -58,7 +62,7 @@ addJoystickEventHandler((evt) => {
   } else {
     networkManager.send(buildServerGamePacket('move-echo', buildClientGamePacket('move', evt)));
   }
-})
+});
 
 addChatEventHandler((evt) => {
   console.log(evt);
@@ -69,20 +73,20 @@ addChatEventHandler((evt) => {
   }
 });
 
-let netSetupPromise = timeout(networkManager.setup(), 5000);
-let assetSetupPromise = loadAssets();
+const netSetupPromise = timeout(networkManager.setup(), 5000);
+const assetSetupPromise = loadAssets();
 Promise.all([netSetupPromise, assetSetupPromise])
-.then(() => {
-  console.log('setup successful');
+  .then(() => {
+    console.log('setup successful');
 
-  document.addEventListener('keydown',joystickWorker);
-  document.addEventListener('keydown',chatWorker);
-  document.getElementById('connecting-msg').style.display = 'none';
-  document.getElementById('game-container').style.display = 'block';
-  Renderer.init();
-  window.requestAnimationFrame(Renderer.render.bind(Renderer));
-})
-.catch(() => {
-  alert('Could not connect to partner! Please Try Again!');
-  window.close();
-});
+    document.addEventListener('keydown', joystickWorker);
+    document.addEventListener('keydown', chatWorker);
+    document.getElementById('connecting-msg').style.display = 'none';
+    document.getElementById('game-container').style.display = 'block';
+    Renderer.init();
+    window.requestAnimationFrame(Renderer.render.bind(Renderer));
+  })
+  .catch(() => {
+    alert('Could not connect to partner! Please Try Again!');
+    window.close();
+  });
