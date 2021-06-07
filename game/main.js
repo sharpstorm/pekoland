@@ -113,12 +113,11 @@ loadAsset('Images/chat-bubble.png')
 
 //Map
 let map = new Image();
-//map.src = 'Images/biggerHouse.png';
-map.src = 'Images/biggerHouseColli.png';
+map.src = 'Images/template1.png';
 let colli = new Image();
-colli.src = 'Images/biggerHouseColli.png';
+colli.src = 'Images/template1_collision.png';
 colli.onload = function() {
-  let map1 = new Map(map,colli,2326, 1700, 30, 20);
+  let map1 = new Map(map, colli, 3300, 1200, 66, 24);
   MapManager.getInstance().registerMap('testMap', map1);
 };
 
