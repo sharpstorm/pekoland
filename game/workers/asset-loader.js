@@ -1,6 +1,6 @@
 import { loadAsset } from '../utils.js';
 import Map from '../models/map.js'
-import Sprite, {AnimatableSprite, AvatarSprite, SlicedSprite} from '../models/sprites.js';
+import {AnimatableSprite, AvatarSprite, SlicedSprite} from '../models/sprites.js';
 import MapManager from '../managers/map-manager.js';
 import SpriteManager from '../managers/sprite-manager.js';
 

@@ -1,7 +1,7 @@
 import Player from './models/player.js';
 import PlayerManager from './managers/player-manager.js';
-import { joystickWorker, joystickUpWorker, addJoystickEventHandler, removeJoystickEventHandler } from './workers/joystick.js';
-import {addChatEventHandler, removeChatEventHandler, chatWorker} from './workers/joystick.js';
+import { joystickWorker, addJoystickEventHandler } from './workers/joystick.js';
+import { addChatEventHandler, chatWorker } from './workers/joystick.js';
 import Renderer from './managers/animation-manager.js';
 import SpriteManager from './managers/sprite-manager.js';
 import NetworkManager from './net/network-manager.js';
