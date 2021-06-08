@@ -7,6 +7,7 @@ import SpriteManager from '../../managers/sprite-manager.js';
 import Player from '../../models/player.js';
 import NetworkManager from '../network-manager.js';
 import buildClientGamePacket from './game-data-sender.js';
+import Renderer from '../../managers/animation-manager.js';
 
 function inflatePlayer(data) {
   const player = new Player(data.userId, data.name, SpriteManager.getInstance().getSprite('rabbit-avatar'));
@@ -26,6 +27,7 @@ function handleSpawnReply(data, conn) {
   const self = inflatePlayer(data.self);
   PlayerManager.getInstance().addPlayer(self);
   PlayerManager.getInstance().setSelf(self.userId);
+  Renderer.getCameraContext().centerOn(self.x, self.y);
   data.others.forEach((x) => {
     PlayerManager.getInstance().addPlayer(inflatePlayer(x));
   });
