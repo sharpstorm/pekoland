@@ -37,6 +37,8 @@ const handlers = {
   'spawn-request': buildSpawnRequest,
   'move': buildMoveUpdate,
   'chat': buildChatUpdate,
+  'join-voice': buildEmptyPacket,
+  'disconnect-voice': buildEmptyPacket,
 };
 
 export default function buildGameDataPacket(opCode, data) {

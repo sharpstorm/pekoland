@@ -4,6 +4,7 @@ import Player from '../models/player.js';
 import MapManager from '../managers/map-manager.js';
 import Renderer from '../managers/animation-manager.js';
 import GameConstants from '../game-constants.js';
+import GameManager from '../managers/game-manager.js';
 
 const playerManager = PlayerManager.getInstance();
 const chatManager = ChatManager.getInstance();
@@ -56,6 +57,8 @@ function joystickWorker(e) {
       self.moveTo(self.x + deltaX, self.y + deltaY);
     }
 
+    console.log(self.x, self.y);
+
     joystickEventHandlers.forEach((x) => x({
       id: direction,
       deltaX,
@@ -97,6 +100,14 @@ function chatWorker(e) {
 
   if (e.keyCode === 8 && ChatManager.getInstance().chatting) { // nani
     chatManager.textField = chatManager.textField.substring(0, chatManager.textField.length - 1);
+  }
+
+  if (e.keyCode === 67 && e.altKey === true) {
+    GameManager.getInstance().getVoiceChannelManager().joinVoice();
+  }
+
+  if (e.keyCode === 68 && e.altKey === true) {
+    GameManager.getInstance().getVoiceChannelManager().disconnectVoice();
   }
 }
 

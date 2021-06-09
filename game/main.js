@@ -32,6 +32,12 @@ networkManager.on('connectionFailed', () => {
   alert('Could not connect to partner! Please Try Again!');
   window.close();
 });
+networkManager.on('callSuccess', () => {
+  console.log('connected to remote voice channel');
+});
+networkManager.on('callConnected', () => {
+  console.log('remote has connected to voice channel');
+});
 networkManager.on('initialized', () => {
   if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {
     networkManager.initConnection().then(() => {
@@ -47,6 +53,9 @@ networkManager.on('initialized', () => {
         PlayerManager.getInstance().removePlayer(userId);
         networkManager.getConnection().sendAllExcept(buildServerGamePacket('despawn-player', userId), peerId);
       }
+      WorldManager.getInstance().removeVoiceChannel(peerId);
+      networkManager.getCallManager().endCall(peerId);
+      networkManager.getConnection().sendAllExcept(buildServerGamePacket('voice-channel-data', WorldManager.getInstance().getVoiceChannelUsers()), peerId);
     });
 
     const playerManager = PlayerManager.getInstance();

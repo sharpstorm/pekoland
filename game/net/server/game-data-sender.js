@@ -60,6 +60,13 @@ function buildChatEcho(opCode, data) {
   };
 }
 
+function buildVoiceChannelData(opCode, data) {
+  return {
+    opCode,
+    users: data,
+  };
+}
+
 const handlers = {
   'handshake': buildEmptyPacket,
   'spawn-reply': buildSpawnReply,
@@ -68,6 +75,7 @@ const handlers = {
   'despawn-player': buildDespawnPlayer,
   'move-echo': buildMoveEcho,
   'chat-echo': buildChatEcho,
+  'voice-channel-data': buildVoiceChannelData,
 };
 
 export default function buildGamePacket(opCode, data) {
