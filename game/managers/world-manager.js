@@ -3,6 +3,7 @@ let instance;
 export default class WorldManager {
   constructor() {
     this.peerIdToUidMap = {};
+    this.voiceChannelUsers = new Set();
   }
 
   registerPlayer(peerId, userId) {
@@ -17,6 +18,18 @@ export default class WorldManager {
 
   getPlayerId(peerId) {
     return this.peerIdToUidMap[peerId];
+  }
+
+  registerVoiceChannel(peerId) {
+    this.voiceChannelUsers.add(peerId);
+  }
+
+  getVoiceChannelUsers() {
+    return Array.from(this.voiceChannelUsers.values());
+  }
+
+  removeVoiceChannel(peerId) {
+    this.voiceChannelUsers.delete(peerId);
   }
 
   static getInstance() {

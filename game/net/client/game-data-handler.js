@@ -58,6 +58,27 @@ function handleChatEcho(data, conn) {
   player.chat.updateMessage(data.message);
 }
 
+function handleVoiceChannelData(data, conn) {
+  const voiceUsers = data.users;
+  if (!voiceUsers.includes(NetworkManager.getInstance().getSelfPeerId())) {
+    return;
+  }
+
+  const remoteUsers = voiceUsers.filter((x) => x !== NetworkManager.getInstance().getSelfPeerId());
+
+  // Cleanup disconnected users
+  NetworkManager.getInstance().getCallManager().getConnectedPeers()
+    .filter((x) => !remoteUsers.includes(x))
+    .forEach((x) => NetworkManager.getInstance().getCallManager().endCall(x));
+
+  // Connect to remaining or new users
+  if (voiceUsers.length === 1) {
+    console.log('Only 1 person in voice channel');
+    return;
+  }
+  remoteUsers.forEach((x) => { NetworkManager.getInstance().connectVoice(x); });
+}
+
 const handlers = {
   'handshake': handleHandshake,
   'spawn-reply': handleSpawnReply,
@@ -66,6 +87,7 @@ const handlers = {
   'despawn-player': handleDespawnPlayer,
   'move-echo': handleMoveEcho,
   'chat-echo': handleChatEcho,
+  'voice-channel-data': handleVoiceChannelData,
 };
 
 // Conn will always be the server
