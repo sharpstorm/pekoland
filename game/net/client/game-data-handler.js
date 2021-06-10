@@ -13,6 +13,7 @@ function inflatePlayer(data) {
   const player = new Player(data.userId, data.name, SpriteManager.getInstance().getSprite('rabbit-avatar'));
   player.x = data.x;
   player.y = data.y;
+  player.direction = data.direction;
   return player;
 }
 
