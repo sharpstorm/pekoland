@@ -16,6 +16,7 @@ import buildServerGamePacket from './net/server/game-data-sender.js';
 import { timeout } from './utils.js';
 import WorldManager from './managers/world-manager.js';
 import loadAssets from './workers/asset-loader.js';
+import GameManager from './managers/game-manager.js';
 
 const networkManager = NetworkManager.getInstance();
 
@@ -32,11 +33,11 @@ networkManager.on('connectionFailed', () => {
   alert('Could not connect to partner! Please Try Again!');
   window.close();
 });
-networkManager.on('callSuccess', () => {
-  console.log('connected to remote voice channel');
+networkManager.on('callStreamOpen', ({ stream, peerId }) => {
+  GameManager.getInstance().getVoiceChannelManager().addOutputStream(peerId, stream);
 });
-networkManager.on('callConnected', () => {
-  console.log('remote has connected to voice channel');
+networkManager.on('callEnded', (peerId) => {
+  GameManager.getInstance().getVoiceChannelManager().removeOutputStream(peerId);
 });
 networkManager.on('initialized', () => {
   if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {

@@ -31,7 +31,8 @@ class AudioMixer {
 }
 
 export default class CallManager {
-  constructor() {
+  constructor(emitEvent) {
+    this.emitEvent = emitEvent;
     this.client = undefined;
     this.calls = {};
     this.streams = {};
@@ -44,9 +45,10 @@ export default class CallManager {
   setup(client) {
     this.client = client;
     client.on('call', ((call) => {
-      console.log(`[CallManager] Incoming call from peer ${call.peer}`);
+      console.debug(`[CallManager] Incoming call from peer ${call.peer}`);
       call.answer(this.sendStream);
       this.registerCall(call);
+      this.emitEvent(CallManager.Events.CALL_RECEIVED, call.peer);
     }).bind(this));
     this.state = CallManager.State.READY;
   }
@@ -54,7 +56,7 @@ export default class CallManager {
   registerCall(call) {
     const peerId = call.peer;
     this.calls[peerId] = call;
-    console.log(`[CallManager] Registered peer ${peerId}`);
+    console.debug(`[CallManager] Registered peer ${peerId}`);
 
     call.on('close', (() => {
       this.dispose(peerId);
@@ -62,13 +64,8 @@ export default class CallManager {
 
     call.on('stream', ((stream) => {
       console.log(`[CallManager] Audio Stream from Peer ${peerId}`);
-      console.log(stream.getTracks().length);
-      const audio = new Audio();
-      audio.srcObject = stream;
-      document.body.appendChild(audio);
-      audio.autoplay = true;
-      audio.play();
       this.streams[peerId] = stream;
+      this.emitEvent(CallManager.Events.CALL_STREAM_OPEN, { peerId, stream });
     }).bind(this));
   }
 
@@ -78,6 +75,7 @@ export default class CallManager {
     }
     const call = this.client.call(peerId, this.sendStream);
     this.registerCall(call);
+    this.emitEvent(CallManager.Events.CALL, peerId);
     return call;
   }
 
@@ -92,13 +90,14 @@ export default class CallManager {
   }
 
   dispose(peerId) {
-    console.log(`[CallManager] Disposing peer ${peerId}`);
+    console.debug(`[CallManager] Disposing peer ${peerId}`);
     if (peerId in this.calls) {
       delete this.calls[peerId];
     }
     if (peerId in this.streams) {
       delete this.streams[peerId];
     }
+    this.emitEvent(CallManager.Events.CALL_ENDED, peerId);
   }
 
   getConnectedPeers() {
@@ -106,13 +105,12 @@ export default class CallManager {
   }
 
   addAudioStream(stream) {
-    console.log('[CallManager] Registering audio stream');
+    console.debug('[CallManager] Registering audio stream');
     this.audioMixer.addStream(stream);
-    console.log(this.sendStream);
   }
 
   removeAudioStream() {
-    console.log('[CallManager] Removing audio stream');
+    console.debug('[CallManager] Removing audio stream');
     this.audioMixer.removeStream();
   }
 }
@@ -120,5 +118,11 @@ export default class CallManager {
 CallManager.State = {
   CREATED: 0,
   READY: 1,
-  CONNECTED: 2,
+};
+
+CallManager.Events = {
+  CALL: 'call',
+  CALL_RECEIVED: 'callReceived',
+  CALL_ENDED: 'callEnded',
+  CALL_STREAM_OPEN: 'callStreamOpen',
 };

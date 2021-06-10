@@ -14,7 +14,7 @@ let instance;
 export default class NetworkManager {
   constructor() {
     this.configStore = new ConfigStore();
-    this.callManager = new CallManager();
+    this.callManager = new CallManager(this.emitEvent.bind(this));
     this.connection = undefined;
     this.state = NetworkManager.State.CREATED;
     this.mode = NetworkManager.Mode.UNSET;
@@ -110,7 +110,8 @@ export default class NetworkManager {
   }
 
   on(evtId, handler) {
-    if (Object.values(NetworkManager.Events).includes(evtId)) {
+    if (Object.values(NetworkManager.Events).includes(evtId)
+      || Object.values(CallManager.Events).includes(evtId)) {
       this.listeners[evtId] = handler;
     } else {
       console.error('[NetworkManager] Invalid Event ID for Listener');
@@ -188,7 +189,4 @@ NetworkManager.Events = {
   CONNECTED: 'connected',
   CLIENT_CONNECTED: 'clientConnected',
   CONNECTION_FAILED: 'connectionFailed',
-  CALL: 'call',
-  CALL_SUCCESS: 'callSuccess',
-  CALL_CONNECTED: 'callConnected',
 };

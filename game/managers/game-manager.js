@@ -11,6 +11,7 @@ class VoiceChannelManager {
   constructor() {
     this.connected = false;
     this.microphoneStream = undefined;
+    this.outputObjects = {};
   }
 
   joinVoice() {
@@ -77,6 +78,29 @@ class VoiceChannelManager {
 
     NetworkManager.getInstance().getCallManager().removeAudioStream();
     this.microphoneStream = undefined;
+  }
+
+  addOutputStream(peerId, stream) {
+    if (peerId in this.outputObjects) {
+      const audio = this.outputObjects[peerId];
+      audio.pause();
+      audio.srcObject = stream;
+      audio.load();
+      audio.play();
+    } else {
+      const audio = new Audio();
+      audio.srcObject = stream;
+      audio.autoplay = true;
+      audio.play();
+    }
+  }
+
+  removeOutputStream(peerId) {
+    if (peerId in this.outputObjects) {
+      const audio = this.outputObjects[peerId];
+      audio.pause();
+      delete this.outputObjects[peerId];
+    }
   }
 }
 
