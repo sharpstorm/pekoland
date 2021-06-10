@@ -42,6 +42,8 @@ class VoiceChannelManager {
       WorldManager.getInstance().removeVoiceChannel(networkManager.getSelfPeerId());
       networkManager.send(buildServerGamePacket('voice-channel-data', WorldManager.getInstance().getVoiceChannelUsers()));
     }
+    this.disconnectMicrophone();
+    this.clearOutputStreams();
     this.connected = false;
   }
 
@@ -101,6 +103,12 @@ class VoiceChannelManager {
       audio.pause();
       delete this.outputObjects[peerId];
     }
+  }
+
+  clearOutputStreams() {
+    Object.keys(this.outputObjects).forEach((x) => {
+      this.removeOutputStream(x);
+    });
   }
 }
 
