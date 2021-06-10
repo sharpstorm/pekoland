@@ -94,11 +94,9 @@ export default class CallManager {
   dispose(peerId) {
     console.log(`[CallManager] Disposing peer ${peerId}`);
     if (peerId in this.calls) {
-      this.calls[peerId].close();
       delete this.calls[peerId];
     }
     if (peerId in this.streams) {
-      this.streams[peerId].close();
       delete this.streams[peerId];
     }
   }
