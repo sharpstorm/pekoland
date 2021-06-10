@@ -1,3 +1,4 @@
+import PlayerManager from '../managers/player-manager.js';
 import CheckerPiece from './CheckerPiece.js';
 import Grid from './Grid.js';
 
@@ -8,7 +9,9 @@ export default class Board {
     this.gridArray = [];
     this.selectedGrid = undefined;
     this.selectedPiece = undefined;
-    this.currentTurn = 'Player 1';
+    this.currentTurn = this.player1;
+    this.opponent = undefined;
+    this.me = undefined;
   }
 
   drawBoard(ctx) {
@@ -19,27 +22,37 @@ export default class Board {
   move() {
     let f;
     let t;
+    let dead;
+    let king = false;
     if (this.selectedGrid.color === 'green') {
       this.selectedPiece.movePieceTo(this.selectedGrid);
       const indexDiff = this.selectedGrid.index - this.selectedPiece.index;
-      if (this.currentTurn === 'Player 1' || (this.currentTurn === 'Player 2' && this.selectedGrid.checkerPiece.isKing)) {
+      if (this.currentTurn === this.player1
+        || (this.currentTurn === this.player2 && this.selectedGrid.checkerPiece.isKing)) {
         if (indexDiff === 14) {
           this.gridArray[this.selectedPiece.index + 7].removePiece();
+          dead = this.selectedPiece.index + 7;
         } else if (indexDiff === 18) {
           this.gridArray[this.selectedPiece.index + 9].removePiece();
+          dead = this.selectedPiece.index + 9;
         }
         if (this.isAtEnd() === 1 && !this.selectedGrid.checkerPiece.isKing) {
           this.selectedGrid.checkerPiece.isKing = true;
+          king = true;
         }
       }
-      if ((this.currentTurn === 'Player 1' && this.selectedGrid.checkerPiece.isKing) || this.currentTurn === 'Player 2') {
+      if ((this.currentTurn === this.player1 && this.selectedGrid.checkerPiece.isKing)
+      || this.currentTurn === this.player2) {
         if (indexDiff === -14) {
           this.gridArray[this.selectedPiece.index - 7].removePiece();
+          dead = this.selectedPiece.index - 7;
         } else if (indexDiff === -18) {
           this.gridArray[this.selectedPiece.index - 9].removePiece();
+          dead = this.selectedPiece.index - 9;
         }
-        if (this.isAtEnd() === 2 && !this.selectedGrid.checkerPiece.isKing) {
+        if (this.isAtEnd() === 1 && !this.selectedGrid.checkerPiece.isKing) {
           this.selectedGrid.checkerPiece.isKing = true;
+          king = true;
         }
       }
       f = this.selectedPiece.index;
@@ -48,18 +61,23 @@ export default class Board {
       // console.log(`to: ${t}`);
       this.resetBoard();
       this.nextTurn();
-      return { from: f, to: t };
+      return {
+        from: f,
+        to: t,
+        remove: dead,
+        k: king,
+      };
     }
     return undefined;
   }
 
   isAtEnd() {
-    if (this.currentTurn === 'Player 2') {
-      if (this.selectedGrid.index - 8 < 0) {
-        return 2;
+    if (this.currentTurn === this.player2) {
+      if (this.selectedGrid.index - 8 < 0 || this.selectedGrid.index + 8 > 63) {
+        return 1;
       }
-    } else if (this.currentTurn === 'Player 1') {
-      if (this.selectedGrid.index + 8 > 63) {
+    } else if (this.currentTurn === this.player1) {
+      if (this.selectedGrid.index - 8 < 0 || this.selectedGrid.index + 8 > 63) {
         return 1;
       }
     }
@@ -95,10 +113,10 @@ export default class Board {
 
   // HARDCODED
   nextTurn() {
-    if (this.currentTurn === 'Player 1') {
-      this.currentTurn = 'Player 2';
+    if (this.currentTurn === this.player1) {
+      this.currentTurn = this.player2;
     } else {
-      this.currentTurn = 'Player 1';
+      this.currentTurn = this.player1;
     }
   }
 
@@ -108,17 +126,27 @@ export default class Board {
       for (i = 0; i < 32; i += 1) {
         if (this.gridArray[i] !== undefined) {
           if (this.gridArray[i].hasPiece) {
-            this.gridArray[i].checkerPiece.player = 'Player 1';
+            this.gridArray[i].checkerPiece.player = PlayerManager.getInstance().getSelfId();
+            this.me = PlayerManager.getInstance().getSelfId();
+            this.gridArray[i].checkerPiece.color = 'red';
           }
         }
       }
       for (i = 32; i < 64; i += 1) {
         if (this.gridArray[i] !== undefined) {
           if (this.gridArray[i].hasPiece) {
-            this.gridArray[i].checkerPiece.player = 'Player 2';
+            if (PlayerManager.getInstance().getSelfId() === this.player1) {
+              this.gridArray[i].checkerPiece.player = this.player2;
+              this.opponent = this.player2;
+            } else {
+              this.gridArray[i].checkerPiece.player = this.player1;
+              this.opponent = this.player1;
+            }
+            this.gridArray[i].checkerPiece.color = 'blue';
           }
         }
       }
+      console.log(this.gridArray);
     }
   }
 
@@ -145,9 +173,9 @@ export default class Board {
     let p2 = false;
     this.gridArray.forEach((grid) => {
       if (grid.hasPiece) {
-        if (grid.checkerPiece.player === 'Player 1') {
+        if (grid.checkerPiece.player === this.player1) {
           p1 = true;
-        } else if (grid.checkerPiece.player === 'Player 2') {
+        } else if (grid.checkerPiece.player === this.player2) {
           p2 = true;
         }
       }
@@ -166,7 +194,7 @@ export default class Board {
 
     this.gridArray.forEach((grid) => {
       if (grid.hasPiece) {
-        if (grid.checkerPiece.player === 'Player 1') {
+        if (grid.checkerPiece.player === this.player1) {
           if (grid.getDiagonals('bottom').left === undefined &&
           grid.getDiagonals('bottom').right === undefined) {
             p1 += 0;
@@ -184,7 +212,7 @@ export default class Board {
 
     this.gridArray.forEach((grid) => {
       if (grid.hasPiece) {
-        if (grid.checkerPiece.player === 'Player 2') {
+        if (grid.checkerPiece.player === this.player2) {
           if (grid.getDiagonals('top').left === undefined && grid.
           getDiagonals('top').right === undefined) {
             p2 += 0;
@@ -204,73 +232,77 @@ export default class Board {
 
   highlightMoves() {
     if (this.selectedGrid.hasPiece) {
-      if (this.selectedGrid.checkerPiece.player === this.currentTurn) {
-        if (this.currentTurn === 'Player 1' || (this.currentTurn === 'Player 2' && this.selectedGrid.checkerPiece.isKing)) {
-          if (this.selectedGrid.getDiagonals('bottom').left !== undefined) {
-            if (this.gridArray[this.selectedGrid.getDiagonals('bottom').left].hasPiece) {
-              if (this.isEnemy(this.selectedGrid.getDiagonals('bottom').left)) {
-                if (this.gridArray[this.selectedGrid.getDiagonals('bottom').left].getDiagonals('bottom').left !== undefined) {
-                  if (!this.gridArray[this.gridArray[this.selectedGrid.getDiagonals('bottom').left].getDiagonals('bottom').left].hasPiece) {
-                    this.gridArray[this.gridArray[this.selectedGrid.getDiagonals('bottom').left].getDiagonals('bottom').left].color = 'green';
+      if (this.selectedGrid.checkerPiece.color === 'red') {
+        if (this.selectedGrid.checkerPiece.player === this.currentTurn) {
+          if (this.currentTurn === this.me
+            || (this.currentTurn === this.opponent && this.selectedGrid.checkerPiece.isKing)) {
+            if (this.selectedGrid.getDiagonals('bottom').left !== undefined) {
+              if (this.gridArray[this.selectedGrid.getDiagonals('bottom').left].hasPiece) {
+                if (this.isEnemy(this.selectedGrid.getDiagonals('bottom').left)) {
+                  if (this.gridArray[this.selectedGrid.getDiagonals('bottom').left].getDiagonals('bottom').left !== undefined) {
+                    if (!this.gridArray[this.gridArray[this.selectedGrid.getDiagonals('bottom').left].getDiagonals('bottom').left].hasPiece) {
+                      this.gridArray[this.gridArray[this.selectedGrid.getDiagonals('bottom').left].getDiagonals('bottom').left].color = 'green';
+                    }
                   }
                 }
+              } else {
+                this.gridArray[this.selectedGrid.getDiagonals('bottom').left].setColor('green');
               }
-            } else {
-              this.gridArray[this.selectedGrid.getDiagonals('bottom').left].setColor('green');
             }
-          }
-          if (this.selectedGrid.getDiagonals('bottom').right !== undefined) {
-            if (this.gridArray[this.selectedGrid.getDiagonals('bottom').right].hasPiece) {
-              if (this.isEnemy(this.selectedGrid.getDiagonals('bottom').right)) {
-                if (this.gridArray[this.selectedGrid.getDiagonals('bottom').right].getDiagonals('bottom').right !== undefined) {
-                  if (!this.gridArray[this.gridArray[this.selectedGrid.getDiagonals('bottom').right].getDiagonals('bottom').right].hasPiece) {
-                    this.gridArray[this.gridArray[this.selectedGrid.getDiagonals('bottom').right].getDiagonals('bottom').right].color = 'green';
+            if (this.selectedGrid.getDiagonals('bottom').right !== undefined) {
+              if (this.gridArray[this.selectedGrid.getDiagonals('bottom').right].hasPiece) {
+                if (this.isEnemy(this.selectedGrid.getDiagonals('bottom').right)) {
+                  if (this.gridArray[this.selectedGrid.getDiagonals('bottom').right].getDiagonals('bottom').right !== undefined) {
+                    if (!this.gridArray[this.gridArray[this.selectedGrid.getDiagonals('bottom').right].getDiagonals('bottom').right].hasPiece) {
+                      this.gridArray[this.gridArray[this.selectedGrid.getDiagonals('bottom').right].getDiagonals('bottom').right].color = 'green';
+                    }
                   }
                 }
+              } else {
+                this.gridArray[this.selectedGrid.getDiagonals('bottom').right].setColor('green');
               }
-            } else {
-              this.gridArray[this.selectedGrid.getDiagonals('bottom').right].setColor('green');
             }
           }
-        }
-        if ((this.currentTurn === 'Player 1' && this.selectedGrid.checkerPiece.isKing) || this.currentTurn === 'Player 2') {
-          if (this.selectedGrid.getDiagonals('top').left !== undefined) {
-            if (this.gridArray[this.selectedGrid.getDiagonals('top').left].hasPiece) {
-              if (this.isEnemy(this.selectedGrid.getDiagonals('top').left)) {
-                if (this.gridArray[this.selectedGrid.getDiagonals('top').left].getDiagonals('top').left !== undefined) {
-                  if (!this.gridArray[this.gridArray[this.selectedGrid.getDiagonals('top').left].getDiagonals('top').left].hasPiece) {
-                    this.gridArray[this.gridArray[this.selectedGrid.getDiagonals('top').left].getDiagonals('top').left].color = 'green';
+          if ((this.currentTurn === this.me && this.selectedGrid.checkerPiece.isKing)
+          || this.currentTurn === this.opponent) {
+            if (this.selectedGrid.getDiagonals('top').left !== undefined) {
+              if (this.gridArray[this.selectedGrid.getDiagonals('top').left].hasPiece) {
+                if (this.isEnemy(this.selectedGrid.getDiagonals('top').left)) {
+                  if (this.gridArray[this.selectedGrid.getDiagonals('top').left].getDiagonals('top').left !== undefined) {
+                    if (!this.gridArray[this.gridArray[this.selectedGrid.getDiagonals('top').left].getDiagonals('top').left].hasPiece) {
+                      this.gridArray[this.gridArray[this.selectedGrid.getDiagonals('top').left].getDiagonals('top').left].color = 'green';
+                    }
                   }
                 }
+              } else {
+                this.gridArray[this.selectedGrid.getDiagonals('top').left].setColor('green');
               }
-            } else {
-              this.gridArray[this.selectedGrid.getDiagonals('top').left].setColor('green');
             }
-          }
-          if (this.selectedGrid.getDiagonals('top').right !== undefined) {
-            if (this.gridArray[this.selectedGrid.getDiagonals('top').right].hasPiece) {
-              if (this.isEnemy(this.selectedGrid.getDiagonals('top').right)) {
-                if (this.gridArray[this.selectedGrid.getDiagonals('top').right].getDiagonals('top').right !== undefined) {
-                  if (!this.gridArray[this.gridArray[this.selectedGrid.getDiagonals('top').right].getDiagonals('top').right].hasPiece) {
-                    this.gridArray[this.gridArray[this.selectedGrid.getDiagonals('top').right].getDiagonals('top').right].color = 'green';
+            if (this.selectedGrid.getDiagonals('top').right !== undefined) {
+              if (this.gridArray[this.selectedGrid.getDiagonals('top').right].hasPiece) {
+                if (this.isEnemy(this.selectedGrid.getDiagonals('top').right)) {
+                  if (this.gridArray[this.selectedGrid.getDiagonals('top').right].getDiagonals('top').right !== undefined) {
+                    if (!this.gridArray[this.gridArray[this.selectedGrid.getDiagonals('top').right].getDiagonals('top').right].hasPiece) {
+                      this.gridArray[this.gridArray[this.selectedGrid.getDiagonals('top').right].getDiagonals('top').right].color = 'green';
+                    }
                   }
                 }
+              } else {
+                this.gridArray[this.selectedGrid.getDiagonals('top').right].setColor('green');
               }
-            } else {
-              this.gridArray[this.selectedGrid.getDiagonals('top').right].setColor('green');
             }
           }
-        }
-
-        // TODO: detect when no possible moves
-        let gg = false;
-        this.gridArray.forEach((grid) => {
-          if (grid.color === 'green') {
-            gg = true;
-          }
-        });
-        if (!gg) {
-          alert('lose');
+          /*
+          // TODO: detect when no possible moves
+          let gg = false;
+          this.gridArray.forEach((grid) => {
+            if (grid.color === 'green') {
+              gg = true;
+            }
+          });
+          if (!gg) {
+            alert('lose');
+          } */
         }
       }
     }

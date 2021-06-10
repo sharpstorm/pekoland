@@ -5,15 +5,12 @@ export default class CheckerPiece {
     this.y = y;
     this.diameter = 50;
     this.isKing = false;
+    this.color = 'red';
   }
 
   drawAt(ctx) {
     ctx.beginPath();
-    if (this.player === 'Player 1') {
-      ctx.fillStyle = 'red';
-    } else {
-      ctx.fillStyle = 'blue';
-    }
+    ctx.fillStyle = this.color;
     ctx.strokeStyle = '#FFF';
     ctx.arc(this.x + this.diameter * 1.1, this.y
       + this.diameter * 1.1, this.diameter, 0, 2 * Math.PI);

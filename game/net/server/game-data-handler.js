@@ -7,6 +7,7 @@ import WorldManager from '../../managers/world-manager.js';
 import Player from '../../models/player.js';
 import buildGamePacket from './game-data-sender.js';
 import NetworkManager from '../network-manager.js';
+import { checkersMove } from '../../games/checkers.js';
 
 // const spawnLocation = [0, 0];
 
@@ -53,7 +54,9 @@ function handleChat(data, conn) {
 }
 
 function handleCheckersGame(data, conn) {
-  NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('checkers-echo', data, conn.peer));
+  console.log(data);
+  checkersMove(data);
+  NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('checkers', data, conn.peer));
 }
 
 const handlers = {

@@ -85,7 +85,9 @@ function pushMsg() {
   // FOR TESTING CHECKERS
   let ss = playerManager.getSelf().chat.currentSpeech;
   ss = ss.split(' ');
-  startGame(ss[1], ss[2]);
+  if (ss[0] === 'start-game-checker') {
+    startGame(ss[1], ss[2]);
+  }
 }
 
 function chatWorker(e) {

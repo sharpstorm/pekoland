@@ -7,6 +7,7 @@ import SpriteManager from '../../managers/sprite-manager.js';
 import Player from '../../models/player.js';
 import NetworkManager from '../network-manager.js';
 import buildClientGamePacket from './game-data-sender.js';
+import { checkersMove } from '../../games/checkers.js';
 
 function inflatePlayer(data) {
   const player = new Player(data.userId, data.name, SpriteManager.getInstance().getSprite('rabbit-avatar'));
@@ -58,6 +59,7 @@ function handleChatEcho(data, conn) {
 
 function handleCheckersEcho(data, conn) {
   console.log(data);
+  checkersMove(data);
 }
 
 const handlers = {
@@ -68,12 +70,11 @@ const handlers = {
   'despawn-player': handleDespawnPlayer,
   'move-echo': handleMoveEcho,
   'chat-echo': handleChatEcho,
-  'checkers-echo': handleCheckersEcho,
+  'checkers': handleCheckersEcho,
 };
 
 // Conn will always be the server
 export default function handleGamePacket(data, conn) {
-  console.log(data);
   if (!data.opCode) return;
 
   const { opCode } = data;

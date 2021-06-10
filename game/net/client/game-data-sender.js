@@ -35,9 +35,10 @@ function buildChatUpdate(opCode, data) {
 function buildCheckersUpdate(opCode, data) {
   return {
     opCode,
+    from: data.from,
     player1: data.player1,
     player2: data.player2,
-    move: data.action,
+    action: data.action,
   };
 }
 
