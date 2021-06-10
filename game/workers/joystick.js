@@ -109,6 +109,16 @@ function chatWorker(e) {
   if (e.keyCode === 68 && e.altKey === true) {
     GameManager.getInstance().getVoiceChannelManager().disconnectVoice();
   }
+
+  if (e.keyCode === 77 && e.altKey === true && e.shiftKey !== true) {
+    GameManager.getInstance().getVoiceChannelManager().activateMicrophone()
+      .then(() => { console.log('successfully activated mic'); })
+      .catch(() => { alert('Could not activate mic'); });
+  }
+
+  if (e.keyCode === 77 && e.altKey === true && e.shiftKey === true) {
+    GameManager.getInstance().getVoiceChannelManager().disconnectMicrophone();
+  }
 }
 
 function joystickUpWorker(evt) {
