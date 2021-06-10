@@ -52,11 +52,16 @@ function handleChat(data, conn) {
   NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('chat-echo', data), conn.peer);
 }
 
+function handleCheckersGame(data, conn) {
+  NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('checkers-echo', data, conn.peer));
+}
+
 const handlers = {
   'handshake': handleHandshake,
   'spawn-request': handleSpawnRequest,
   'move': handleMove,
   'chat': handleChat,
+  'checkers': handleCheckersGame,
 };
 
 // Conn can be used to uniquely identify the peer

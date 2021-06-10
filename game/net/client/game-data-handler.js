@@ -56,6 +56,10 @@ function handleChatEcho(data, conn) {
   player.chat.updateMessage(data.message);
 }
 
+function handleCheckersEcho(data, conn) {
+  console.log(data);
+}
+
 const handlers = {
   'handshake': handleHandshake,
   'spawn-reply': handleSpawnReply,
@@ -64,6 +68,7 @@ const handlers = {
   'despawn-player': handleDespawnPlayer,
   'move-echo': handleMoveEcho,
   'chat-echo': handleChatEcho,
+  'checkers-echo': handleCheckersEcho,
 };
 
 // Conn will always be the server

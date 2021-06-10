@@ -4,6 +4,7 @@ import Player from '../models/player.js';
 import MapManager from '../managers/map-manager.js';
 import Renderer from '../managers/animation-manager.js';
 import GameConstants from '../game-constants.js';
+import { startGame } from '../games/checkers.js';
 
 const playerManager = PlayerManager.getInstance();
 const chatManager = ChatManager.getInstance();
@@ -80,6 +81,11 @@ function pushMsg() {
     name: playerManager.getSelf().name,
     msg: playerManager.getSelf().chat.currentSpeech,
   }));
+
+  // FOR TESTING CHECKERS
+  let ss = playerManager.getSelf().chat.currentSpeech;
+  ss = ss.split(' ');
+  startGame(ss[1], ss[2]);
 }
 
 function chatWorker(e) {

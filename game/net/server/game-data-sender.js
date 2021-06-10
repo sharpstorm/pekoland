@@ -60,6 +60,15 @@ function buildChatEcho(opCode, data) {
   };
 }
 
+function buildCheckersEcho(opCode, data) {
+  return {
+    opCode,
+    player1: data.player1,
+    player2: data.player2,
+    move: data.action,
+  };
+}
+
 const handlers = {
   'handshake': buildEmptyPacket,
   'spawn-reply': buildSpawnReply,
@@ -68,6 +77,7 @@ const handlers = {
   'despawn-player': buildDespawnPlayer,
   'move-echo': buildMoveEcho,
   'chat-echo': buildChatEcho,
+  'checkers-echo': buildCheckersEcho,
 };
 
 export default function buildGamePacket(opCode, data) {
