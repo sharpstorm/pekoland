@@ -1,9 +1,7 @@
-import ChatManager from './chat-manager.js';
 import PlayerManager from './player-manager.js';
 import MapManager from './map-manager.js';
 import GameConstants from '../game-constants.js';
-
-const chatManager = ChatManager.getInstance();
+import Chatbox from '../ui/ui-chatbox.js';
 
 class CameraContext {
   constructor(viewportWidth, viewportHeight) {
@@ -79,58 +77,6 @@ class CameraContext {
   }
 } */
 
-function getUIState(camContext) {
-  return {
-    viewportHeight: camContext.viewportHeight,
-    viewportWidth: camContext.viewportWidth,
-    chatting: chatManager.chatting,
-    text: chatManager.textField,
-    history: chatManager.bigChatBox,
-  };
-}
-
-function drawTextBox(ctx, uiState) {
-  ctx.strokeStyle = '#FFF';
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-  ctx.lineWidth = 1;
-  ctx.font = '15px Arial';
-
-  ctx.beginPath();
-  ctx.rect(0, uiState.viewportHeight - 20, 500, 20);
-  ctx.stroke();
-  ctx.fill();
-
-  if (uiState.chatting === true) {
-    // Expand top for prev chat
-    ctx.fillRect(0, uiState.viewportHeight - 170, 500, 150);
-  }
-
-  // Plus sign behind
-  ctx.fillRect(480, uiState.viewportHeight - 20, 20, 20);
-  ctx.strokeStyle = '#FFF';
-  ctx.strokeText('+', 487, uiState.viewportHeight - 3);
-
-  // To who
-  ctx.fillRect(0, uiState.viewportHeight - 20, 50, 20);
-  ctx.font = 'normal 10px Arial';
-  ctx.fillStyle = '#FFF';
-  ctx.fillText('All', 18, uiState.viewportHeight - 5);
-
-  if (uiState.chatting === true) {
-    // typing words
-    ctx.fillText(uiState.text, 60, uiState.viewportHeight - 5);
-
-    // chat history
-    for (let i = 0; i < 9; i += 1) {
-      const idx = uiState.history.length - 1 - i;
-      if (idx < 0) {
-        break;
-      }
-      ctx.fillText(uiState.history[idx], 5, uiState.viewportHeight - 155 + ((8 - i) * 15));
-    }
-  }
-}
-
 let instance;
 class Renderer {
   constructor() {
@@ -149,6 +95,7 @@ class Renderer {
     this.lastUIState = undefined;
 
     this.cameraContext = new CameraContext(this.dimens.width, this.dimens.height);
+    this.uiElements = [];
   }
 
   init() {
@@ -168,6 +115,7 @@ class Renderer {
       this.synchronizeCanvasSize();
       this.cameraContext.updateViewport(this.dimens);
     }));
+    this.uiElements.push(new Chatbox());
   }
 
   render(timestamp) {
@@ -195,11 +143,13 @@ class Renderer {
     });
 
     // Draw UI
-    if (this.isUILayerDirty()) {
-      this.lastUIState = getUIState(this.cameraContext);
-      this.uiCtx.clearRect(0, 0, this.dimens.width, this.dimens.height);
-      drawTextBox(this.uiCtx, this.lastUIState);
-    }
+    this.uiElements.forEach((x) => {
+      if (x.isDirty(camContext)) {
+        const box = x.getBoundingBox(camContext);
+        this.uiCtx.clearRect(box.x, box.y, box.width, box.height);
+        x.render(this.uiCtx, camContext);
+      }
+    });
 
     // Update Camera
     camContext.animate(delta);
@@ -220,20 +170,6 @@ class Renderer {
 
   moveCamera(x, y) {
     this.cameraContext.moveContext(x, y);
-  }
-
-  isUILayerDirty() {
-    const oldState = this.lastUIState;
-    if (oldState === undefined) {
-      return true;
-    }
-
-    const curState = getUIState(this.cameraContext);
-    return (curState.viewportHeight !== oldState.viewportHeight
-      || curState.viewportWidth !== oldState.viewportWidth
-      || curState.chatting !== oldState.chatting
-      || curState.text !== oldState.text
-      || curState.history.length !== oldState.history.length);
   }
 
   synchronizeCanvasSize() {
