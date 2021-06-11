@@ -1,4 +1,3 @@
-import ChatManager from '../managers/chat-manager.js';
 import PlayerManager from '../managers/player-manager.js';
 import Player from '../models/player.js';
 import MapManager from '../managers/map-manager.js';
@@ -7,7 +6,7 @@ import GameConstants from '../game-constants.js';
 import GameManager from '../managers/game-manager.js';
 
 const playerManager = PlayerManager.getInstance();
-const chatManager = ChatManager.getInstance();
+const chatManager = GameManager.getInstance().getTextChannelManager();
 
 let joystickEventHandlers = [];
 let chatEventHandlers = [];
@@ -76,7 +75,7 @@ function typing(letter) {
 function pushMsg() {
   playerManager.getSelf().chat.speechBubbleCounter = 0;
   playerManager.getSelf().chat.speechBubble = true;
-  playerManager.getSelf().chat.currentSpeech = ChatManager.getInstance().textField;
+  playerManager.getSelf().chat.currentSpeech = chatManager.textField;
   chatManager.bigChatBox.push(`${playerManager.getSelf().name}: ${playerManager.getSelf().chat.currentSpeech}`);
   chatManager.textField = '';
   chatEventHandlers.forEach((x) => x({
@@ -86,19 +85,19 @@ function pushMsg() {
 }
 
 function chatWorker(e) {
-  if (e.key.length === 1 && ChatManager.getInstance().chatting) {
+  if (e.key.length === 1 && chatManager.chatting) {
     typing(e.key);
   }
 
   if (e.keyCode === 13 && e.altKey === true) {
-    ChatManager.getInstance().chatting = !ChatManager.getInstance().chatting;
+    chatManager.chatting = !chatManager.chatting;
   }
 
-  if (e.keyCode === 13 && ChatManager.getInstance().chatting && chatManager.textField !== '') { // nani
+  if (e.keyCode === 13 && chatManager.chatting && chatManager.textField !== '') { // nani
     pushMsg();
   }
 
-  if (e.keyCode === 8 && ChatManager.getInstance().chatting) { // nani
+  if (e.keyCode === 8 && chatManager.chatting) { // nani
     chatManager.textField = chatManager.textField.substring(0, chatManager.textField.length - 1);
   }
 

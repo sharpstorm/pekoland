@@ -1,5 +1,7 @@
 import UIElement from './ui-element.js';
-import ChatManager from '../managers/chat-manager.js';
+import GameManager from '../managers/game-manager.js';
+
+const chatManager = GameManager.getInstance().getTextChannelManager();
 
 export default class Chatbox extends UIElement {
   constructor() {
@@ -12,9 +14,9 @@ export default class Chatbox extends UIElement {
     return {
       viewportHeight: camContext.viewportHeight,
       viewportWidth: camContext.viewportWidth,
-      chatting: ChatManager.getInstance().chatting,
-      text: ChatManager.getInstance().textField,
-      history: ChatManager.getInstance().bigChatBox,
+      chatting: chatManager.chatting,
+      text: chatManager.textField,
+      history: chatManager.bigChatBox,
     };
   }
 
@@ -39,7 +41,6 @@ export default class Chatbox extends UIElement {
   }
 
   render(ctx, camContext) {
-    console.log('render');
     const currentState = this.getState(camContext);
 
     ctx.strokeStyle = '#FFF';

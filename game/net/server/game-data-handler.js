@@ -1,13 +1,15 @@
 /* eslint-disable quote-props */
 
 import PlayerManager from '../../managers/player-manager.js';
-import ChatManager from '../../managers/chat-manager.js';
 import SpriteManager from '../../managers/sprite-manager.js';
 import WorldManager from '../../managers/world-manager.js';
 import Player from '../../models/player.js';
 import buildGamePacket from './game-data-sender.js';
 import handleClientGamePacket from '../client/game-data-handler.js';
 import NetworkManager from '../network-manager.js';
+import GameManager from '../../managers/game-manager.js';
+
+const chatManager = GameManager.getInstance().getTextChannelManager();
 
 // const spawnLocation = [0, 0];
 
@@ -48,7 +50,7 @@ function handleMove(data, conn) {
 
 function handleChat(data, conn) {
   const player = PlayerManager.getInstance().getPlayer(data.userId);
-  ChatManager.getInstance().bigChatBox.push(`${player.name}: ${data.message}`);
+  chatManager.bigChatBox.push(`${player.name}: ${data.message}`);
   player.chat.updateMessage(data.message);
   NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('chat-echo', data), conn.peer);
 }

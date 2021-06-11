@@ -1,7 +1,6 @@
 import WorldManager from './world-manager.js';
 import NetworkManager from '../net/network-manager.js';
 import buildClientGamePacket from '../net/client/game-data-sender.js';
-import handleClientGamePacket from '../net/client/game-data-handler.js';
 import buildServerGamePacket from '../net/server/game-data-sender.js';
 import { timeout } from '../utils.js';
 
@@ -24,7 +23,7 @@ class VoiceChannelManager {
       networkManager.send(buildClientGamePacket('join-voice'));
     } else {
       WorldManager.getInstance().registerVoiceChannel(networkManager.getSelfPeerId());
-      handleClientGamePacket(buildServerGamePacket('voice-channel-data', WorldManager.getInstance().getVoiceChannelUsers()));
+      this.updateChannelUsers(WorldManager.getInstance().getVoiceChannelUsers());
     }
     this.connected = true;
   }
@@ -110,15 +109,55 @@ class VoiceChannelManager {
       this.removeOutputStream(x);
     });
   }
+
+  // eslint-disable-next-line class-methods-use-this
+  updateChannelUsers(voiceUsers) {
+    const selfId = NetworkManager.getInstance().getSelfPeerId();
+    if (!voiceUsers.includes(selfId)) {
+      return;
+    }
+
+    const remoteUsers = voiceUsers.filter((x) => x !== selfId);
+
+    // Cleanup disconnected users
+    NetworkManager.getInstance().getCallManager().getConnectedPeers()
+      .filter((x) => !remoteUsers.includes(x))
+      .forEach((x) => NetworkManager.getInstance().getCallManager().endCall(x));
+
+    // Connect to remaining or new users
+    if (voiceUsers.length === 1) {
+      console.log('Only 1 person in voice channel');
+      return;
+    }
+    remoteUsers.forEach((x) => { NetworkManager.getInstance().connectVoice(x); });
+  }
+}
+
+class TextChannelManager {
+  constructor() {
+    this.chatting = false;
+    this.self = undefined;
+    this.bigChatBox = [];
+    this.textField = '';
+  }
+
+  getChats() {
+    return this.bigChatBox;
+  }
 }
 
 export default class GameManager {
   constructor() {
     this.voiceChannelManager = new VoiceChannelManager();
+    this.textChannelManager = new TextChannelManager();
   }
 
   getVoiceChannelManager() {
     return this.voiceChannelManager;
+  }
+
+  getTextChannelManager() {
+    return this.textChannelManager;
   }
 
   static getInstance() {
