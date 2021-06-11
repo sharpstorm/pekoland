@@ -1,11 +1,11 @@
-import UIElement from './ui-element.js';
+import UIElement, { UIAnchor } from './ui-element.js';
 import GameManager from '../managers/game-manager.js';
 
 const chatManager = GameManager.getInstance().getTextChannelManager();
 
 export default class Chatbox extends UIElement {
   constructor() {
-    super();
+    super(0, 0, 500, 170, new UIAnchor(false, false, true, true)); // Bottom Left
     this.lastState = undefined;
   }
 
@@ -28,16 +28,6 @@ export default class Chatbox extends UIElement {
       || this.lastState.chatting !== currentState.chatting
       || this.lastState.text !== currentState.text
       || this.lastState.history.length !== currentState.history.length;
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  getBoundingBox(camContext) {
-    return {
-      x: 0,
-      y: camContext.viewportHeight - 170,
-      width: 500,
-      height: 170,
-    };
   }
 
   render(ctx, camContext) {

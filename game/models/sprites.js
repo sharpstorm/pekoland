@@ -9,7 +9,7 @@ class Sprite {
 
   drawAt(ctx, x, y, width, height) {
     ctx.drawImage(this.spritesheet, this.x, this.y, this.width, this.height, x, y,
-      (width === undefined) ? this.width : width, (height === undefined) ? this.width : height);
+      (width === undefined) ? this.width : width, (height === undefined) ? this.height : height);
   }
 }
 

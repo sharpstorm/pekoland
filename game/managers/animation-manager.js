@@ -2,6 +2,9 @@ import PlayerManager from './player-manager.js';
 import MapManager from './map-manager.js';
 import GameConstants from '../game-constants.js';
 import Chatbox from '../ui/ui-chatbox.js';
+import Button from '../ui/ui-button.js';
+import { UIAnchor } from '../ui/ui-element.js';
+import SpriteManager from './sprite-manager.js';
 
 class CameraContext {
   constructor(viewportWidth, viewportHeight) {
@@ -116,6 +119,8 @@ class Renderer {
       this.cameraContext.updateViewport(this.dimens);
     }));
     this.uiElements.push(new Chatbox());
+    this.uiElements.push(new Button(10, 10, 36, 36, new UIAnchor(false, true, true, false),
+      SpriteManager.getInstance().getSprite('icon-mic')));
   }
 
   render(timestamp) {

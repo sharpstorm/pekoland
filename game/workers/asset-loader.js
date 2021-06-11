@@ -1,6 +1,6 @@
 import { loadAsset } from '../utils.js';
 import Map from '../models/map.js';
-import { AnimatableSprite, AvatarSprite, SlicedSprite } from '../models/sprites.js';
+import Sprite, { AnimatableSprite, AvatarSprite, SlicedSprite } from '../models/sprites.js';
 import MapManager from '../managers/map-manager.js';
 import SpriteManager from '../managers/sprite-manager.js';
 
@@ -41,6 +41,29 @@ export default function loadAssets() {
         MapManager.getInstance().registerMap('testMap', map1);
       });
 
-    Promise.all([load1, load2, load3]).then(resolve);
+    const load4 = loadAsset('Images/ui.png')
+      .then((x) => {
+        const spriteManager = SpriteManager.getInstance();
+        spriteManager.registerSprite('button', new Sprite(x, 1, 1, 36, 36));
+        spriteManager.registerSprite('button-shaded', new Sprite(x, 1, 39, 36, 36));
+        spriteManager.registerSprite('icon-mic', new Sprite(x, 39, 1, 36, 36));
+        spriteManager.registerSprite('icon-mic-muted', new Sprite(x, 77, 1, 36, 36));
+        spriteManager.registerSprite('icon-speaker', new Sprite(x, 115, 1, 36, 36));
+        spriteManager.registerSprite('icon-speaker-muted', new Sprite(x, 153, 1, 36, 36));
+        const longBtn = SlicedSprite.from(x, [
+          [1, 77, 18, 15],
+          [19, 77, 28, 15],
+          [47, 77, 18, 15],
+          [1, 92, 18, 2],
+          [19, 92, 28, 2],
+          [47, 92, 18, 2],
+          [1, 94, 18, 19],
+          [19, 94, 28, 19],
+          [47, 94, 18, 19],
+        ]);
+        spriteManager.registerSprite('button-long', longBtn);
+      });
+
+    Promise.all([load1, load2, load3, load4]).then(resolve);
   });
 }
