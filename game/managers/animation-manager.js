@@ -121,9 +121,13 @@ function drawTextBox(ctx, uiState) {
     ctx.fillText(uiState.text, 60, uiState.viewportHeight - 5);
 
     // chat history
-    uiState.history.forEach((x, idx) => {
-      ctx.fillText(x, 5, uiState.viewportHeight - 155 + (idx * 15));
-    });
+    for (let i = 0; i < 9; i += 1) {
+      const idx = uiState.history.length - 1 - i;
+      if (idx < 0) {
+        break;
+      }
+      ctx.fillText(uiState.history[idx], 5, uiState.viewportHeight - 155 + ((8 - i) * 15));
+    }
   }
 }
 
