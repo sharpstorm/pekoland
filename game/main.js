@@ -1,24 +1,29 @@
 import Player from './models/player.js';
+
 import PlayerManager from './managers/player-manager.js';
+import Renderer from './managers/animation-manager.js';
+import SpriteManager from './managers/sprite-manager.js';
+import WorldManager from './managers/world-manager.js';
+import GameManager from './managers/game-manager.js';
+import NetworkManager from './net/network-manager.js';
+
+import handleClientGamePacket from './net/client/game-data-handler.js';
+import buildClientGamePacket from './net/client/game-data-sender.js';
+import handleServerGamePacket from './net/server/game-data-handler.js';
+import buildServerGamePacket from './net/server/game-data-sender.js';
+import { timeout } from './utils.js';
+
+import loadAssets from './workers/asset-loader.js';
+import InputSystem from './workers/input-system.js';
 import {
   joystickWorker,
   addJoystickEventHandler,
   addChatEventHandler,
   chatWorker,
 } from './workers/joystick.js';
-import Renderer from './managers/animation-manager.js';
-import SpriteManager from './managers/sprite-manager.js';
-import NetworkManager from './net/network-manager.js';
-import handleClientGamePacket from './net/client/game-data-handler.js';
-import buildClientGamePacket from './net/client/game-data-sender.js';
-import handleServerGamePacket from './net/server/game-data-handler.js';
-import buildServerGamePacket from './net/server/game-data-sender.js';
-import { timeout } from './utils.js';
-import WorldManager from './managers/world-manager.js';
-import loadAssets from './workers/asset-loader.js';
-import GameManager from './managers/game-manager.js';
 
 const networkManager = NetworkManager.getInstance();
+const inputSystem = new InputSystem(document.getElementById('game'), document);
 
 networkManager.on('connected', () => {
   console.log('Connected to remote');
@@ -39,6 +44,7 @@ networkManager.on('callStreamOpen', ({ stream, peerId }) => {
 networkManager.on('callEnded', (peerId) => {
   GameManager.getInstance().getVoiceChannelManager().removeOutputStream(peerId);
 });
+
 networkManager.on('initialized', () => {
   if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {
     networkManager.initConnection().then(() => {
@@ -88,15 +94,17 @@ const assetSetupPromise = loadAssets();
 Promise.all([netSetupPromise, assetSetupPromise])
   .then(() => {
     console.log('setup successful');
-
-    document.addEventListener('keydown', joystickWorker);
-    document.addEventListener('keydown', chatWorker);
     document.getElementById('connecting-msg').style.display = 'none';
     document.getElementById('game-container').style.display = 'block';
+
+    inputSystem.addListener('keydown', joystickWorker);
+    inputSystem.addListener('keydown', chatWorker);
+
     Renderer.init();
     window.requestAnimationFrame(Renderer.render.bind(Renderer));
   })
-  .catch(() => {
+  .catch((err) => {
+    console.log(err);
     alert('Could not connect to partner! Please Try Again!');
     window.close();
   });
