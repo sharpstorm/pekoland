@@ -110,6 +110,9 @@ Promise.all([netSetupPromise, assetSetupPromise])
 
     uiRenderer.addElement(new Chatbox());
 
+    const menuBtn = new Button(10, 10, 36, 36, new UIAnchor(false, true, true, false),
+      SpriteManager.getInstance().getSprite('icon-hamburger'));
+
     const micBtn = new Button(174, 10, 36, 36, new UIAnchor(false, true, true, false),
       SpriteManager.getInstance().getSprite('icon-mic-muted'));
     micBtn.setVisible(false);
@@ -137,6 +140,7 @@ Promise.all([netSetupPromise, assetSetupPromise])
         micBtn.setContent(SpriteManager.getInstance().getSprite('icon-mic-muted'));
       }
     });
+    uiRenderer.addElement(menuBtn);
     uiRenderer.addElement(connectBtn);
     uiRenderer.addElement(micBtn);
 

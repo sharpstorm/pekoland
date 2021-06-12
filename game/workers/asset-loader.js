@@ -50,6 +50,7 @@ export default function loadAssets() {
         spriteManager.registerSprite('icon-mic-muted', new Sprite(x, 77, 1, 36, 36));
         spriteManager.registerSprite('icon-speaker', new Sprite(x, 115, 1, 36, 36));
         spriteManager.registerSprite('icon-speaker-muted', new Sprite(x, 153, 1, 36, 36));
+        spriteManager.registerSprite('icon-hamburger', new Sprite(x, 39, 39, 36, 36));
         const longBtn = SlicedSprite.from(x, [
           [1, 77, 18, 15],
           [19, 77, 28, 15],
