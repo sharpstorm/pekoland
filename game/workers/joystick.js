@@ -3,13 +3,10 @@ import Player from '../models/player.js';
 import MapManager from '../managers/map-manager.js';
 import Renderer from '../managers/animation-manager.js';
 import GameConstants from '../game-constants.js';
-import GameManager from '../managers/game-manager.js';
 
 const playerManager = PlayerManager.getInstance();
-const chatManager = GameManager.getInstance().getTextChannelManager();
 
 let joystickEventHandlers = [];
-let chatEventHandlers = [];
 
 function joystickWorker(e) {
   const event = window.event ? window.event : e;
@@ -68,40 +65,6 @@ function joystickWorker(e) {
   }
 }
 
-function typing(letter) {
-  chatManager.textField += letter;
-}
-
-function pushMsg() {
-  playerManager.getSelf().chat.speechBubbleCounter = 0;
-  playerManager.getSelf().chat.speechBubble = true;
-  playerManager.getSelf().chat.currentSpeech = chatManager.textField;
-  chatManager.bigChatBox.push(`${playerManager.getSelf().name}: ${playerManager.getSelf().chat.currentSpeech}`);
-  chatManager.textField = '';
-  chatEventHandlers.forEach((x) => x({
-    name: playerManager.getSelf().name,
-    msg: playerManager.getSelf().chat.currentSpeech,
-  }));
-}
-
-function chatWorker(e) {
-  if (e.key.length === 1 && chatManager.chatting) {
-    typing(e.key);
-  }
-
-  if (e.keyCode === 13 && e.altKey === true) {
-    chatManager.chatting = !chatManager.chatting;
-  }
-
-  if (e.keyCode === 13 && chatManager.chatting && chatManager.textField !== '') { // nani
-    pushMsg();
-  }
-
-  if (e.keyCode === 8 && chatManager.chatting) { // nani
-    chatManager.textField = chatManager.textField.substring(0, chatManager.textField.length - 1);
-  }
-}
-
 function joystickUpWorker(evt) {
   // const event = window.event ? window.event : e;
   return evt;
@@ -115,23 +78,9 @@ function removeJoystickEventHandler(handler) {
   joystickEventHandlers = joystickEventHandlers.filter((x) => x !== handler);
 }
 
-function addChatEventHandler(handler) {
-  chatEventHandlers.push(handler);
-}
-
-function removeChatEventHandler(handler) {
-  chatEventHandlers = chatEventHandlers.filter((x) => x !== handler);
-}
-
 export {
   joystickWorker,
   joystickUpWorker,
   addJoystickEventHandler,
   removeJoystickEventHandler,
-};
-
-export {
-  addChatEventHandler,
-  removeChatEventHandler,
-  chatWorker,
 };

@@ -50,7 +50,7 @@ function handleMove(data, conn) {
 
 function handleChat(data, conn) {
   const player = PlayerManager.getInstance().getPlayer(data.userId);
-  chatManager.bigChatBox.push(`${player.name}: ${data.message}`);
+  chatManager.addToHistory(player.name, data.message);
   player.chat.updateMessage(data.message);
   NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('chat-echo', data), conn.peer);
 }

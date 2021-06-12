@@ -1,30 +1,40 @@
 import UIElement from './ui-element.js';
 import SpriteManager from '../managers/sprite-manager.js';
+import { createElement } from './ui-utils.js';
 
 class Button extends UIElement {
-  constructor(marginX, marginY, width, height, anchor, content, background) {
+  constructor(marginX, marginY, width, height, anchor, content, background, hoverBackground) {
     super(marginX, marginY, width, height, anchor);
 
     this.content = content;
     this.background = background;
+    this.hoverBackground = hoverBackground;
     this.hover = false;
     this.visible = true;
-
-    this.cache = document.createElement('canvas');
-    this.cache.width = width;
-    this.cache.height = height;
-    this.updateCache();
+    this.initObject();
   }
 
-  updateCache() {
-    const ctx = this.cache.getContext('2d');
-    const { width, height } = this.cache;
-    ctx.clearRect(0, 0, width, height);
+  initObject() {
+    this.button = createElement('div', { className: 'game-btn' });
+    this.node.appendChild(this.button);
+    this.redraw();
+  }
 
-    if (this.background && this.background.drawAt !== undefined) {
+  redraw() {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const { width, height } = this;
+
+    if (!this.hover && this.isBackgroundValid()) {
+      this.background.drawAt(ctx, 0, 0, width, height);
+    } else if (!this.hover) {
+      SpriteManager.getInstance().getSprite('button').drawAt(ctx, 0, 0, width, height);
+    } else if (this.hover && this.isHoverBackgroundValid()) {
+      this.hoverBackground.drawAt(ctx, 0, 0, width, height);
+    } else if (this.hover && !this.isHoverBackgroundValid() && this.isBackgroundValid()) {
       this.background.drawAt(ctx, 0, 0, width, height);
     } else {
-      SpriteManager.getInstance().getSprite('button').drawAt(ctx, 0, 0, width, height);
+      SpriteManager.getInstance().getSprite('button-shaded').drawAt(ctx, 0, 0, width, height);
     }
 
     const { content } = this;
@@ -37,47 +47,35 @@ class Button extends UIElement {
       ctx.fillText(content, (width - textWidth) / 2, (height - 16) / 2 + 10);
     }
 
-    this.lastState = undefined; // Force redraw
+    this.button.style.background = `url('${canvas.toDataURL()}')`;
   }
 
   setContent(content) {
     this.content = content;
-    this.updateCache();
+    this.redraw();
+  }
+
+  setBackground(background) {
+    this.background = background;
+    this.redraw();
+  }
+
+  setHoverBackground(hoverBackground) {
+    this.hoverBackground = hoverBackground;
+    this.redraw();
+  }
+
+  isBackgroundValid() {
+    return this.background && this.background.drawAt !== undefined;
+  }
+
+  isHoverBackgroundValid() {
+    return this.hoverBackground && this.hoverBackground.drawAt !== undefined;
   }
 
   setVisible(isVisible) {
     this.visible = isVisible;
-    this.lastState = undefined;
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  getState(camContext) {
-    return {
-      viewportHeight: camContext.viewportHeight,
-      viewportWidth: camContext.viewportWidth,
-      hover: this.hover,
-    };
-  }
-
-  isDirty(camContext) {
-    const currentState = this.getState(camContext);
-    return this.lastState === undefined
-      || this.lastState.viewportHeight !== currentState.viewportHeight
-      || this.lastState.viewportWidth !== currentState.viewportWidth
-      || this.lastState.hover !== currentState.hover;
-  }
-
-  render(ctx, camContext) {
-    if (!this.visible) {
-      return;
-    }
-    const currentState = this.getState(camContext);
-
-    ctx.drawImage(this.cache, 0, 0, this.width, this.height,
-      this.resolveX(camContext.viewportWidth), this.resolveY(camContext.viewportHeight),
-      this.width, this.height);
-
-    this.lastState = currentState;
+    this.node.style.display = isVisible ? '' : 'none';
   }
 }
 

@@ -144,12 +144,24 @@ class VoiceChannelManager {
 class TextChannelManager {
   constructor() {
     this.chatting = false;
-    this.self = undefined;
     this.bigChatBox = [];
-    this.textField = '';
+    this.listeners = [];
   }
 
-  getChats() {
+  addChangeListener(handler) {
+    this.listeners.push(handler);
+  }
+
+  notifyListeners() {
+    this.listeners.forEach((x) => x(this));
+  }
+
+  addToHistory(name, msg) {
+    this.bigChatBox.push(`${name}: ${msg}`);
+    this.notifyListeners();
+  }
+
+  getHistory() {
     return this.bigChatBox;
   }
 }

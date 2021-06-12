@@ -1,78 +1,56 @@
 import UIElement, { UIAnchor } from './ui-element.js';
 import GameManager from '../managers/game-manager.js';
+import { createElement } from './ui-utils.js';
 
 const chatManager = GameManager.getInstance().getTextChannelManager();
 
 export default class Chatbox extends UIElement {
   constructor() {
     super(0, 0, 500, 170, new UIAnchor(false, false, true, true)); // Bottom Left
+    this.initObject();
+
     this.lastState = undefined;
+    this.submitListeners = [];
+    this.historyObjects = [];
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  getState(camContext) {
-    return {
-      viewportHeight: camContext.viewportHeight,
-      viewportWidth: camContext.viewportWidth,
-      chatting: chatManager.chatting,
-      text: chatManager.textField,
-      history: chatManager.bigChatBox,
-    };
+  initObject() {
+    this.node.id = 'chatbox';
+    this.inputBox = createElement('input', { id: 'chatbox-input', type: 'text' });
+    this.historyBox = createElement('div', { id: 'chatbox-history' });
+
+    this.node.appendChild(this.historyBox);
+    this.node.appendChild(
+      createElement('div', { id: 'chatbox-input-row' },
+        this.inputBox,
+        createElement('button', { id: 'chatbox-btn-send', eventListener: { click: this.triggerListeners.bind(this) } }, 'Send')),
+    );
+
+    this.inputBox.addEventListener('keydown', (evt) => {
+      if (evt.keyCode === 13) {
+        this.triggerListeners();
+      }
+    });
   }
 
-  isDirty(camContext) {
-    const currentState = this.getState(camContext);
-    return this.lastState === undefined
-      || this.lastState.viewportHeight !== currentState.viewportHeight
-      || this.lastState.viewportWidth !== currentState.viewportWidth
-      || this.lastState.chatting !== currentState.chatting
-      || this.lastState.text !== currentState.text
-      || this.lastState.history.length !== currentState.history.length;
+  addSubmitListener(listener) {
+    this.submitListeners.push(listener);
   }
 
-  render(ctx, camContext) {
-    const currentState = this.getState(camContext);
+  triggerListeners() {
+    const text = this.inputBox.value;
+    this.submitListeners.forEach((x) => x(text));
+    this.inputBox.value = '';
+  }
 
-    ctx.strokeStyle = '#FFF';
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-    ctx.lineWidth = 1;
-    ctx.font = '15px Arial';
-
-    ctx.beginPath();
-    ctx.rect(0, currentState.viewportHeight - 20, 500, 20);
-    ctx.stroke();
-    ctx.fill();
-
-    if (currentState.chatting === true) {
-      // Expand top for prev chat
-      ctx.fillRect(0, currentState.viewportHeight - 170, 500, 150);
-    }
-
-    // Plus sign behind
-    ctx.fillRect(480, currentState.viewportHeight - 20, 20, 20);
-    ctx.strokeStyle = '#FFF';
-    ctx.strokeText('+', 487, currentState.viewportHeight - 3);
-
-    // To who
-    ctx.fillRect(0, currentState.viewportHeight - 20, 50, 20);
-    ctx.font = 'normal 10px Arial';
-    ctx.fillStyle = '#FFF';
-    ctx.fillText('All', 18, currentState.viewportHeight - 5);
-
-    if (currentState.chatting === true) {
-      // typing words
-      ctx.fillText(currentState.text, 60, currentState.viewportHeight - 5);
-
-      // chat history
-      for (let i = 0; i < 9; i += 1) {
-        const idx = currentState.history.length - 1 - i;
-        if (idx < 0) {
-          break;
-        }
-        ctx.fillText(currentState.history[idx], 5,
-          currentState.viewportHeight - 155 + ((8 - i) * 15));
+  update() {
+    if (chatManager.getHistory().length !== this.historyObjects.length) {
+      for (let i = this.historyObjects.length; i < chatManager.getHistory().length; i += 1) {
+        const line = createElement('div', {}, chatManager.getHistory()[i]);
+        this.historyObjects.push(line);
+        this.historyBox.appendChild(line);
+        this.historyBox.scrollTo(0, this.historyBox.scrollHeight);
       }
     }
-    this.lastState = currentState;
   }
 }

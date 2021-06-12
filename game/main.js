@@ -18,8 +18,6 @@ import InputSystem from './workers/input-system.js';
 import {
   joystickWorker,
   addJoystickEventHandler,
-  addChatEventHandler,
-  chatWorker,
 } from './workers/joystick.js';
 
 import Chatbox from './ui/ui-chatbox.js';
@@ -84,15 +82,6 @@ addJoystickEventHandler((evt) => {
   }
 });
 
-addChatEventHandler((evt) => {
-  console.log(evt);
-  if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {
-    networkManager.send(buildClientGamePacket('chat', evt));
-  } else {
-    networkManager.send(buildServerGamePacket('chat-echo', buildClientGamePacket('chat', evt)));
-  }
-});
-
 const netSetupPromise = timeout(networkManager.setup(), 5000);
 const assetSetupPromise = loadAssets();
 Promise.all([netSetupPromise, assetSetupPromise])
@@ -102,17 +91,31 @@ Promise.all([netSetupPromise, assetSetupPromise])
     document.getElementById('game-container').style.display = 'block';
 
     inputSystem.addListener('keydown', joystickWorker);
-    inputSystem.addListener('keydown', chatWorker);
     inputSystem.addListener('click', (evt) => Renderer.propagateEvent('click', evt));
 
     const voiceChannelManager = GameManager.getInstance().getVoiceChannelManager();
     const uiRenderer = Renderer.getUILayer();
+    const playerManager = PlayerManager.getInstance();
+    const chatManager = GameManager.getInstance().getTextChannelManager();
 
-    uiRenderer.addElement(new Chatbox());
+    const chatbox = new Chatbox();
+    chatbox.addSubmitListener((msg) => {
+      chatManager.addToHistory(playerManager.getSelf().name, msg);
+      playerManager.getSelf().chat.updateMessage(msg);
+
+      if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {
+        networkManager.send(buildClientGamePacket('chat', { msg }));
+      } else {
+        networkManager.send(buildServerGamePacket('chat-echo', buildClientGamePacket('chat', { msg })));
+      }
+    });
+    chatManager.addChangeListener(() => chatbox.update());
+    uiRenderer.addElement(chatbox);
 
     const menuBtn = new Button(10, 10, 36, 36, new UIAnchor(false, true, true, false),
       SpriteManager.getInstance().getSprite('icon-hamburger'));
 
+    uiRenderer.addElement(menuBtn);
     const micBtn = new Button(174, 10, 36, 36, new UIAnchor(false, true, true, false),
       SpriteManager.getInstance().getSprite('icon-mic-muted'));
     micBtn.setVisible(false);
@@ -150,5 +153,5 @@ Promise.all([netSetupPromise, assetSetupPromise])
   .catch((err) => {
     console.log(err);
     alert('Could not connect to partner! Please Try Again!');
-    window.close();
+    // window.close();
   });

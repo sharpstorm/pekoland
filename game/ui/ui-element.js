@@ -1,3 +1,5 @@
+import { createElement } from './ui-utils.js';
+
 /* eslint-disable no-else-return */
 class UIAnchor {
   constructor(anchorTop, anchorRight, anchorBottom, anchorLeft) {
@@ -41,61 +43,46 @@ class UIElement {
     this.width = width;
     this.height = height;
     this.anchor = anchor;
-    this.eventHandlers = {};
+    this.initDOM();
   }
 
-  resolveX(viewportWidth) {
-    const alignMode = this.anchor.getXAlignMode();
-    if (alignMode === UIAnchor.AlignMode.BEGIN) {
-      return this.marginX;
-    } else if (alignMode === UIAnchor.AlignMode.MIDDLE) {
-      return ((viewportWidth - this.width) / 2) + this.marginX;
+  initDOM() {
+    this.node = createElement('div', {});
+    this.node.style.width = this.width;
+    this.node.style.height = this.height;
+    this.node.style.position = 'absolute';
+    this.anchorNode();
+  }
+
+  anchorNode() {
+    const xAlignMode = this.anchor.getXAlignMode();
+    const yAlignMode = this.anchor.getYAlignMode();
+
+    if (xAlignMode === UIAnchor.AlignMode.BEGIN) {
+      this.node.style.left = this.marginX;
+    } else if (xAlignMode === UIAnchor.AlignMode.MIDDLE) {
+      this.node.style.left = this.marginX;
+      this.node.style.right = 0;
     } else {
-      return viewportWidth - this.width - this.marginX;
+      this.node.style.right = this.marginX;
+    }
+
+    if (yAlignMode === UIAnchor.AlignMode.BEGIN) {
+      this.node.style.top = this.marginY;
+    } else if (yAlignMode === UIAnchor.AlignMode.MIDDLE) {
+      this.node.style.top = this.marginY;
+      this.node.style.bottom = 0;
+    } else {
+      this.node.style.bottom = this.marginY;
     }
   }
 
-  resolveY(viewportHeight) {
-    const alignMode = this.anchor.getYAlignMode();
-    if (alignMode === UIAnchor.AlignMode.BEGIN) {
-      return this.marginY;
-    } else if (alignMode === UIAnchor.AlignMode.MIDDLE) {
-      return ((viewportHeight - this.height) / 2) + this.marginY;
-    } else {
-      return viewportHeight - this.height - this.marginY;
-    }
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  getBoundingBox(camContext) {
-    return {
-      x: this.resolveX(camContext.viewportWidth),
-      y: this.resolveY(camContext.viewportHeight),
-      width: this.width,
-      height: this.height,
-    };
+  getDOMNode() {
+    return this.node;
   }
 
   addEventListener(evtId, handler) {
-    if (evtId in this.eventHandlers) {
-      this.eventHandlers[evtId].push(handler);
-    } else {
-      this.eventHandlers[evtId] = [handler];
-    }
-    return this;
-  }
-
-  removeEventListener(evtId, handler) {
-    if (evtId in this.eventHandlers) {
-      this.eventHandlers[evtId] = this.eventHandlers[evtId].filter((x) => x !== handler);
-    }
-    return this;
-  }
-
-  handleEvent(evtId, evt) {
-    if (evtId in this.eventHandlers) {
-      this.eventHandlers[evtId].forEach((x) => x(evt));
-    }
+    this.node.addEventListener(evtId, handler);
   }
 }
 
