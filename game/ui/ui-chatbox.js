@@ -15,7 +15,7 @@ export default class Chatbox extends UIElement {
   }
 
   initObject() {
-    this.node = createElement('div', { id: 'chatbox' });
+    this.node.id = 'chatbox';
     this.inputBox = createElement('input', { id: 'chatbox-input', type: 'text' });
     this.historyBox = createElement('div', { id: 'chatbox-history' });
 
@@ -31,10 +31,6 @@ export default class Chatbox extends UIElement {
         this.triggerListeners();
       }
     });
-  }
-
-  getDOMNode() {
-    return this.node;
   }
 
   addSubmitListener(listener) {

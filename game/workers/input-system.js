@@ -11,7 +11,14 @@ export default class InputSystem {
   }
 
   attachEvent(evtId) {
-    if (evtId === InputSystem.Events.CLICK) {
+    if (evtId === InputSystem.Events.CLICK
+      || evtId === InputSystem.Events.DOUBLE_CLICK
+      || evtId === InputSystem.Events.MOUSE_DOWN
+      || evtId === InputSystem.Events.MOUSE_UP
+      || evtId === InputSystem.Events.MOUSE_MOVE
+      || evtId === InputSystem.Events.DRAG
+      || evtId === InputSystem.Events.DRAG_START
+      || evtId === InputSystem.Events.DRAG_END) {
       this.canvas.addEventListener(evtId, this.handleClick.bind(this));
     } else {
       this.doc.addEventListener(evtId, (evt) => this.handleEvent(evtId, evt));

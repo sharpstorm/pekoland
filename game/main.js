@@ -93,7 +93,7 @@ Promise.all([netSetupPromise, assetSetupPromise])
     inputSystem.addListener('keydown', joystickWorker);
     inputSystem.addListener('click', (evt) => Renderer.propagateEvent('click', evt));
 
-    // const voiceChannelManager = GameManager.getInstance().getVoiceChannelManager();
+    const voiceChannelManager = GameManager.getInstance().getVoiceChannelManager();
     const uiRenderer = Renderer.getUILayer();
     const playerManager = PlayerManager.getInstance();
     const chatManager = GameManager.getInstance().getTextChannelManager();
@@ -112,9 +112,10 @@ Promise.all([netSetupPromise, assetSetupPromise])
     chatManager.addChangeListener(() => chatbox.update());
     uiRenderer.addElement(chatbox);
 
-    /* const menuBtn = new Button(10, 10, 36, 36, new UIAnchor(false, true, true, false),
+    const menuBtn = new Button(10, 10, 36, 36, new UIAnchor(false, true, true, false),
       SpriteManager.getInstance().getSprite('icon-hamburger'));
 
+    uiRenderer.addElement(menuBtn);
     const micBtn = new Button(174, 10, 36, 36, new UIAnchor(false, true, true, false),
       SpriteManager.getInstance().getSprite('icon-mic-muted'));
     micBtn.setVisible(false);
@@ -144,7 +145,7 @@ Promise.all([netSetupPromise, assetSetupPromise])
     });
     uiRenderer.addElement(menuBtn);
     uiRenderer.addElement(connectBtn);
-    uiRenderer.addElement(micBtn); */
+    uiRenderer.addElement(micBtn);
 
     Renderer.init();
     window.requestAnimationFrame(Renderer.render.bind(Renderer));
