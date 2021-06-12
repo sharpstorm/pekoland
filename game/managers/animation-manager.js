@@ -1,10 +1,6 @@
 import PlayerManager from './player-manager.js';
 import MapManager from './map-manager.js';
 import GameConstants from '../game-constants.js';
-import Chatbox from '../ui/ui-chatbox.js';
-import Button, { LongButton } from '../ui/ui-button.js';
-import { UIAnchor } from '../ui/ui-element.js';
-import SpriteManager from './sprite-manager.js';
 
 class CameraContext {
   constructor(viewportWidth, viewportHeight) {
@@ -87,12 +83,9 @@ class UIRenderer {
     this.uiElements = [];
   }
 
+  // eslint-disable-next-line class-methods-use-this
   init() {
-    this.uiElements.push(new Chatbox());
-    this.uiElements.push(new Button(10, 10, 36, 36, new UIAnchor(false, true, true, false),
-      SpriteManager.getInstance().getSprite('icon-mic')));
-    this.uiElements.push(new LongButton(64, 10, 100, 36, new UIAnchor(false, true, true, false), 'Connect')
-      .addEventListener('click', () => { console.log('click'); }));
+
   }
 
   render(camContext) {
@@ -103,6 +96,10 @@ class UIRenderer {
         x.render(this.uiCtx, camContext);
       }
     });
+  }
+
+  addElement(element) {
+    this.uiElements.push(element);
   }
 
   updateCanvasSize(width, height) {
@@ -221,6 +218,10 @@ class Renderer {
 
   propagateEvent(evtId, evt) {
     this.uiRenderer.propagateEvent(evtId, evt, this.cameraContext);
+  }
+
+  getUILayer() {
+    return this.uiRenderer;
   }
 
   static getInstance() {

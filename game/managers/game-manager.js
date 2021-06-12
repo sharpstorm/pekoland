@@ -131,6 +131,14 @@ class VoiceChannelManager {
     }
     remoteUsers.forEach((x) => { NetworkManager.getInstance().connectVoice(x); });
   }
+
+  isConnected() {
+    return this.connected;
+  }
+
+  isMicConnected() {
+    return this.microphoneStream !== undefined;
+  }
 }
 
 class TextChannelManager {

@@ -5,29 +5,48 @@ class Button extends UIElement {
   constructor(marginX, marginY, width, height, anchor, content, background) {
     super(marginX, marginY, width, height, anchor);
 
+    this.content = content;
+    this.background = background;
     this.hover = false;
+    this.visible = true;
 
     this.cache = document.createElement('canvas');
     this.cache.width = width;
     this.cache.height = height;
+    this.updateCache();
+  }
+
+  updateCache() {
     const ctx = this.cache.getContext('2d');
-    if (background && background.drawAt !== undefined) {
-      background.drawAt(ctx, 0, 0, width, height);
+    const { width, height } = this.cache;
+    ctx.clearRect(0, 0, width, height);
+
+    if (this.background && this.background.drawAt !== undefined) {
+      this.background.drawAt(ctx, 0, 0, width, height);
     } else {
       SpriteManager.getInstance().getSprite('button').drawAt(ctx, 0, 0, width, height);
     }
 
+    const { content } = this;
     if (content.drawAt !== undefined) {
       content.drawAt(ctx, (width - content.width) / 2, (height - content.height) / 2);
     } else if (typeof content === 'string') {
       ctx.font = '16px Arial';
       ctx.fillStyle = '#000';
       const textWidth = ctx.measureText(content).width;
-      console.log((height - 16) / 2);
-      console.log(height);
       ctx.fillText(content, (width - textWidth) / 2, (height - 16) / 2 + 10);
     }
 
+    this.lastState = undefined; // Force redraw
+  }
+
+  setContent(content) {
+    this.content = content;
+    this.updateCache();
+  }
+
+  setVisible(isVisible) {
+    this.visible = isVisible;
     this.lastState = undefined;
   }
 
@@ -49,6 +68,9 @@ class Button extends UIElement {
   }
 
   render(ctx, camContext) {
+    if (!this.visible) {
+      return;
+    }
     const currentState = this.getState(camContext);
 
     ctx.drawImage(this.cache, 0, 0, this.width, this.height,

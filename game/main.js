@@ -22,6 +22,10 @@ import {
   chatWorker,
 } from './workers/joystick.js';
 
+import Chatbox from './ui/ui-chatbox.js';
+import Button, { LongButton } from './ui/ui-button.js';
+import { UIAnchor } from './ui/ui-element.js';
+
 const networkManager = NetworkManager.getInstance();
 const inputSystem = new InputSystem(document.getElementById('ui'), document);
 
@@ -100,6 +104,41 @@ Promise.all([netSetupPromise, assetSetupPromise])
     inputSystem.addListener('keydown', joystickWorker);
     inputSystem.addListener('keydown', chatWorker);
     inputSystem.addListener('click', (evt) => Renderer.propagateEvent('click', evt));
+
+    const voiceChannelManager = GameManager.getInstance().getVoiceChannelManager();
+    const uiRenderer = Renderer.getUILayer();
+
+    uiRenderer.addElement(new Chatbox());
+
+    const micBtn = new Button(174, 10, 36, 36, new UIAnchor(false, true, true, false),
+      SpriteManager.getInstance().getSprite('icon-mic-muted'));
+    micBtn.setVisible(false);
+    micBtn.addEventListener('click', () => {
+      if (!voiceChannelManager.isMicConnected()) {
+        GameManager.getInstance().getVoiceChannelManager().activateMicrophone()
+          .then(() => { micBtn.setContent(SpriteManager.getInstance().getSprite('icon-mic')); })
+          .catch(() => { alert('Could not activate mic'); });
+      } else {
+        voiceChannelManager.disconnectMicrophone();
+        micBtn.setContent(SpriteManager.getInstance().getSprite('icon-mic-muted'));
+      }
+    });
+
+    const connectBtn = new LongButton(64, 10, 100, 36, new UIAnchor(false, true, true, false), 'Connect');
+    connectBtn.addEventListener('click', () => {
+      if (!voiceChannelManager.isConnected()) {
+        voiceChannelManager.joinVoice();
+        micBtn.setVisible(true);
+        connectBtn.setContent('Disconnect');
+      } else {
+        voiceChannelManager.disconnectVoice();
+        connectBtn.setContent('Connect');
+        micBtn.setVisible(false);
+        micBtn.setContent(SpriteManager.getInstance().getSprite('icon-mic-muted'));
+      }
+    });
+    uiRenderer.addElement(connectBtn);
+    uiRenderer.addElement(micBtn);
 
     Renderer.init();
     window.requestAnimationFrame(Renderer.render.bind(Renderer));
