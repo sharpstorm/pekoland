@@ -57,7 +57,7 @@ function handleMoveEcho(data, conn) {
 
 function handleChatEcho(data, conn) {
   const player = PlayerManager.getInstance().getPlayer(data.userId);
-  chatManager.bigChatBox.push(`${player.name}: ${data.message}`);
+  chatManager.addToHistory(player.name, data.message);
   player.chat.updateMessage(data.message);
 }
 

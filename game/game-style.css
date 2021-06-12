@@ -1,0 +1,64 @@
+#chatbox {
+  width: 500px;
+  height: 170px;
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  color: #FFF;
+}
+
+#chatbox-history {
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  flex: 1 1 0;
+  border-bottom: 1px solid #CCC;
+  overflow-y: scroll;
+}
+
+#chatbox-history::-webkit-scrollbar {
+  width: 10px;
+}
+
+#chatbox-history::-webkit-scrollbar-track {
+  background: #333;
+}
+
+#chatbox-history::-webkit-scrollbar-thumb {
+  background: #CCC;
+}
+
+#chatbox-history > div {
+  font-size: 1rem;
+  padding: 2px 8px;
+  word-break: break-all;
+}
+
+#chatbox-input-row {
+  width: 100%;
+  display: flex;
+  flex: 0 0 1.2em;
+}
+
+#chatbox-input {
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  outline: none;
+  color: #FFF;
+  padding: 4px 8px;
+  flex: 1 1 0;
+}
+
+#chatbox-btn-send {
+  background: rgba(0, 0, 0, 0.8);
+  color: #FFF;
+  border: none;
+  outline: none;
+  border-left: 1px solid #CCC;
+  padding: 0 8px;
+}
+
+#chatbox-btn-send:hover {
+  background: rgba(80, 80, 80, 0.8);
+}

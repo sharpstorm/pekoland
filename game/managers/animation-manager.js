@@ -76,50 +76,15 @@ class CameraContext {
   }
 } */
 
-class UIRenderer {
+class UILayer {
   constructor() {
-    this.uiCanvas = document.getElementById('ui');
-    this.uiCtx = this.uiCanvas.getContext('2d');
-    this.uiElements = [];
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  init() {
-
-  }
-
-  render(camContext) {
-    this.uiElements.forEach((x) => {
-      if (x.isDirty(camContext)) {
-        const box = x.getBoundingBox(camContext);
-        this.uiCtx.clearRect(box.x, box.y, box.width, box.height);
-        x.render(this.uiCtx, camContext);
-      }
-    });
+    this.domElement = document.getElementById('ui-overlay');
+    this.elements = [];
   }
 
   addElement(element) {
-    this.uiElements.push(element);
-  }
-
-  updateCanvasSize(width, height) {
-    this.uiCanvas.width = width;
-    this.uiCanvas.height = height;
-  }
-
-  propagateEvent(evtId, evt, camContext) {
-    this.uiElements.forEach((x) => {
-      if (evt.x && evt.y) {
-        // Bounded event
-        const box = x.getBoundingBox(camContext);
-        if (evt.x >= box.x && evt.x <= box.x + box.width
-          && evt.y >= box.y && evt.y <= box.y + box.height) {
-          x.handleEvent(evtId, evt);
-        }
-      } else {
-        x.handleEvent(evtId, evt);
-      }
-    });
+    this.elements.push(element);
+    this.domElement.appendChild(element.getDOMNode());
   }
 }
 
@@ -131,7 +96,7 @@ class Renderer {
     this.haltRender = false;
     this.canvas = document.getElementById('game');
     this.ctx = this.canvas.getContext('2d', { alpha: false });
-    this.uiRenderer = new UIRenderer();
+    this.uiLayer = new UILayer();
 
     this.dimens = {
       width: this.canvas.width,
@@ -159,7 +124,6 @@ class Renderer {
       this.synchronizeCanvasSize();
       this.cameraContext.updateViewport(this.dimens);
     }));
-    this.uiRenderer.init();
   }
 
   render(timestamp) {
@@ -186,9 +150,6 @@ class Renderer {
       player.animate(delta, majorUpdate);
     });
 
-    // Draw UI
-    this.uiRenderer.render(camContext);
-
     // Update Camera
     camContext.animate(delta);
 
@@ -213,15 +174,10 @@ class Renderer {
   synchronizeCanvasSize() {
     this.canvas.width = this.dimens.width;
     this.canvas.height = this.dimens.height;
-    this.uiRenderer.updateCanvasSize(this.dimens.width, this.dimens.height);
-  }
-
-  propagateEvent(evtId, evt) {
-    this.uiRenderer.propagateEvent(evtId, evt, this.cameraContext);
   }
 
   getUILayer() {
-    return this.uiRenderer;
+    return this.uiLayer;
   }
 
   static getInstance() {
