@@ -75,6 +75,28 @@ class UIElement {
       height: this.height,
     };
   }
+
+  addEventListener(evtId, handler) {
+    if (evtId in this.eventHandlers) {
+      this.eventHandlers[evtId].push(handler);
+    } else {
+      this.eventHandlers[evtId] = [handler];
+    }
+    return this;
+  }
+
+  removeEventListener(evtId, handler) {
+    if (evtId in this.eventHandlers) {
+      this.eventHandlers[evtId] = this.eventHandlers[evtId].filter((x) => x !== handler);
+    }
+    return this;
+  }
+
+  handleEvent(evtId, evt) {
+    if (evtId in this.eventHandlers) {
+      this.eventHandlers[evtId].forEach((x) => x(evt));
+    }
+  }
 }
 
 export { UIElement as default, UIAnchor };

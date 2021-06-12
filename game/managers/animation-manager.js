@@ -2,7 +2,7 @@ import PlayerManager from './player-manager.js';
 import MapManager from './map-manager.js';
 import GameConstants from '../game-constants.js';
 import Chatbox from '../ui/ui-chatbox.js';
-import Button from '../ui/ui-button.js';
+import Button, { LongButton } from '../ui/ui-button.js';
 import { UIAnchor } from '../ui/ui-element.js';
 import SpriteManager from './sprite-manager.js';
 
@@ -121,6 +121,8 @@ class Renderer {
     this.uiElements.push(new Chatbox());
     this.uiElements.push(new Button(10, 10, 36, 36, new UIAnchor(false, true, true, false),
       SpriteManager.getInstance().getSprite('icon-mic')));
+    this.uiElements.push(new LongButton(64, 10, 100, 36, new UIAnchor(false, true, true, false), 'Connect')
+      .addEventListener('click', () => { console.log('click'); }));
   }
 
   render(timestamp) {
@@ -182,6 +184,21 @@ class Renderer {
     this.canvas.height = this.dimens.height;
     this.uiCanvas.width = this.dimens.width;
     this.uiCanvas.height = this.dimens.height;
+  }
+
+  propagateEvent(evtId, evt) {
+    this.uiElements.forEach((x) => {
+      if (evt.x && evt.y) {
+        // Bounded event
+        const box = x.getBoundingBox(this.getCameraContext());
+        if (evt.x >= box.x && evt.x <= box.x + box.width
+          && evt.y >= box.y && evt.y <= box.y + box.height) {
+          x.handleEvent(evtId, evt);
+        }
+      } else {
+        x.handleEvent(evtId, evt);
+      }
+    });
   }
 
   static getInstance() {

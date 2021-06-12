@@ -23,7 +23,7 @@ import {
 } from './workers/joystick.js';
 
 const networkManager = NetworkManager.getInstance();
-const inputSystem = new InputSystem(document.getElementById('game'), document);
+const inputSystem = new InputSystem(document.getElementById('ui'), document);
 
 networkManager.on('connected', () => {
   console.log('Connected to remote');
@@ -99,6 +99,7 @@ Promise.all([netSetupPromise, assetSetupPromise])
 
     inputSystem.addListener('keydown', joystickWorker);
     inputSystem.addListener('keydown', chatWorker);
+    inputSystem.addListener('click', (evt) => Renderer.propagateEvent('click', evt));
 
     Renderer.init();
     window.requestAnimationFrame(Renderer.render.bind(Renderer));

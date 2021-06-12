@@ -1,9 +1,8 @@
 import UIElement from './ui-element.js';
-import Sprite from '../models/sprites.js';
 import SpriteManager from '../managers/sprite-manager.js';
 
-export default class Button extends UIElement {
-  constructor(marginX, marginY, width, height, anchor, content) {
+class Button extends UIElement {
+  constructor(marginX, marginY, width, height, anchor, content, background) {
     super(marginX, marginY, width, height, anchor);
 
     this.hover = false;
@@ -12,15 +11,21 @@ export default class Button extends UIElement {
     this.cache.width = width;
     this.cache.height = height;
     const ctx = this.cache.getContext('2d');
-    SpriteManager.getInstance().getSprite('button').drawAt(ctx, 0, 0, width, height);
+    if (background && background.drawAt !== undefined) {
+      background.drawAt(ctx, 0, 0, width, height);
+    } else {
+      SpriteManager.getInstance().getSprite('button').drawAt(ctx, 0, 0, width, height);
+    }
 
-    if (content instanceof Sprite) {
+    if (content.drawAt !== undefined) {
       content.drawAt(ctx, (width - content.width) / 2, (height - content.height) / 2);
     } else if (typeof content === 'string') {
-      const textWidth = ctx.measureText(content).width;
       ctx.font = '16px Arial';
-      ctx.fillStyle = 'white';
-      ctx.fillText(content, (width - textWidth) / 2, (height - 16) / 2);
+      ctx.fillStyle = '#000';
+      const textWidth = ctx.measureText(content).width;
+      console.log((height - 16) / 2);
+      console.log(height);
+      ctx.fillText(content, (width - textWidth) / 2, (height - 16) / 2 + 10);
     }
 
     this.lastState = undefined;
@@ -44,8 +49,6 @@ export default class Button extends UIElement {
   }
 
   render(ctx, camContext) {
-    console.log(this.getBoundingBox(camContext));
-    console.log(camContext);
     const currentState = this.getState(camContext);
 
     ctx.drawImage(this.cache, 0, 0, this.width, this.height,
@@ -55,3 +58,11 @@ export default class Button extends UIElement {
     this.lastState = currentState;
   }
 }
+
+class LongButton extends Button {
+  constructor(marginX, marginY, width, height, anchor, content) {
+    super(marginX, marginY, width, height, anchor, content, SpriteManager.getInstance().getSprite('button-long'));
+  }
+}
+
+export { Button as default, LongButton };
