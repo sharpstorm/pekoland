@@ -80,6 +80,52 @@ class CameraContext {
   }
 } */
 
+class UIRenderer {
+  constructor() {
+    this.uiCanvas = document.getElementById('ui');
+    this.uiCtx = this.uiCanvas.getContext('2d');
+    this.uiElements = [];
+  }
+
+  init() {
+    this.uiElements.push(new Chatbox());
+    this.uiElements.push(new Button(10, 10, 36, 36, new UIAnchor(false, true, true, false),
+      SpriteManager.getInstance().getSprite('icon-mic')));
+    this.uiElements.push(new LongButton(64, 10, 100, 36, new UIAnchor(false, true, true, false), 'Connect')
+      .addEventListener('click', () => { console.log('click'); }));
+  }
+
+  render(camContext) {
+    this.uiElements.forEach((x) => {
+      if (x.isDirty(camContext)) {
+        const box = x.getBoundingBox(camContext);
+        this.uiCtx.clearRect(box.x, box.y, box.width, box.height);
+        x.render(this.uiCtx, camContext);
+      }
+    });
+  }
+
+  updateCanvasSize(width, height) {
+    this.uiCanvas.width = width;
+    this.uiCanvas.height = height;
+  }
+
+  propagateEvent(evtId, evt, camContext) {
+    this.uiElements.forEach((x) => {
+      if (evt.x && evt.y) {
+        // Bounded event
+        const box = x.getBoundingBox(camContext);
+        if (evt.x >= box.x && evt.x <= box.x + box.width
+          && evt.y >= box.y && evt.y <= box.y + box.height) {
+          x.handleEvent(evtId, evt);
+        }
+      } else {
+        x.handleEvent(evtId, evt);
+      }
+    });
+  }
+}
+
 let instance;
 class Renderer {
   constructor() {
@@ -87,9 +133,8 @@ class Renderer {
     this.lastMajorUpdate = 0;
     this.haltRender = false;
     this.canvas = document.getElementById('game');
-    this.uiCanvas = document.getElementById('ui');
     this.ctx = this.canvas.getContext('2d', { alpha: false });
-    this.uiCtx = this.uiCanvas.getContext('2d');
+    this.uiRenderer = new UIRenderer();
 
     this.dimens = {
       width: this.canvas.width,
@@ -98,7 +143,6 @@ class Renderer {
     this.lastUIState = undefined;
 
     this.cameraContext = new CameraContext(this.dimens.width, this.dimens.height);
-    this.uiElements = [];
   }
 
   init() {
@@ -118,11 +162,7 @@ class Renderer {
       this.synchronizeCanvasSize();
       this.cameraContext.updateViewport(this.dimens);
     }));
-    this.uiElements.push(new Chatbox());
-    this.uiElements.push(new Button(10, 10, 36, 36, new UIAnchor(false, true, true, false),
-      SpriteManager.getInstance().getSprite('icon-mic')));
-    this.uiElements.push(new LongButton(64, 10, 100, 36, new UIAnchor(false, true, true, false), 'Connect')
-      .addEventListener('click', () => { console.log('click'); }));
+    this.uiRenderer.init();
   }
 
   render(timestamp) {
@@ -150,13 +190,7 @@ class Renderer {
     });
 
     // Draw UI
-    this.uiElements.forEach((x) => {
-      if (x.isDirty(camContext)) {
-        const box = x.getBoundingBox(camContext);
-        this.uiCtx.clearRect(box.x, box.y, box.width, box.height);
-        x.render(this.uiCtx, camContext);
-      }
-    });
+    this.uiRenderer.render(camContext);
 
     // Update Camera
     camContext.animate(delta);
@@ -182,23 +216,11 @@ class Renderer {
   synchronizeCanvasSize() {
     this.canvas.width = this.dimens.width;
     this.canvas.height = this.dimens.height;
-    this.uiCanvas.width = this.dimens.width;
-    this.uiCanvas.height = this.dimens.height;
+    this.uiRenderer.updateCanvasSize(this.dimens.width, this.dimens.height);
   }
 
   propagateEvent(evtId, evt) {
-    this.uiElements.forEach((x) => {
-      if (evt.x && evt.y) {
-        // Bounded event
-        const box = x.getBoundingBox(this.getCameraContext());
-        if (evt.x >= box.x && evt.x <= box.x + box.width
-          && evt.y >= box.y && evt.y <= box.y + box.height) {
-          x.handleEvent(evtId, evt);
-        }
-      } else {
-        x.handleEvent(evtId, evt);
-      }
-    });
+    this.uiRenderer.propagateEvent(evtId, evt, this.cameraContext);
   }
 
   static getInstance() {
