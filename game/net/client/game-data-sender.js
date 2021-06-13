@@ -1,59 +1,30 @@
-/* eslint-disable quote-props */
-
-import PlayerManager from '../../managers/player-manager.js';
-
-function buildEmptyPacket(opCode) {
-  return { opCode };
-}
-
-function buildSpawnRequest(opCode, data) {
-  return {
-    opCode,
-    name: data.name,
-    userId: data.userId,
-  };
-}
-
-function buildMoveUpdate(opCode, data) {
-  return {
-    opCode,
-    direction: data.id,
-    userId: PlayerManager.getInstance().getSelfId(),
-    x: data.x,
-    y: data.y,
-  };
-}
-
-function buildChatUpdate(opCode, data) {
-  return {
-    opCode,
-    userId: PlayerManager.getInstance().getSelfId(),
-    message: data.msg,
-  };
-}
-
-function buildCheckersUpdate(opCode, data) {
-  return {
-    opCode,
-    from: data.from,
-    player1: data.player1,
-    player2: data.player2,
-    action: data.action,
-  };
-}
-
-const handlers = {
-  'handshake': buildEmptyPacket,
-  'spawn-request': buildSpawnRequest,
-  'move': buildMoveUpdate,
-  'chat': buildChatUpdate,
-  'checkers': buildCheckersUpdate,
-};
+import PlayerManager from '../../managers/player-manager.js'
 
 export default function buildGameDataPacket(opCode, data) {
-  if (opCode in handlers) {
-    return handlers[opCode](opCode, data);
+  if (opCode === 'handshake' || opCode === 'spawn-request') {
+    return {
+      opCode,
+      data
+    };
+  } else if (opCode === 'move') {
+    return {
+      opCode,
+      direction: data.id,
+      name: PlayerManager.getInstance().getSelfName(),
+      x: data.x,
+      y: data.y,
+    };
+  } 
+
+  else if (opCode === 'chat'){
+    return{
+      opCode,
+      message: data.msg,
+      name: PlayerManager.getInstance().getSelfName(),
+    };
   }
-  console.log(`[ClientSender] Unknown Op Code: ${opCode}`);
-  return undefined;
+
+  else {
+    console.log('unknown op code: ' + opCode);
+  }
 }

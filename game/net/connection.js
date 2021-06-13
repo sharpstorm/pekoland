@@ -1,14 +1,15 @@
-/* eslint-disable no-extra-bind */
+import { timeout } from './utils.js';
 
-import { timeout } from '../utils.js';
-
+const configuration = {
+  iceServers: [{urls: 'stun:stun.l.google.com:19302'}]
+};
 const CONN_TIMEOUT = 10000;
 
-// https://peerjs.com/docs.html#api
+//https://peerjs.com/docs.html#api
 
 class Connection {
   constructor(client, target) {
-    this.id = target;
+    this.id = 
     this.client = client;
     this.target = target;
     this.conn = undefined;
@@ -18,7 +19,7 @@ class Connection {
   connect() {
     this.state = Connection.State.CONNECTING;
     return new Promise((resolve, reject) => {
-      timeout(new Promise(((res) => {
+      timeout(new Promise(((res, rej) => {
         this.conn = this.client.connect(this.target);
         this.conn.on('open', () => {
           this.conn.on('close', () => {
@@ -50,7 +51,7 @@ class Connection {
   }
 
   handlerAdapter(handler) {
-    return ((data) => {
+    return (data => {
       handler(data, this);
     }).bind(this);
   }
@@ -60,8 +61,8 @@ Connection.State = {
   CREATED: 0,
   CONNECTING: 1,
   CONNECTED: 2,
-  DEAD: 3,
-};
+  DEAD: 3
+}
 
 class BroadcastConnection {
   constructor() {
@@ -86,40 +87,37 @@ class BroadcastConnection {
     if (peerId in this.connections) {
       this.connections[peerId].close();
       delete this.connections[peerId];
-      this.cleanupHandlers.forEach((x) => x(peerId));
+      this.cleanupHandlers.forEach(x => x(peerId));
     }
   }
 
   send(data) {
-    Object.values(this.connections).forEach((conn) => conn.send(data));
+    Object.values(this.connections).forEach(conn => conn.send(data));
   }
 
   sendAllExcept(data, peerId) {
-    Object.values(this.connections).forEach((conn) => {
+    Object.values(this.connections).forEach(conn => { 
       if (conn.peer === peerId) return;
-      conn.send(data);
+      conn.send(data)
     });
   }
 
   setDataHandler(handler) {
     this.dataHandler = handler;
-    Object.values(this.connections).forEach(((conn) => {
+    Object.values(this.connections).forEach((conn => {
       conn.on('data', this.handlerAdapter(conn));
     }).bind(this));
   }
 
   handlerAdapter(conn) {
-    return ((data) => this.dataHandler(data, conn)).bind(this);
+    return (data => this.dataHandler(data, conn)).bind(this);
   }
 
   addCleanupHandler(handler) {
-    const id = this.cleanupHandlers.length;
+    let id = this.cleanupHandlers.length;
     this.cleanupHandlers.push(handler);
     return id;
   }
 }
 
-export {
-  Connection as default,
-  BroadcastConnection,
-};
+export { Connection as default, BroadcastConnection }

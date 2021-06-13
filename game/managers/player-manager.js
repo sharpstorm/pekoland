@@ -1,17 +1,18 @@
 let instance;
 
 export default class PlayerManager {
+
   constructor() {
     this.players = {};
     this.self = undefined;
   }
 
   addPlayer(player) {
-    this.players[player.userId] = player;
+    this.players[player.name] = player;
   }
 
-  setSelf(userId) {
-    this.self = userId;
+  setSelf(playerName) {
+    this.self = playerName;
   }
 
   getSelf() {
@@ -19,10 +20,6 @@ export default class PlayerManager {
   }
 
   getSelfName() {
-    return this.players[this.self].name;
-  }
-
-  getSelfId() {
     return this.self;
   }
 
@@ -30,13 +27,13 @@ export default class PlayerManager {
     return Object.values(this.players);
   }
 
-  getPlayer(userId) {
-    return this.players[userId];
+  getPlayer(name) {
+    return this.players[name];
   }
 
-  removePlayer(userId) {
-    if (this.players[userId] !== undefined) {
-      delete this.players[userId];
+  removePlayer(name) {
+    if (this.players[name] !== undefined) {
+      delete this.players[name];
     }
   }
 

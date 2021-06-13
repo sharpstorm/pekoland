@@ -1,8 +1,7 @@
-import React, { useEffect } from 'react';
-import { useHistory, Link } from 'react-router-dom';
-// eslint-disable-next-line import/no-unresolved
+import React, { Fragment, useState, useEffect } from 'react';
+import { Button } from './forms/form-components'
 import { useIdentityContext } from 'react-netlify-identity-auth';
-import { Button } from './forms/form-components';
+import { useHistory, Link } from 'react-router-dom';
 
 export default function HomeView() {
   const identity = useIdentityContext();
@@ -20,10 +19,10 @@ export default function HomeView() {
   }, [identity.ready]);
 
   return (
-    <div className="panel panel-sm panel-dark flexbox flex-col" style={{ textAlign: 'center', paddingBottom: '16px' }}>
+    <div className='panel panel-sm panel-dark flexbox flex-col' style={{textAlign: 'center', paddingBottom: '16px'}}>
       <h1>Home</h1>
-      <Link to="/launchgame"><Button className="btn-primary">Launch Game</Button></Link>
-      <Button className="btn-accent" style={{ margin: '8px 0' }} onClick={logout}>Logout</Button>
+      <Link to='/launchgame'><Button className='btn-primary'>Launch Game</Button></Link>
+      <Button className='btn-accent' style={{margin: '8px 0'}} onClick={logout}>Logout</Button>
     </div>
   );
 }

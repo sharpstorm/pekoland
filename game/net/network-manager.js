@@ -1,12 +1,10 @@
-/* eslint-disable no-extra-bind */
-
 import ConfigStore from './config-store.js';
 import Connection, { BroadcastConnection } from './connection.js';
 
 const WEBRTC_CONFIG = {
-  iceServers: [
-    { url: 'stun:stun.l.google.com:19302' },
-  ],
+  'iceServers': [
+    { url: 'stun:stun.l.google.com:19302' }
+  ]
 };
 
 let instance;
@@ -20,19 +18,16 @@ export default class NetworkManager {
   }
 
   setup() {
-    const configPromise = this.configStore.updateConfig().then((() => {
+    let configPromise = this.configStore.updateConfig().then((() => {
       this.configStore.freeze();
-      this.mode = (this.configStore.opMode === ConfigStore.Mode.SERVER)
-        ? NetworkManager.Mode.SERVER : NetworkManager.Mode.CLIENT;
-
+      this.mode = (this.configStore.opMode === ConfigStore.Mode.SERVER) ? NetworkManager.Mode.SERVER : NetworkManager.Mode.CLIENT;
       this.emitEvent(NetworkManager.Events.MODE_CHANGED, this.mode);
     }).bind(this));
-    const peerPromise = new Promise(((resolve) => {
-      // eslint-disable-next-line no-undef
+    let peerPromise = new Promise(((resolve) => {
       this.peer = new Peer(WEBRTC_CONFIG);
       this.peer.on('open', ((id) => {
         this.peerId = id;
-        console.log(`[NetworkManager] My Peer ID: ${id}`);
+        console.log('[NetworkManager] My Peer ID: ' + id);
         if (this.mode === NetworkManager.Mode.SERVER) {
           this.hookServerHandlers();
         }
@@ -73,20 +68,18 @@ export default class NetworkManager {
   }
 
   initConnection() {
-    let error;
     if (this.state < NetworkManager.State.INITIALIZED) {
-      error = '[NetworkManager] Library has not finished initialising';
+      console.error('[NetworkManager] Library has not finished initialising');
+      return;
     } else if (this.state === NetworkManager.State.CONNECTING) {
-      error = '[NetworkManager] Currently already attempting to connect';
+      console.error('[NetworkManager] Currently already attempting to connect');
+      return;
     } else if (this.connection || this.state > NetworkManager.State.INITIALIZED) {
-      error = '[NetworkManager] A Connection is already established!';
+      console.error('[NetworkManager] A Connection is already established!');
+      return;
     } else if (!this.configStore.peerConnectionString) {
-      error = '[NetworkManager] Partner Configuration Not Set';
-    }
-
-    if (error) {
-      console.error(error);
-      return undefined;
+      console.error('[NetworkManager] Partner Configuration Not Set');
+      return;
     }
 
     this.emitEvent(NetworkManager.Events.CONNECT);
@@ -96,10 +89,10 @@ export default class NetworkManager {
       this.state = NetworkManager.State.READY;
       this.emitEvent(NetworkManager.Events.CONNECTED);
     }).bind(this))
-      .catch(() => {
-        this.state = NetworkManager.State.INITIALIZED;
-        this.emitEvent(NetworkManager.Events.CONNECTION_FAILED);
-      });
+    .catch(err => {
+      this.state = NetworkManager.State.INITIALIZED;
+      this.emitEvent(NetworkManager.Events.CONNECTION_FAILED);
+    });
   }
 
   getOperationMode() {
@@ -149,14 +142,14 @@ NetworkManager.State = {
   INITIALIZED: 1,
   CONNECTING: 2,
   READY: 3,
-  DEAD: 4,
-};
+  DEAD: 4
+}
 
 NetworkManager.Mode = {
   UNSET: 0,
   SERVER: 1,
-  CLIENT: 2,
-};
+  CLIENT: 2
+}
 
 NetworkManager.Events = {
   MODE_CHANGED: 'modeChanged',
@@ -165,4 +158,4 @@ NetworkManager.Events = {
   CONNECTED: 'connected',
   CLIENT_CONNECTED: 'clientConnected',
   CONNECTION_FAILED: 'connectionFailed',
-};
+}

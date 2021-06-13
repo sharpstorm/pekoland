@@ -3,20 +3,18 @@
 const routes = /(confirmation|invite|recovery|email_change|access)_token=([^&]+)/;
 const hashReplace = /^#\/?/;
 
-export default function parseTokenFromLocation() {
+export function parseTokenFromLocation() {
   if (!document?.location?.hash) {
-    return null;
+    return null
   }
-  const hash = document.location.hash.replace(hashReplace, '');
+  const hash = document.location.hash.replace(hashReplace, '')
 
   try {
-    if (window) {
-      window.history.pushState(
-        '',
-        document.title,
-        window.location.pathname + window.location.search,
-      );
-    }
+    window && window.history.pushState(
+      '',
+      document.title,
+      window.location.pathname + window.location.search
+    );
   } catch (_) {
     window.location.href.substr(0, window.location.href.indexOf('#'));
   }
@@ -26,9 +24,9 @@ export default function parseTokenFromLocation() {
   if (matchesActionHashes) {
     return ({
       type: matchesActionHashes[1],
-      token: matchesActionHashes[2],
-    });
+      token: matchesActionHashes[2]
+    })
   }
 
-  return null;
+  return null
 }

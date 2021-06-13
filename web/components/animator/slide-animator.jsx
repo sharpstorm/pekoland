@@ -1,5 +1,3 @@
-/* eslint-disable no-useless-computed-key */
-/* eslint-disable no-underscore-dangle */
 /* https://medium.com/onfido-tech/animations-with-react-router-8e97222e25e1 */
 
 import React from 'react';
@@ -13,7 +11,7 @@ export default class SlideAnimator extends React.Component {
     this.state = {
       animating: false,
       position: SlideAnimator.CENTER,
-      animatePrepare: false,
+      animatePrepare: false
     };
 
     this.startAnimation = this.startAnimation.bind(this);
@@ -28,16 +26,58 @@ export default class SlideAnimator extends React.Component {
     }
   }
 
+  componentWillUnmount() {
+    if (this.node) {
+      this.node.removeEventListener('transitionend', this.onTransitionEnd);
+    }
+  }
+
   componentDidUpdate(prevProps) {
     if (this.props.position !== prevProps.position) {
       this.startAnimation(this.props.position, this.props.animationCallback);
     }
   }
 
-  componentWillUnmount() {
-    if (this.node) {
-      this.node.removeEventListener('transitionend', this.onTransitionEnd);
+  startAnimation(position, animationCallback) {
+    const noAnimate = position === SlideAnimator.CENTER;
+    const animatingOut = [SlideAnimator.TO_LEFT, SlideAnimator.TO_RIGHT, SlideAnimator.TO_TOP, SlideAnimator.TO_BOTTOM].includes(position);
+    const currentlyIn = [
+      SlideAnimator.CENTER,
+      SlideAnimator.FROM_LEFT,
+      SlideAnimator.FROM_RIGHT,
+      SlideAnimator.FROM_TOP,
+      SlideAnimator.FROM_BOTTOM
+    ].includes(this.state.position);
+    if (noAnimate || (currentlyIn && animatingOut)) {
+      // in these cases we don't need to prepare our animation at all, we can just
+      // run straight into it
+      this._animationCallback = animationCallback;
+      return this.setState({
+        animatePrepare: false,
+        position
+      });
     }
+
+    this._animationCallback = this.postPrepareAnimation;
+    // in case the transition fails, we also post-prepare after some ms (whichever
+    // runs first should cancel the other)
+    this._postPrepareTimeout = setTimeout(this.postPrepareAnimation, 500);
+
+    this.setState({
+      animating: true,
+      animatePrepare: true,
+      position
+    });
+  }
+
+  postPrepareAnimation() {
+    clearTimeout(this._postPrepareTimeout);
+    this._animationCallback = null;
+
+    this.setState(
+      { animatePrepare: false },
+      () => (this._animationCallback = this.props.animationCallback)
+    );
   }
 
   onTransitionEnd(e) {
@@ -54,78 +94,33 @@ export default class SlideAnimator extends React.Component {
     else this.setState({ animating: false });
   }
 
-  startAnimation(position, animationCallback) {
-    const noAnimate = position === SlideAnimator.CENTER;
-    const animatingOut = [SlideAnimator.TO_LEFT, SlideAnimator.TO_RIGHT,
-      SlideAnimator.TO_TOP, SlideAnimator.TO_BOTTOM].includes(position);
-
-    const currentlyIn = [
-      SlideAnimator.CENTER,
-      SlideAnimator.FROM_LEFT,
-      SlideAnimator.FROM_RIGHT,
-      SlideAnimator.FROM_TOP,
-      SlideAnimator.FROM_BOTTOM,
-    ].includes(this.state.position);
-    if (noAnimate || (currentlyIn && animatingOut)) {
-      // in these cases we don't need to prepare our animation at all, we can just
-      // run straight into it
-      this._animationCallback = animationCallback;
-      this.setState({
-        animatePrepare: false,
-        position,
-      });
-      return;
-    }
-
-    this._animationCallback = this.postPrepareAnimation;
-    // in case the transition fails, we also post-prepare after some ms (whichever
-    // runs first should cancel the other)
-    this._postPrepareTimeout = setTimeout(this.postPrepareAnimation, 500);
-
-    this.setState({
-      animating: true,
-      animatePrepare: true,
-      position,
-    });
-  }
-
-  postPrepareAnimation() {
-    clearTimeout(this._postPrepareTimeout);
-    this._animationCallback = null;
-
-    this.setState(
-      { animatePrepare: false },
-      () => { this._animationCallback = this.props.animationCallback; },
-    );
-  }
-
   render() {
     return (
       <div
-        ref={(node) => { this.node = node; }}
+        ref={node => (this.node = node)}
         className={classNames('slideable', {
           ['to']: [SlideAnimator.TO_LEFT, SlideAnimator.TO_RIGHT, SlideAnimator.TO_BOTTOM, SlideAnimator.TO_TOP].includes(
-            this.state.position,
+            this.state.position
           ),
           ['from']: [SlideAnimator.FROM_LEFT, SlideAnimator.FROM_RIGHT, SlideAnimator.FROM_BOTTOM, SlideAnimator.FROM_TOP].includes(
-            this.state.position,
+            this.state.position
           ),
           ['right']: [SlideAnimator.TO_RIGHT, SlideAnimator.FROM_RIGHT].includes(
-            this.state.position,
+            this.state.position
           ),
           ['left']: [SlideAnimator.TO_LEFT, SlideAnimator.FROM_LEFT].includes(
-            this.state.position,
+            this.state.position
           ),
           ['top']: [SlideAnimator.TO_TOP, SlideAnimator.FROM_TOP].includes(
-            this.state.position,
+            this.state.position
           ),
           ['bottom']: [SlideAnimator.TO_BOTTOM, SlideAnimator.FROM_BOTTOM].includes(
-            this.state.position,
+            this.state.position
           ),
-          ['prepare']: this.state.animatePrepare,
+          ['prepare']: this.state.animatePrepare
         })}
         data-qa-loading={Boolean(
-          this.props['data-qa-loading'] || this.state.animating,
+          this.props['data-qa-loading'] || this.state.animating
         )}
       >
         <div className={this.props.className}>{this.props.children}</div>

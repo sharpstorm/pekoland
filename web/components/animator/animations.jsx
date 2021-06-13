@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable react/no-unused-state */
 import React from 'react';
 import SlideAnimator from './slide-animator';
 import FadeAnimator from './fade-animator';
@@ -14,7 +12,7 @@ class AnimSlideOut extends React.Component {
       curUniqId: props.uniqId,
       prevChild: null,
       prevUniqId: null,
-      animationCallback: null,
+      animationCallback: null
     };
   }
 
@@ -29,7 +27,7 @@ class AnimSlideOut extends React.Component {
         curUniqId: uniqId,
         prevChild: prevProps.children,
         prevUniqId,
-        animationCallback: this.swapChildren.bind(this),
+        animationCallback: this.swapChildren
       });
       if (this.props.fastForward) {
         this.setState({
@@ -37,7 +35,7 @@ class AnimSlideOut extends React.Component {
           curChild: this.props.children,
           prevChild: null,
           prevUniqId,
-          animationCallback: null,
+          animationCallback: null
         });
         this.callback();
       }
@@ -47,20 +45,20 @@ class AnimSlideOut extends React.Component {
         curChild: this.props.children,
         prevChild: null,
         prevUniqId,
-        animationCallback: this.swapChildren.bind(this),
+        animationCallback: this.swapChildren
       });
     }
   }
 
-  swapChildren() {
+  swapChildren = () => {
     this.setState({
       childPosition: SlideAnimator.FROM_RIGHT,
       prevChild: null,
       prevUniqId: null,
-      animationCallback: null,
+      animationCallback: null
     });
     this.callback();
-  }
+  };
 
   callback() {
     if (this.props.onChange !== undefined) {
@@ -90,7 +88,7 @@ class AnimSlideUp extends React.Component {
       curUniqId: props.uniqId,
       prevChild: null,
       prevUniqId: null,
-      animationCallback: null,
+      animationCallback: null
     };
   }
 
@@ -105,7 +103,7 @@ class AnimSlideUp extends React.Component {
         curUniqId: uniqId,
         prevChild: prevProps.children,
         prevUniqId,
-        animationCallback: this.swapChildren.bind(this),
+        animationCallback: this.swapChildren
       });
       if (this.props.fastForward) {
         this.swapChildren();
@@ -113,14 +111,14 @@ class AnimSlideUp extends React.Component {
     }
   }
 
-  swapChildren() {
+  swapChildren = () => {
     this.setState({
       childPosition: SlideAnimator.FROM_TOP,
       prevChild: null,
       prevUniqId: null,
-      animationCallback: null,
+      animationCallback: null
     });
-  }
+  };
 
   render() {
     return (
@@ -144,7 +142,7 @@ class AnimCrossFade extends React.Component {
       curUniqId: props.uniqId,
       prevChild: null,
       prevUniqId: null,
-      animationCallback: null,
+      animationCallback: null
     };
   }
 
@@ -159,7 +157,7 @@ class AnimCrossFade extends React.Component {
         curUniqId: uniqId,
         prevChild: prevProps.children,
         prevUniqId,
-        animationCallback: this.swapChildren.bind(this),
+        animationCallback: this.swapChildren
       });
       if (this.props.fastForward) {
         this.swapChildren();
@@ -170,22 +168,22 @@ class AnimCrossFade extends React.Component {
         curChild: this.props.children,
         prevChild: null,
         prevUniqId: null,
-        animationCallback: this.swapChildren.bind(this),
+        animationCallback: this.swapChildren
       });
     }
   }
 
-  swapChildren() {
+  swapChildren = () => {
     this.setState({
       childState: FadeAnimator.OPAQUE,
       prevChild: null,
       prevUniqId: null,
-      animationCallback: null,
+      animationCallback: null
     });
     if (this.props.onChange !== undefined) {
       this.props.onChange();
     }
-  }
+  };
 
   render() {
     return (
@@ -199,4 +197,4 @@ class AnimCrossFade extends React.Component {
   }
 }
 
-export { AnimSlideOut, AnimSlideUp, AnimCrossFade };
+export { AnimSlideOut, AnimSlideUp, AnimCrossFade }
