@@ -1,5 +1,6 @@
 /* eslint-disable no-extra-bind */
 
+import CallManager from './call-manager.js';
 import ConfigStore from './config-store.js';
 import Connection, { BroadcastConnection } from './connection.js';
 
@@ -13,6 +14,7 @@ let instance;
 export default class NetworkManager {
   constructor() {
     this.configStore = new ConfigStore();
+    this.callManager = new CallManager(this.emitEvent.bind(this));
     this.connection = undefined;
     this.state = NetworkManager.State.CREATED;
     this.mode = NetworkManager.Mode.UNSET;
@@ -30,6 +32,7 @@ export default class NetworkManager {
     const peerPromise = new Promise(((resolve) => {
       // eslint-disable-next-line no-undef
       this.peer = new Peer(WEBRTC_CONFIG);
+      this.callManager.setup(this.peer);
       this.peer.on('open', ((id) => {
         this.peerId = id;
         console.log(`[NetworkManager] My Peer ID: ${id}`);
@@ -107,7 +110,8 @@ export default class NetworkManager {
   }
 
   on(evtId, handler) {
-    if (Object.values(NetworkManager.Events).includes(evtId)) {
+    if (Object.values(NetworkManager.Events).includes(evtId)
+      || Object.values(CallManager.Events).includes(evtId)) {
       this.listeners[evtId] = handler;
     } else {
       console.error('[NetworkManager] Invalid Event ID for Listener');
@@ -130,9 +134,29 @@ export default class NetworkManager {
     return this.connection;
   }
 
+  getCallManager() {
+    return this.callManager;
+  }
+
+  getSelfPeerId() {
+    return this.peerId;
+  }
+
   setDataHandler(handler) {
     if (this.connection) {
       this.connection.setDataHandler(handler);
+    }
+  }
+
+  connectVoice(peerId) {
+    if (this.state !== NetworkManager.State.CREATED) {
+      this.callManager.callPeer(peerId);
+    }
+  }
+
+  disconnectVoice() {
+    if (this.state !== NetworkManager.State.CREATED) {
+      this.callManager.endAllCalls();
     }
   }
 

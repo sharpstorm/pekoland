@@ -8,11 +8,13 @@ import Player from '../../models/player.js';
 import NetworkManager from '../network-manager.js';
 import buildClientGamePacket from './game-data-sender.js';
 import { checkersMove } from '../../games/checkers.js';
+import Renderer from '../../managers/animation-manager.js';
 
 function inflatePlayer(data) {
   const player = new Player(data.userId, data.name, SpriteManager.getInstance().getSprite('rabbit-avatar'));
   player.x = data.x;
   player.y = data.y;
+  player.direction = data.direction;
   return player;
 }
 
@@ -27,6 +29,7 @@ function handleSpawnReply(data, conn) {
   const self = inflatePlayer(data.self);
   PlayerManager.getInstance().addPlayer(self);
   PlayerManager.getInstance().setSelf(self.userId);
+  Renderer.getCameraContext().centerOn(self.x, self.y);
   data.others.forEach((x) => {
     PlayerManager.getInstance().addPlayer(inflatePlayer(x));
   });
@@ -62,6 +65,27 @@ function handleCheckersEcho(data, conn) {
   checkersMove(data);
 }
 
+function handleVoiceChannelData(data, conn) {
+  const voiceUsers = data.users;
+  if (!voiceUsers.includes(NetworkManager.getInstance().getSelfPeerId())) {
+    return;
+  }
+
+  const remoteUsers = voiceUsers.filter((x) => x !== NetworkManager.getInstance().getSelfPeerId());
+
+  // Cleanup disconnected users
+  NetworkManager.getInstance().getCallManager().getConnectedPeers()
+    .filter((x) => !remoteUsers.includes(x))
+    .forEach((x) => NetworkManager.getInstance().getCallManager().endCall(x));
+
+  // Connect to remaining or new users
+  if (voiceUsers.length === 1) {
+    console.log('Only 1 person in voice channel');
+    return;
+  }
+  remoteUsers.forEach((x) => { NetworkManager.getInstance().connectVoice(x); });
+}
+
 const handlers = {
   'handshake': handleHandshake,
   'spawn-reply': handleSpawnReply,
@@ -71,6 +95,7 @@ const handlers = {
   'move-echo': handleMoveEcho,
   'chat-echo': handleChatEcho,
   'checkers': handleCheckersEcho,
+  'voice-channel-data': handleVoiceChannelData,
 };
 
 // Conn will always be the server

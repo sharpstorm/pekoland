@@ -6,6 +6,7 @@ function flattenPlayer(playerObj) {
     name: playerObj.name,
     x: playerObj.x,
     y: playerObj.y,
+    direction: playerObj.direction,
   };
 }
 
@@ -60,6 +61,7 @@ function buildChatEcho(opCode, data) {
   };
 }
 
+
 function buildCheckers(opCode, data) {
   return {
     opCode,
@@ -67,6 +69,13 @@ function buildCheckers(opCode, data) {
     player1: data.player1,
     player2: data.player2,
     action: data.action,
+  };
+}
+
+function buildVoiceChannelData(opCode, data) {
+  return {
+    opCode,
+    users: data,
   };
 }
 
@@ -79,6 +88,7 @@ const handlers = {
   'move-echo': buildMoveEcho,
   'chat-echo': buildChatEcho,
   'checkers': buildCheckers,
+  'voice-channel-data': buildVoiceChannelData,
 };
 
 export default function buildGamePacket(opCode, data) {

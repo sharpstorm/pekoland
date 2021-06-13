@@ -48,6 +48,8 @@ const handlers = {
   'move': buildMoveUpdate,
   'chat': buildChatUpdate,
   'checkers': buildCheckersUpdate,
+  'join-voice': buildEmptyPacket,
+  'disconnect-voice': buildEmptyPacket,
 };
 
 export default function buildGameDataPacket(opCode, data) {
