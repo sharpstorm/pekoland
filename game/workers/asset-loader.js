@@ -63,6 +63,18 @@ export default function loadAssets() {
           [47, 94, 18, 19],
         ]);
         spriteManager.registerSprite('button-long', longBtn);
+        const longBtnDark = SlicedSprite.from(x, [
+          [1, 115, 18, 15],
+          [19, 115, 28, 15],
+          [47, 115, 18, 15],
+          [1, 130, 18, 2],
+          [19, 130, 28, 2],
+          [47, 130, 18, 2],
+          [1, 132, 18, 19],
+          [19, 132, 28, 19],
+          [47, 132, 18, 19],
+        ]);
+        spriteManager.registerSprite('button-long-shaded', longBtnDark);
       });
 
     Promise.all([load1, load2, load3, load4]).then(resolve);
