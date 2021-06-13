@@ -8,6 +8,7 @@ import buildGamePacket from './game-data-sender.js';
 import handleClientGamePacket from '../client/game-data-handler.js';
 import NetworkManager from '../network-manager.js';
 import GameManager from '../../managers/game-manager.js';
+import { checkersMove } from '../../games/checkers.js';
 
 const chatManager = GameManager.getInstance().getTextChannelManager();
 
@@ -55,6 +56,12 @@ function handleChat(data, conn) {
   NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('chat-echo', data), conn.peer);
 }
 
+function handleCheckersGame(data, conn) {
+  console.log(data);
+  checkersMove(data);
+  NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('checkers', data, conn.peer));
+}
+
 function handleJoinVoice(data, conn) {
   WorldManager.getInstance().registerVoiceChannel(conn.peer);
   conn.send(buildGamePacket('voice-channel-data', WorldManager.getInstance().getVoiceChannelUsers()));
@@ -73,6 +80,7 @@ const handlers = {
   'spawn-request': handleSpawnRequest,
   'move': handleMove,
   'chat': handleChat,
+  'checkers': handleCheckersGame,
   'join-voice': handleJoinVoice,
   'disconnect-voice': handleDisconnectVoice,
 };

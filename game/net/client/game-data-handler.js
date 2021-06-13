@@ -6,6 +6,7 @@ import SpriteManager from '../../managers/sprite-manager.js';
 import Player from '../../models/player.js';
 import NetworkManager from '../network-manager.js';
 import buildClientGamePacket from './game-data-sender.js';
+import { checkersMove } from '../../games/checkers.js';
 import Renderer from '../../managers/animation-manager.js';
 import GameManager from '../../managers/game-manager.js';
 
@@ -61,6 +62,11 @@ function handleChatEcho(data, conn) {
   player.chat.updateMessage(data.message);
 }
 
+function handleCheckersEcho(data, conn) {
+  console.log(data);
+  checkersMove(data);
+}
+
 function handleVoiceChannelData(data, conn) {
   const voiceUsers = data.users;
   GameManager.getInstance().getVoiceChannelManager().updateChannelUsers(voiceUsers);
@@ -74,12 +80,12 @@ const handlers = {
   'despawn-player': handleDespawnPlayer,
   'move-echo': handleMoveEcho,
   'chat-echo': handleChatEcho,
+  'checkers': handleCheckersEcho,
   'voice-channel-data': handleVoiceChannelData,
 };
 
 // Conn will always be the server
 export default function handleGamePacket(data, conn) {
-  console.log(data);
   if (!data.opCode) return;
 
   const { opCode } = data;

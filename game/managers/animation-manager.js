@@ -1,6 +1,7 @@
 import PlayerManager from './player-manager.js';
 import MapManager from './map-manager.js';
 import GameConstants from '../game-constants.js';
+import { drawChecker } from '../games/checkers.js';
 
 class CameraContext {
   constructor(viewportWidth, viewportHeight) {
@@ -149,6 +150,9 @@ class Renderer {
       player.drawAt(ctx, player.x, player.y, GameConstants.UNIT, GameConstants.UNIT, camContext);
       player.animate(delta, majorUpdate);
     });
+
+    // Checkers
+    drawChecker(this.uiCtx, this.lastUIState);
 
     // Update Camera
     camContext.animate(delta);
