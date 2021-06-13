@@ -2,6 +2,7 @@ import ChatManager from './chat-manager.js';
 import PlayerManager from './player-manager.js';
 import MapManager from './map-manager.js';
 import GameConstants from '../game-constants.js';
+import { drawChecker } from '../games/checkers.js';
 
 const chatManager = ChatManager.getInstance();
 
@@ -200,6 +201,9 @@ class Renderer {
       this.uiCtx.clearRect(0, 0, this.dimens.width, this.dimens.height);
       drawTextBox(this.uiCtx, this.lastUIState);
     }
+
+    // Checkers
+    drawChecker(this.uiCtx, this.lastUIState);
 
     // Update Camera
     camContext.animate(delta);

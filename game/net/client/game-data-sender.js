@@ -32,11 +32,22 @@ function buildChatUpdate(opCode, data) {
   };
 }
 
+function buildCheckersUpdate(opCode, data) {
+  return {
+    opCode,
+    from: data.from,
+    player1: data.player1,
+    player2: data.player2,
+    action: data.action,
+  };
+}
+
 const handlers = {
   'handshake': buildEmptyPacket,
   'spawn-request': buildSpawnRequest,
   'move': buildMoveUpdate,
   'chat': buildChatUpdate,
+  'checkers': buildCheckersUpdate,
   'join-voice': buildEmptyPacket,
   'disconnect-voice': buildEmptyPacket,
 };

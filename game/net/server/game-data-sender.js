@@ -61,6 +61,17 @@ function buildChatEcho(opCode, data) {
   };
 }
 
+
+function buildCheckers(opCode, data) {
+  return {
+    opCode,
+    from: data.from,
+    player1: data.player1,
+    player2: data.player2,
+    action: data.action,
+  };
+}
+
 function buildVoiceChannelData(opCode, data) {
   return {
     opCode,
@@ -76,6 +87,7 @@ const handlers = {
   'despawn-player': buildDespawnPlayer,
   'move-echo': buildMoveEcho,
   'chat-echo': buildChatEcho,
+  'checkers': buildCheckers,
   'voice-channel-data': buildVoiceChannelData,
 };
 
