@@ -1,3 +1,5 @@
+/* eslint-disable no-extra-bind */
+
 const BROADCAST_CHANNEL_ID = 'pekoland-data';
 
 // Receive Message Headers
@@ -13,7 +15,8 @@ export default class ConfigStore {
     if (window.location.hash && window.location.hash.length >= 2) {
       this.subchannelId = window.location.hash.substring(1);
       window.location.hash = '';
-    } 
+    }
+    this.userId = undefined;
     this.name = undefined;
     this.peerConnectionString = undefined;
     this.opMode = undefined;
@@ -27,13 +30,15 @@ export default class ConfigStore {
   setup() {
     this.broadcastChannel.onmessage = ((ev) => {
       if (!ev.data || !ev.data.op || this.frozen) return;
-      let data = ev.data;
+      const { data } = ev;
       if (this.subchannelId !== '' && ev.data.channel !== this.subchannelId) return;
 
       if (data.op === RECVOP_CONFIG_CHANGED) {
         this.peerConnectionString = data.partnerString;
+        this.userId = data.userId;
         this.name = data.name;
-        this.opMode = (data.opMode === ConfigStore.Mode.SERVER) ? ConfigStore.Mode.SERVER : ConfigStore.Mode.CLIENT;
+        this.opMode = (data.opMode === ConfigStore.Mode.SERVER)
+          ? ConfigStore.Mode.SERVER : ConfigStore.Mode.CLIENT;
 
         console.log('[NetworkConfig] Configuration Received');
         if (this.listener) this.listener(this.peerConnectionString);
@@ -44,15 +49,15 @@ export default class ConfigStore {
 
   updateConfig() {
     return new Promise((resolve, reject) => {
-      if (this.isBusy) { //Awaiting Response
-        reject('[NetworkConfig] Config Worker is Busy');
+      if (this.isBusy) { // Awaiting Response
+        reject(new Error('[NetworkConfig] Config Worker is Busy'));
         return;
       }
 
       this.listener = resolve;
       this.isBusy = true;
       this.broadcastChannel.postMessage({
-        op: SENDOP_CONFIG_REQUEST
+        op: SENDOP_CONFIG_REQUEST,
       });
     });
   }
@@ -60,7 +65,7 @@ export default class ConfigStore {
   updateRemote(peerId) {
     this.broadcastChannel.postMessage({
       op: SENDOP_UPDATE_PEERID,
-      peerId: peerId
+      peerId,
     });
   }
 
@@ -75,5 +80,5 @@ export default class ConfigStore {
 
 ConfigStore.Mode = {
   SERVER: 1,
-  CLIENT: 2
-}
+  CLIENT: 2,
+};

@@ -1,10 +1,6 @@
-let instance = undefined;
+let instance;
 
 export default class GameManager {
-  constructor() {
-
-  }
-
   static getInstance() {
     if (instance === undefined) {
       instance = new GameManager();

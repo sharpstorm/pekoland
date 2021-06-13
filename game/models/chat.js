@@ -1,11 +1,12 @@
-const speechSprite = new Image();
-speechSprite.src = 'Images/speech.png';
+import SpriteManager from '../managers/sprite-manager.js';
 
 export default class Chat {
   constructor() {
     this.speechBubble = false;
     this.speechBubbleCounter = 0;
     this.currentSpeech = '';
+    this.cachedSprite = undefined;
+    this.cachedText = undefined;
   }
 
   updateMessage(m) {
@@ -15,26 +16,31 @@ export default class Chat {
   }
 
   drawAt(ctx, x, y) {
-    /*
-    if(this.speechBubbleCounter === 1){
-        chatManager.bigChatBox.push(player.name + ": " + player.currentSpeech);
-      }*/
-    if (this.speechBubbleCounter > 30) {
-      //console.log('heree');
-      //console.log(this.speechBubbleCounter);
+    if (this.speechBubbleCounter > 120) {
       this.speechBubbleCounter = 0;
       this.speechBubble = false;
-    }
+      this.currentSpeech = '';
+      this.cachedSprite = undefined;
+      this.cachedText = undefined;
+    } else if (this.speechBubble) {
+      if (this.cachedSprite === undefined || this.cachedText !== this.currentSpeech) {
+        this.cachedSprite = document.createElement('canvas');
+        const cachedCtx = this.cachedSprite.getContext('2d');
+        cachedCtx.font = '15px Arial';
+        const dimens = cachedCtx.measureText(this.currentSpeech);
 
-    if (this.speechBubble) {
-      //console.log('her');
-      //console.log(this.speechBubbleCounter);
+        this.cachedSprite.width = dimens.width + 10;
+        this.cachedSprite.height = dimens.fontBoundingBoxAscent
+          + dimens.fontBoundingBoxDescent + 15;
+        cachedCtx.font = '15px Arial';
+        cachedCtx.fillStyle = 'rgba(0, 0, 0, 1)';
 
-      ctx.drawImage(speechSprite, 0, 0, 1551, 779, x, y, 100, 50);
-      ctx.font = '15px Arial';
-      ctx.fillStyle = "rgba(0, 0, 0, 1)";
-      ctx.fillText(this.currentSpeech, x + 20, y + 30);  //Hard coded for now
-      this.speechBubbleCounter++;
+        SpriteManager.getInstance().getSprite('chat-bubble').drawAt(cachedCtx, 0, 0, dimens.width + 10, dimens.fontBoundingBoxAscent + dimens.fontBoundingBoxDescent + 15);
+        cachedCtx.fillText(this.currentSpeech, 5, 20);
+        this.cachedText = this.currentSpeech;
+      }
+      ctx.drawImage(this.cachedSprite, x, y);
+      this.speechBubbleCounter += 1;
     }
   }
 }
