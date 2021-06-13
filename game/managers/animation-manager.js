@@ -103,7 +103,6 @@ class Renderer {
       width: this.canvas.width,
       height: this.canvas.height,
     };
-    this.lastUIState = undefined;
 
     this.cameraContext = new CameraContext(this.dimens.width, this.dimens.height);
   }
@@ -152,7 +151,7 @@ class Renderer {
     });
 
     // Checkers
-    drawChecker(this.uiCtx, this.lastUIState);
+    drawChecker(this.ctx, camContext);
 
     // Update Camera
     camContext.animate(delta);

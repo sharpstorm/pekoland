@@ -3,8 +3,6 @@ import Player from '../models/player.js';
 import MapManager from '../managers/map-manager.js';
 import Renderer from '../managers/animation-manager.js';
 import GameConstants from '../game-constants.js';
-import { startGame } from '../games/checkers.js';
-import GameManager from '../managers/game-manager.js';
 
 const playerManager = PlayerManager.getInstance();
 

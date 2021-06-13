@@ -23,6 +23,7 @@ import {
 import Chatbox from './ui/ui-chatbox.js';
 import Button, { LongButton } from './ui/ui-button.js';
 import { UIAnchor } from './ui/ui-element.js';
+import { startGame } from './games/checkers.js';
 
 const networkManager = NetworkManager.getInstance();
 const inputSystem = new InputSystem(document.getElementById('ui'), document);
@@ -100,6 +101,12 @@ Promise.all([netSetupPromise, assetSetupPromise])
 
     const chatbox = new Chatbox();
     chatbox.addSubmitListener((msg) => {
+      if (msg.startsWith('start-game-checker ')) {
+        const parts = msg.split(' ');
+        startGame(parts[1], parts[2]);
+        return;
+      }
+
       chatManager.addToHistory(playerManager.getSelf().name, msg);
       playerManager.getSelf().chat.updateMessage(msg);
 
