@@ -1,17 +1,12 @@
-import ChatManager from '../managers/chat-manager.js';
 import PlayerManager from '../managers/player-manager.js';
 import Player from '../models/player.js';
 import MapManager from '../managers/map-manager.js';
 import Renderer from '../managers/animation-manager.js';
 import GameConstants from '../game-constants.js';
-import { startGame } from '../games/checkers.js';
-import GameManager from '../managers/game-manager.js';
 
 const playerManager = PlayerManager.getInstance();
-const chatManager = ChatManager.getInstance();
 
 let joystickEventHandlers = [];
-let chatEventHandlers = [];
 
 function joystickWorker(e) {
   const event = window.event ? window.event : e;
@@ -70,65 +65,6 @@ function joystickWorker(e) {
   }
 }
 
-function typing(letter) {
-  chatManager.textField += letter;
-}
-
-function pushMsg() {
-  playerManager.getSelf().chat.speechBubbleCounter = 0;
-  playerManager.getSelf().chat.speechBubble = true;
-  playerManager.getSelf().chat.currentSpeech = ChatManager.getInstance().textField;
-  chatManager.bigChatBox.push(`${playerManager.getSelf().name}: ${playerManager.getSelf().chat.currentSpeech}`);
-  chatManager.textField = '';
-  chatEventHandlers.forEach((x) => x({
-    name: playerManager.getSelf().name,
-    msg: playerManager.getSelf().chat.currentSpeech,
-  }));
-
-  // FOR TESTING CHECKERS
-  let ss = playerManager.getSelf().chat.currentSpeech;
-  ss = ss.split(' ');
-  if (ss[0] === 'start-game-checker') {
-    startGame(ss[1], ss[2]);
-  }
-}
-
-function chatWorker(e) {
-  if (e.key.length === 1 && ChatManager.getInstance().chatting) {
-    typing(e.key);
-  }
-
-  if (e.keyCode === 13 && e.altKey === true) {
-    ChatManager.getInstance().chatting = !ChatManager.getInstance().chatting;
-  }
-
-  if (e.keyCode === 13 && ChatManager.getInstance().chatting && chatManager.textField !== '') { // nani
-    pushMsg();
-  }
-
-  if (e.keyCode === 8 && ChatManager.getInstance().chatting) { // nani
-    chatManager.textField = chatManager.textField.substring(0, chatManager.textField.length - 1);
-  }
-
-  if (e.keyCode === 67 && e.altKey === true) {
-    GameManager.getInstance().getVoiceChannelManager().joinVoice();
-  }
-
-  if (e.keyCode === 68 && e.altKey === true) {
-    GameManager.getInstance().getVoiceChannelManager().disconnectVoice();
-  }
-
-  if (e.keyCode === 77 && e.altKey === true && e.shiftKey !== true) {
-    GameManager.getInstance().getVoiceChannelManager().activateMicrophone()
-      .then(() => { console.log('successfully activated mic'); })
-      .catch(() => { alert('Could not activate mic'); });
-  }
-
-  if (e.keyCode === 77 && e.altKey === true && e.shiftKey === true) {
-    GameManager.getInstance().getVoiceChannelManager().disconnectMicrophone();
-  }
-}
-
 function joystickUpWorker(evt) {
   // const event = window.event ? window.event : e;
   return evt;
@@ -142,23 +78,9 @@ function removeJoystickEventHandler(handler) {
   joystickEventHandlers = joystickEventHandlers.filter((x) => x !== handler);
 }
 
-function addChatEventHandler(handler) {
-  chatEventHandlers.push(handler);
-}
-
-function removeChatEventHandler(handler) {
-  chatEventHandlers = chatEventHandlers.filter((x) => x !== handler);
-}
-
 export {
   joystickWorker,
   joystickUpWorker,
   addJoystickEventHandler,
   removeJoystickEventHandler,
-};
-
-export {
-  addChatEventHandler,
-  removeChatEventHandler,
-  chatWorker,
 };

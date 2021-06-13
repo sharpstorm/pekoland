@@ -62,10 +62,10 @@ function checkersMove(data) {
   }
 }
 
-export default function drawChecker(ctx, uiState) {
+export default function drawChecker(ctx, camContext) {
   if (gameOn) {
-    aa.setUp(uiState);
-    aa.drawBoard(ctx, uiState);
+    aa.setUp(camContext);
+    aa.drawBoard(ctx);
   }
 }
 

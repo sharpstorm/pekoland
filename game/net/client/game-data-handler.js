@@ -2,13 +2,15 @@
 /* eslint-disable no-unused-vars */
 
 import PlayerManager from '../../managers/player-manager.js';
-import ChatManager from '../../managers/chat-manager.js';
 import SpriteManager from '../../managers/sprite-manager.js';
 import Player from '../../models/player.js';
 import NetworkManager from '../network-manager.js';
 import buildClientGamePacket from './game-data-sender.js';
 import { checkersMove } from '../../games/checkers.js';
 import Renderer from '../../managers/animation-manager.js';
+import GameManager from '../../managers/game-manager.js';
+
+const chatManager = GameManager.getInstance().getTextChannelManager();
 
 function inflatePlayer(data) {
   const player = new Player(data.userId, data.name, SpriteManager.getInstance().getSprite('rabbit-avatar'));
@@ -56,7 +58,7 @@ function handleMoveEcho(data, conn) {
 
 function handleChatEcho(data, conn) {
   const player = PlayerManager.getInstance().getPlayer(data.userId);
-  ChatManager.getInstance().bigChatBox.push(`${player.name}: ${data.message}`);
+  chatManager.addToHistory(player.name, data.message);
   player.chat.updateMessage(data.message);
 }
 
@@ -67,23 +69,7 @@ function handleCheckersEcho(data, conn) {
 
 function handleVoiceChannelData(data, conn) {
   const voiceUsers = data.users;
-  if (!voiceUsers.includes(NetworkManager.getInstance().getSelfPeerId())) {
-    return;
-  }
-
-  const remoteUsers = voiceUsers.filter((x) => x !== NetworkManager.getInstance().getSelfPeerId());
-
-  // Cleanup disconnected users
-  NetworkManager.getInstance().getCallManager().getConnectedPeers()
-    .filter((x) => !remoteUsers.includes(x))
-    .forEach((x) => NetworkManager.getInstance().getCallManager().endCall(x));
-
-  // Connect to remaining or new users
-  if (voiceUsers.length === 1) {
-    console.log('Only 1 person in voice channel');
-    return;
-  }
-  remoteUsers.forEach((x) => { NetworkManager.getInstance().connectVoice(x); });
+  GameManager.getInstance().getVoiceChannelManager().updateChannelUsers(voiceUsers);
 }
 
 const handlers = {

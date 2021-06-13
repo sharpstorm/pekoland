@@ -84,12 +84,12 @@ export default class Board {
     return 0;
   }
 
-  setUp(uiState) {
+  setUp(camContext) {
     let i;
     let ii;
     const unit = 900 / 8;
-    const width = (uiState.viewportWidth / 2 - 450);
-    const height = (uiState.viewportHeight / 2 - 450);
+    const width = (camContext.viewportWidth / 2 - 450);
+    const height = (camContext.viewportHeight / 2 - 450);
     for (ii = 0; ii < 8; ii += 1) {
       for (i = 0; i < 8; i += 1) {
         if (this.gridArray.length < 64) {
@@ -146,7 +146,6 @@ export default class Board {
           }
         }
       }
-      console.log(this.gridArray);
     }
   }
 
