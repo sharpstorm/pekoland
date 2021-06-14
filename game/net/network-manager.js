@@ -1,16 +1,20 @@
+/* eslint-disable no-extra-bind */
+
+import CallManager from './call-manager.js';
 import ConfigStore from './config-store.js';
 import Connection, { BroadcastConnection } from './connection.js';
 
 const WEBRTC_CONFIG = {
-  'iceServers': [
-    { url: 'stun:stun.l.google.com:19302' }
-  ]
+  iceServers: [
+    { url: 'stun:stun.l.google.com:19302' },
+  ],
 };
 
 let instance;
 export default class NetworkManager {
   constructor() {
     this.configStore = new ConfigStore();
+    this.callManager = new CallManager(this.emitEvent.bind(this));
     this.connection = undefined;
     this.state = NetworkManager.State.CREATED;
     this.mode = NetworkManager.Mode.UNSET;
@@ -18,16 +22,20 @@ export default class NetworkManager {
   }
 
   setup() {
-    let configPromise = this.configStore.updateConfig().then((() => {
+    const configPromise = this.configStore.updateConfig().then((() => {
       this.configStore.freeze();
-      this.mode = (this.configStore.opMode === ConfigStore.Mode.SERVER) ? NetworkManager.Mode.SERVER : NetworkManager.Mode.CLIENT;
+      this.mode = (this.configStore.opMode === ConfigStore.Mode.SERVER)
+        ? NetworkManager.Mode.SERVER : NetworkManager.Mode.CLIENT;
+
       this.emitEvent(NetworkManager.Events.MODE_CHANGED, this.mode);
     }).bind(this));
-    let peerPromise = new Promise(((resolve) => {
+    const peerPromise = new Promise(((resolve) => {
+      // eslint-disable-next-line no-undef
       this.peer = new Peer(WEBRTC_CONFIG);
+      this.callManager.setup(this.peer);
       this.peer.on('open', ((id) => {
         this.peerId = id;
-        console.log('[NetworkManager] My Peer ID: ' + id);
+        console.log(`[NetworkManager] My Peer ID: ${id}`);
         if (this.mode === NetworkManager.Mode.SERVER) {
           this.hookServerHandlers();
         }
@@ -68,18 +76,20 @@ export default class NetworkManager {
   }
 
   initConnection() {
+    let error;
     if (this.state < NetworkManager.State.INITIALIZED) {
-      console.error('[NetworkManager] Library has not finished initialising');
-      return;
+      error = '[NetworkManager] Library has not finished initialising';
     } else if (this.state === NetworkManager.State.CONNECTING) {
-      console.error('[NetworkManager] Currently already attempting to connect');
-      return;
+      error = '[NetworkManager] Currently already attempting to connect';
     } else if (this.connection || this.state > NetworkManager.State.INITIALIZED) {
-      console.error('[NetworkManager] A Connection is already established!');
-      return;
+      error = '[NetworkManager] A Connection is already established!';
     } else if (!this.configStore.peerConnectionString) {
-      console.error('[NetworkManager] Partner Configuration Not Set');
-      return;
+      error = '[NetworkManager] Partner Configuration Not Set';
+    }
+
+    if (error) {
+      console.error(error);
+      return undefined;
     }
 
     this.emitEvent(NetworkManager.Events.CONNECT);
@@ -89,10 +99,10 @@ export default class NetworkManager {
       this.state = NetworkManager.State.READY;
       this.emitEvent(NetworkManager.Events.CONNECTED);
     }).bind(this))
-    .catch(err => {
-      this.state = NetworkManager.State.INITIALIZED;
-      this.emitEvent(NetworkManager.Events.CONNECTION_FAILED);
-    });
+      .catch(() => {
+        this.state = NetworkManager.State.INITIALIZED;
+        this.emitEvent(NetworkManager.Events.CONNECTION_FAILED);
+      });
   }
 
   getOperationMode() {
@@ -100,7 +110,8 @@ export default class NetworkManager {
   }
 
   on(evtId, handler) {
-    if (Object.values(NetworkManager.Events).includes(evtId)) {
+    if (Object.values(NetworkManager.Events).includes(evtId)
+      || Object.values(CallManager.Events).includes(evtId)) {
       this.listeners[evtId] = handler;
     } else {
       console.error('[NetworkManager] Invalid Event ID for Listener');
@@ -123,9 +134,29 @@ export default class NetworkManager {
     return this.connection;
   }
 
+  getCallManager() {
+    return this.callManager;
+  }
+
+  getSelfPeerId() {
+    return this.peerId;
+  }
+
   setDataHandler(handler) {
     if (this.connection) {
       this.connection.setDataHandler(handler);
+    }
+  }
+
+  connectVoice(peerId) {
+    if (this.state !== NetworkManager.State.CREATED) {
+      this.callManager.callPeer(peerId);
+    }
+  }
+
+  disconnectVoice() {
+    if (this.state !== NetworkManager.State.CREATED) {
+      this.callManager.endAllCalls();
     }
   }
 
@@ -142,14 +173,14 @@ NetworkManager.State = {
   INITIALIZED: 1,
   CONNECTING: 2,
   READY: 3,
-  DEAD: 4
-}
+  DEAD: 4,
+};
 
 NetworkManager.Mode = {
   UNSET: 0,
   SERVER: 1,
-  CLIENT: 2
-}
+  CLIENT: 2,
+};
 
 NetworkManager.Events = {
   MODE_CHANGED: 'modeChanged',
@@ -158,4 +189,4 @@ NetworkManager.Events = {
   CONNECTED: 'connected',
   CLIENT_CONNECTED: 'clientConnected',
   CONNECTION_FAILED: 'connectionFailed',
-}
+};

@@ -1,15 +1,15 @@
 import React, { Fragment, useState, useEffect } from 'react';
+import { Route, Link, useHistory } from 'react-router-dom';
+// eslint-disable-next-line import/no-unresolved
+import { useIdentityContext } from 'react-netlify-identity-auth';
 import Logo from './logo';
 import BackgroundOverlay from './background-overlay';
-import { Route, Link, useHistory } from 'react-router-dom';
 import { RouteAnimatorSwitch } from './animator/animator-switch';
 import { AnimSlideOut } from './animator/animations';
 import { TextInput, Button } from './forms/form-components';
-import { useIdentityContext } from 'react-netlify-identity-auth';
 import { ArrowLeft } from './icons';
 
-
-export default function FrontPageView(props) {
+export default function FrontPageView() {
   const [isHidden, setIsHidden] = useState(false);
   const [fastForward, setFastForward] = useState(false);
   const history = useHistory();
@@ -24,49 +24,57 @@ export default function FrontPageView(props) {
     function validateLogin() {
       return loginEmail.length > 0 && loginPassword.length > 0;
     }
-    
+
     function loginUser(evt) {
       evt.preventDefault();
       setFormState(1);
 
       identity.login({
         email: loginEmail,
-        password: loginPassword
-      }).then(() => {
-        setIsHidden(true);
-        history.replace('/home');
+        password: loginPassword,
       })
-      .catch(err => {
-        setLoginErr(err.message);
-        setFormState(0);
-        setTimeout(() => setLoginErr(''), 4000);
-      });
+        .then(() => {
+          setIsHidden(true);
+          history.replace('/home');
+        })
+        .catch((err) => {
+          setLoginErr(err.message);
+          setFormState(0);
+          setTimeout(() => setLoginErr(''), 4000);
+        });
     }
 
     return (
-      <Fragment>
-      <div className='panel panel-sm panel-dark flexbox flex-col' style={{textAlign: 'center', paddingBottom: '16px'}}>
-        <h1>Welcome!</h1>
-        <form className='flexbox flex-col'>
-          <div style={{width: '100%', maxWidth: '400px', margin: '4px auto'}} className='flexbox'>
-            <TextInput type='email' placeholder='Email' style={{flex: '1 1 0'}} onChange={(evt) => setLoginEmail(evt.target.checkValidity() ? evt.target.value : '')} value={loginEmail} disabled={!(formState === 0)} />
-          </div>
-          <div style={{width: '100%', maxWidth: '400px', margin: '4px auto'}} className='flexbox'>
-            <TextInput type='password' placeholder='Password' style={{flex: '1 1 0'}} onChange={(evt) => setLoginPassword(evt.target.value)} value={loginPassword} disabled={!(formState === 0)} />
-          </div>
-          <span style={{ opacity: (loginErr === '') ? 0 : 1, height: '1em', transition: 'opacity 0.3s ease-in' }}>{loginErr}</span>
-          <Button className={'btn btn-primary' + ['', ' loading', ' tick'][formState]} style={{width: '100%', maxWidth: '300px', margin: '1.5rem auto 8px'}}
-            onClick={loginUser} disabled={!validateLogin()}>Login</Button>
-          <Link className='link' to='/login/forget'>Forgot Your Password?</Link>
-        </form>
-      </div>
-      <div className='panel panel-sm panel-dark flexbox flex-center' style={{marginTop: '8px'}}>
-        <Link className='link' to='/login/register'>Dont Have An Account?</Link>
-      </div>
-      </Fragment>
+      <>
+        <div className="panel panel-sm panel-dark flexbox flex-col" style={{ textAlign: 'center', paddingBottom: '16px' }}>
+          <h1>Welcome!</h1>
+          <form className="flexbox flex-col">
+            <div style={{ width: '100%', maxWidth: '400px', margin: '4px auto' }} className="flexbox">
+              <TextInput type="email" placeholder="Email" style={{ flex: '1 1 0' }} onChange={(evt) => setLoginEmail(evt.target.checkValidity() ? evt.target.value : '')} value={loginEmail} disabled={!(formState === 0)} />
+            </div>
+            <div style={{ width: '100%', maxWidth: '400px', margin: '4px auto' }} className="flexbox">
+              <TextInput type="password" placeholder="Password" style={{ flex: '1 1 0' }} onChange={(evt) => setLoginPassword(evt.target.value)} value={loginPassword} disabled={!(formState === 0)} />
+            </div>
+            <span style={{ opacity: (loginErr === '') ? 0 : 1, height: '1em', transition: 'opacity 0.3s ease-in' }}>{loginErr}</span>
+            <Button
+              type="submit"
+              className={`btn btn-primary${['', ' loading', ' tick'][formState]}`}
+              style={{ width: '100%', maxWidth: '300px', margin: '1.5rem auto 8px' }}
+              onClick={loginUser}
+              disabled={!validateLogin()}
+            >
+              Login
+            </Button>
+            <Link className="link" to="/login/forget">Forgot Your Password?</Link>
+          </form>
+        </div>
+        <div className="panel panel-sm panel-dark flexbox flex-center" style={{ marginTop: '8px' }}>
+          <Link className="link" to="/login/register">Dont Have An Account?</Link>
+        </div>
+      </>
     );
   }
-  
+
   function RegisterView() {
     const [registerEmail, setRegisterEmail] = useState('');
     const [registerPassword, setRegisterPassword] = useState('');
@@ -77,9 +85,9 @@ export default function FrontPageView(props) {
     const identity = useIdentityContext();
 
     function validateRegister() {
-      return registerEmail.length > 0 
-        && registerPassword.length > 0 
-        && registerPassword2.length > 0 
+      return registerEmail.length > 0
+        && registerPassword.length > 0
+        && registerPassword2.length > 0
         && registerIgn.length > 0
         && registerPassword === registerPassword2;
     }
@@ -92,60 +100,60 @@ export default function FrontPageView(props) {
         email: registerEmail,
         password: registerPassword,
         user_metadata: {
-          ign: registerIgn
-        }
+          ign: registerIgn,
+        },
       })
-      .then(() => setFormState(2))
-      .catch(err => {
-        setErrorMsg(err.message);
-        setFormState(3);
-      });
+        .then(() => setFormState(2))
+        .catch((err) => {
+          setErrorMsg(err.message);
+          setFormState(3);
+        });
     }
 
     return (
-      <div className='panel panel-sm panel-dark flexbox flex-col' style={{textAlign: 'center', paddingBottom: '16px'}}>
+      <div className="panel panel-sm panel-dark flexbox flex-col" style={{ textAlign: 'center', paddingBottom: '16px' }}>
         {(formState < 2) ? (
-          <Fragment>
-            <div style={{marginTop: '8px', marginLeft: '8px'}}>
-              <Link to='/login'>
-                <div style={{float: 'left'}}><ArrowLeft color='#FFF' size='2rem'/></div>
+          <>
+            <div style={{ marginTop: '8px', marginLeft: '8px' }}>
+              <Link to="/login">
+                <div style={{ float: 'left' }}><ArrowLeft color="#FFF" size="2rem" /></div>
               </Link>
             </div>
-            <h1 style={{marginTop: 0}}>Tell Me About Yourself</h1>
-            <form className='flexbox flex-col'>
-              <div style={{width: '100%', maxWidth: '400px', margin: '4px auto'}} className='flexbox'>
-                <TextInput type='email' placeholder='Email' style={{flex: '1 1 0'}} onChange={(evt) => setRegisterEmail(evt.target.checkValidity() ? evt.target.value : '')} value={registerEmail} disabled={!(formState === 0)} />
+            <h1 style={{ marginTop: 0 }}>Tell Me About Yourself</h1>
+            <form className="flexbox flex-col">
+              <div style={{ width: '100%', maxWidth: '400px', margin: '4px auto' }} className="flexbox">
+                <TextInput type="email" placeholder="Email" style={{ flex: '1 1 0' }} onChange={(evt) => setRegisterEmail(evt.target.checkValidity() ? evt.target.value : '')} value={registerEmail} disabled={!(formState === 0)} />
               </div>
-              <div style={{width: '100%', maxWidth: '400px', margin: '4px auto'}} className='flexbox'>
-                <TextInput type='password' placeholder='Password' style={{flex: '1 1 0'}} onChange={(evt) => setRegisterPassword(evt.target.value)} value={registerPassword} disabled={!(formState === 0)} />
+              <div style={{ width: '100%', maxWidth: '400px', margin: '4px auto' }} className="flexbox">
+                <TextInput type="password" placeholder="Password" style={{ flex: '1 1 0' }} onChange={(evt) => setRegisterPassword(evt.target.value)} value={registerPassword} disabled={!(formState === 0)} />
               </div>
-              <div style={{width: '100%', maxWidth: '400px', margin: '4px auto'}} className='flexbox'>
-                <TextInput type='password' placeholder='Repeat Password' style={{flex: '1 1 0'}} onChange={(evt) => setRegisterPassword2(evt.target.value)} value={registerPassword2} disabled={!(formState === 0)} />
+              <div style={{ width: '100%', maxWidth: '400px', margin: '4px auto' }} className="flexbox">
+                <TextInput type="password" placeholder="Repeat Password" style={{ flex: '1 1 0' }} onChange={(evt) => setRegisterPassword2(evt.target.value)} value={registerPassword2} disabled={!(formState === 0)} />
               </div>
-              <div style={{width: '100%', maxWidth: '400px', margin: '4px auto'}} className='flexbox'>
-                <TextInput type='text' placeholder='In-Game Name' style={{flex: '1 1 0'}} onChange={(evt) => setRegisterIgn(evt.target.value)} value={registerIgn} disabled={!(formState === 0)} />
+              <div style={{ width: '100%', maxWidth: '400px', margin: '4px auto' }} className="flexbox">
+                <TextInput type="text" placeholder="In-Game Name" style={{ flex: '1 1 0' }} onChange={(evt) => setRegisterIgn(evt.target.value)} value={registerIgn} disabled={!(formState === 0)} />
               </div>
-              <Button className={'btn-primary' + ((formState === 0) ? '' : ' loading')} style={{maxWidth: '300px', margin: '2rem auto 8px'}} onClick={registerUser} disabled={!validateRegister()}>Register</Button>
+              <Button type="submit" className={`btn-primary${(formState === 0) ? '' : ' loading'}`} style={{ maxWidth: '300px', margin: '2rem auto 8px' }} onClick={registerUser} disabled={!validateRegister()}>Register</Button>
             </form>
-          </Fragment>
+          </>
         ) : null}
         {(formState === 2) ? (
-          <Fragment>
+          <>
             <h1>Registration Successful</h1>
             <div>
               Please Check Your Email to Verify Your Account
             </div>
-            <Link to='/login'>
-              <button style={{maxWidth: '300px', margin: '2rem auto 8px'}} className='btn btn-primary'>Back to Login</button>
+            <Link to="/login">
+              <button type="button" style={{ maxWidth: '300px', margin: '2rem auto 8px' }} className="btn btn-primary">Back to Login</button>
             </Link>
-          </Fragment>
+          </>
         ) : null}
         {(formState === 3) ? (
-          <Fragment>
+          <>
             <h1>Registration Failed</h1>
             <div>{errorMsg}</div>
-            <button style={{maxWidth: '300px', margin: '2rem auto 8px'}} className='btn btn-primary' onClick={() => setFormState(0)}>Try Again</button>
-          </Fragment>
+            <button type="button" style={{ maxWidth: '300px', margin: '2rem auto 8px' }} className="btn btn-primary" onClick={() => setFormState(0)}>Try Again</button>
+          </>
         ) : null}
       </div>
     );
@@ -160,48 +168,54 @@ export default function FrontPageView(props) {
     function validateForm() {
       return email.length > 0;
     }
-    
+
     function submitForgetPassword(evt) {
       evt.preventDefault();
       setFormState(1);
 
       identity.sendPasswordRecovery({ email })
-        .then(a => setFormState(2))
-        .catch(e => {
+        .then(() => setFormState(2))
+        .catch((e) => {
           setErr(e.message);
           setFormState(0);
         });
     }
 
     return (
-      <Fragment>
-      <div className='panel panel-sm panel-dark flexbox flex-col' style={{textAlign: 'center', paddingBottom: '16px'}}>
-        <div style={{marginTop: '8px', marginLeft: '8px'}}>
-          <Link to='/login'>
-            <div style={{float: 'left'}}><ArrowLeft color='#FFF' size='2rem'/></div>
-          </Link>
-        </div>
-        { formState < 2 ? (
-        <Fragment>
-          <h1 style={{marginTop: 0}}>Forgotten Password</h1>
-          <form className='flexbox flex-col'>
-            <div style={{width: '100%', maxWidth: '400px', margin: '4px auto'}} className='flexbox'>
-              <TextInput type='email' placeholder='Email' style={{flex: '1 1 0'}} onChange={(evt) => setEmail(evt.target.checkValidity() ? evt.target.value : '')} value={email} disabled={!(formState === 0)} />
-            </div>
-            <span style={{ opacity: (err === '') ? 0 : 1, height: '1em', transition: 'opacity 0.3s ease-in' }}>{err}</span>
-            <Button className={'btn btn-primary' + ['', ' loading', ' tick'][formState]} style={{width: '100%', maxWidth: '300px', margin: '1.5rem auto 8px'}}
-              onClick={submitForgetPassword} disabled={!validateForm()}>Reset</Button>
-          </form>
-        </Fragment>
-        ) : (
-          <div className='flexbox flex-col'>
-            <h2>Password Reset Requested</h2>
-            <span>Please Check Your Registered Email</span>
+      <>
+        <div className="panel panel-sm panel-dark flexbox flex-col" style={{ textAlign: 'center', paddingBottom: '16px' }}>
+          <div style={{ marginTop: '8px', marginLeft: '8px' }}>
+            <Link to="/login">
+              <div style={{ float: 'left' }}><ArrowLeft color="#FFF" size="2rem" /></div>
+            </Link>
           </div>
-        )
-        }
-      </div>
-      </Fragment>
+          { formState < 2 ? (
+            <>
+              <h1 style={{ marginTop: 0 }}>Forgotten Password</h1>
+              <form className="flexbox flex-col">
+                <div style={{ width: '100%', maxWidth: '400px', margin: '4px auto' }} className="flexbox">
+                  <TextInput type="email" placeholder="Email" style={{ flex: '1 1 0' }} onChange={(evt) => setEmail(evt.target.checkValidity() ? evt.target.value : '')} value={email} disabled={!(formState === 0)} />
+                </div>
+                <span style={{ opacity: (err === '') ? 0 : 1, height: '1em', transition: 'opacity 0.3s ease-in' }}>{err}</span>
+                <Button
+                  type="submit"
+                  className={`btn btn-primary${['', ' loading', ' tick'][formState]}`}
+                  style={{ width: '100%', maxWidth: '300px', margin: '1.5rem auto 8px' }}
+                  onClick={submitForgetPassword}
+                  disabled={!validateForm()}
+                >
+                  Reset
+                </Button>
+              </form>
+            </>
+          ) : (
+            <div className="flexbox flex-col">
+              <h2>Password Reset Requested</h2>
+              <span>Please Check Your Registered Email</span>
+            </div>
+          )}
+        </div>
+      </>
     );
   }
 
@@ -215,17 +229,17 @@ export default function FrontPageView(props) {
     function validateForm() {
       return password.length > 0 && password2.length > 0 && password === password2;
     }
-    
+
     function submitForgetPassword(evt) {
       evt.preventDefault();
       setFormState(1);
 
       identity.completeUrlTokenTwoStep({ password })
         .then(() => setFormState(2))
-        .catch(e => {
+        .catch(() => {
           setErr('An Error Occurred. Please Try Again!');
           setFormState(0);
-        })
+        });
     }
 
     useEffect(() => {
@@ -239,51 +253,66 @@ export default function FrontPageView(props) {
       }
     }, [identity.urlToken, identity.user]);
 
-    return (
-      <Fragment>
-      <div className='panel panel-sm panel-dark flexbox flex-col' style={{textAlign: 'center', paddingBottom: '16px'}}>
-        <div style={{marginTop: '8px', marginLeft: '8px'}}>
-          <Link to='/login'>
-            <div style={{float: 'left'}}><ArrowLeft color='#FFF' size='2rem'/></div>
-          </Link>
-        </div>
-        { (formState < 2) ? (
-        <Fragment>
-          <h1 style={{marginTop: 0}}>Choose Your New Password</h1>
-          <form className='flexbox flex-col'>
-            <div style={{width: '100%', maxWidth: '400px', margin: '4px auto'}} className='flexbox'>
-              <TextInput type='password' placeholder='Password' style={{flex: '1 1 0'}} onChange={(evt) => setPassword(evt.target.value)} value={password} disabled={!(formState === 0)} />
+    let page;
+    if (formState < 2) {
+      page = (
+        <>
+          <h1 style={{ marginTop: 0 }}>Choose Your New Password</h1>
+          <form className="flexbox flex-col">
+            <div style={{ width: '100%', maxWidth: '400px', margin: '4px auto' }} className="flexbox">
+              <TextInput type="password" placeholder="Password" style={{ flex: '1 1 0' }} onChange={(evt) => setPassword(evt.target.value)} value={password} disabled={!(formState === 0)} />
             </div>
-            <div style={{width: '100%', maxWidth: '400px', margin: '4px auto'}} className='flexbox'>
-              <TextInput type='password' placeholder='Repeat Password' style={{flex: '1 1 0'}} onChange={(evt) => setPassword2(evt.target.value)} value={password2} disabled={!(formState === 0)} />
+            <div style={{ width: '100%', maxWidth: '400px', margin: '4px auto' }} className="flexbox">
+              <TextInput type="password" placeholder="Repeat Password" style={{ flex: '1 1 0' }} onChange={(evt) => setPassword2(evt.target.value)} value={password2} disabled={!(formState === 0)} />
             </div>
             <span style={{ opacity: (err === '') ? 0 : 1, height: '1em', transition: 'opacity 0.3s ease-in' }}>{err}</span>
-            <Button className={'btn btn-primary' + ['', ' loading', ' tick'][formState]} style={{width: '100%', maxWidth: '300px', margin: '1.5rem auto 8px'}}
-              onClick={submitForgetPassword} disabled={!validateForm()}>Reset</Button>
+            <Button
+              type="submit"
+              className={`btn btn-primary${['', ' loading', ' tick'][formState]}`}
+              style={{ width: '100%', maxWidth: '300px', margin: '1.5rem auto 8px' }}
+              onClick={submitForgetPassword}
+              disabled={!validateForm()}
+            >
+              Reset
+            </Button>
           </form>
-        </Fragment>
-        ) : ((formState < 3) ? (
-          <div className='flexbox flex-col'>
-            <h2>Password Successfully Reset</h2>
-            <Link to='/login'><Button className='btn-primary'>Go To Login</Button></Link>
+        </>
+      );
+    } else if (formState < 3) {
+      page = (
+        <div className="flexbox flex-col">
+          <h2>Password Successfully Reset</h2>
+          <Link to="/login"><Button className="btn-primary">Go To Login</Button></Link>
+        </div>
+      );
+    } else if (formState < 4) {
+      page = (
+        <div className="flexbox flex-col">
+          <h1>Validating Link</h1>
+        </div>
+      );
+    } else {
+      page = (
+        <div className="flexbox flex-col">
+          <h1>Invalid Link</h1>
+        </div>
+      );
+    }
+    return (
+      <>
+        <div className="panel panel-sm panel-dark flexbox flex-col" style={{ textAlign: 'center', paddingBottom: '16px' }}>
+          <div style={{ marginTop: '8px', marginLeft: '8px' }}>
+            <Link to="/login">
+              <div style={{ float: 'left' }}><ArrowLeft color="#FFF" size="2rem" /></div>
+            </Link>
           </div>
-        ) : ((formState < 4) ? (
-          <div className='flexbox flex-col'>
-            <h1>Validating Link</h1>
-          </div>
-        ) : (
-          <div className='flexbox flex-col'>
-            <h1>Invalid Link</h1>
-          </div>
-        )))
-        }
-      </div>
-      </Fragment>
+          {page}
+        </div>
+      </>
     );
   }
 
   function ConfirmationView() {
-    const [err, setErr] = useState('');
     const [formState, setFormState] = useState(0);
     const identity = useIdentityContext();
 
@@ -295,31 +324,39 @@ export default function FrontPageView(props) {
       }
     }, [identity.urlToken, identity.goTrueToken]);
 
-    return (
-      <Fragment>
-      <div className='panel panel-sm panel-dark flexbox flex-col' style={{textAlign: 'center', paddingBottom: '16px'}}>
-        <div style={{marginTop: '8px', marginLeft: '8px'}}>
-          <Link to='/login'>
-            <div style={{float: 'left'}}><ArrowLeft color='#FFF' size='2rem'/></div>
-          </Link>
+    let page;
+    if (formState < 1) {
+      page = (
+        <div className="flexbox flex-col">
+          <h1>Validating Link</h1>
         </div>
-        { (formState < 1) ? (
-          <div className='flexbox flex-col'>
-            <h1>Validating Link</h1>
+      );
+    } else if (formState < 2) {
+      page = (
+        <div className="flexbox flex-col">
+          <h2>Account Successfully Confirmed</h2>
+          <Link to="/login"><Button className="btn-primary">Go To Login</Button></Link>
+        </div>
+      );
+    } else {
+      page = (
+        <div className="flexbox flex-col">
+          <h1>Invalid Link</h1>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <div className="panel panel-sm panel-dark flexbox flex-col" style={{ textAlign: 'center', paddingBottom: '16px' }}>
+          <div style={{ marginTop: '8px', marginLeft: '8px' }}>
+            <Link to="/login">
+              <div style={{ float: 'left' }}><ArrowLeft color="#FFF" size="2rem" /></div>
+            </Link>
           </div>
-        ) : ((formState < 2) ? (
-          <div className='flexbox flex-col'>
-            <h2>Account Successfully Confirmed</h2>
-            <Link to='/login'><Button className='btn-primary'>Go To Login</Button></Link>
-          </div>
-        ) : (
-          <div className='flexbox flex-col'>
-            <h1>Invalid Link</h1>
-          </div>
-        ))
-        }
-      </div>
-      </Fragment>
+          {page}
+        </div>
+      </>
     );
   }
 
@@ -327,28 +364,35 @@ export default function FrontPageView(props) {
   useEffect(() => {
     if (identity.urlToken?.type === 'confirmation') {
       setFastForward(true);
-      history.replace('/login/confirm')
+      history.replace('/login/confirm');
     } else if (identity.urlToken?.type === 'recovery') {
       setFastForward(true);
       history.replace('/login/reset');
     }
   }, [identity.urlToken]);
-  
+
   return (
-    <Fragment>
+    <>
       <BackgroundOverlay isVisible={!isHidden} />
-      <div style={{overflow: 'hidden'}}>
-        <Logo style={{marginBottom: '16px'}}/>
-        <div style={{width: '100%', margin:'auto', maxWidth:'1200px', position:'relative', overflow: 'hidden'}}>
-        <RouteAnimatorSwitch animator={AnimSlideOut} fastForward={fastForward} onChange={() => setFastForward(false)} path='*'>
-          <Route exact path='/login/register' component={RegisterView} />
-          <Route exact path='/login/forget' component={ForgetView} />
-          <Route exact path='/login/reset' component={ResetView} />
-          <Route exact path='/login/confirm' component={ConfirmationView} />
-          <Route component={LoginView} />
-        </RouteAnimatorSwitch>
+      <div style={{ overflow: 'hidden' }}>
+        <Logo style={{ marginBottom: '16px' }} />
+        <div style={{
+          width: '100%',
+          margin: 'auto',
+          maxWidth: '1200px',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+        >
+          <RouteAnimatorSwitch animator={AnimSlideOut} fastForward={fastForward} onChange={() => setFastForward(false)} path="*">
+            <Route exact path="/login/register" component={RegisterView} />
+            <Route exact path="/login/forget" component={ForgetView} />
+            <Route exact path="/login/reset" component={ResetView} />
+            <Route exact path="/login/confirm" component={ConfirmationView} />
+            <Route component={LoginView} />
+          </RouteAnimatorSwitch>
         </div>
       </div>
-    </Fragment> 
+    </>
   );
 }

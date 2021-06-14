@@ -1,121 +1,194 @@
-import ChatManager from './chat-manager.js';
 import PlayerManager from './player-manager.js';
+import MapManager from './map-manager.js';
+import GameConstants from '../game-constants.js';
+import { drawChecker } from '../games/checkers.js';
 
-let counter = 0;
-let che = false;
-let chatboxText = '';
-let bigChatBox = [];
-let map = new Image();
-//map.src = 'Images/house.jpg';
-map.src = 'Images/house1.png';
-
-const playerManager = PlayerManager.getInstance();
-const chatManager = ChatManager.getInstance();
-
-function drawer() {
-  if (counter > 4) {
-    let ctx = document.getElementById('game').getContext('2d');
-    ctx.clearRect(0, 0, 1000, 500);
-    ctx.drawImage(map, 0, 0, 1551, 779, 0, 0, 1000, 500);
-    if (ChatManager.getInstance().chatting)
-      drawExpandedTextBox();
-    else
-      drawTextBox();
-      
-    PlayerManager.getInstance().getPlayers().forEach(player => {
-      player.drawAt(ctx, player.x, player.y, 50, 50);
-      player.animate();
-    });
-    counter = 0;  //FPS
+class CameraContext {
+  constructor(viewportWidth, viewportHeight) {
+    this.x = 0;
+    this.y = 0;
+    this.oldX = 0;
+    this.oldY = 0;
+    this.newX = 0;
+    this.newY = 0;
+    this.viewportWidth = viewportWidth;
+    this.viewportHeight = viewportHeight;
   }
-  counter++;
-  window.requestAnimationFrame(drawer);
+
+  updateViewport(dimens) {
+    // Recenter
+    this.x -= (dimens.width - this.viewportWidth) / 2;
+    this.y -= (dimens.height - this.viewportHeight) / 2;
+    this.viewportWidth = dimens.width;
+    this.viewportHeight = dimens.height;
+  }
+
+  animate(delta) {
+    if (this.newX - this.x === 0 && this.newY - this.y === 0) return;
+
+    const stdDeltaX = (this.newX - this.oldX) / 24;
+    const stdDeltaY = (this.newY - this.oldY) / 24;
+
+    if (Math.abs(this.newX - this.x) > Math.abs(stdDeltaX)) {
+      this.x += stdDeltaX * (delta / 16.66667);
+      return;
+    }
+    if (Math.abs(this.newY - this.y) > Math.abs(stdDeltaY)) {
+      this.y += stdDeltaY * (delta / 16.66667);
+      return;
+    }
+
+    this.x = this.newX;
+    this.y = this.newY;
+    this.oldX = this.x;
+    this.oldY = this.y;
+  }
+
+  moveContext(newX, newY) {
+    this.oldX = this.x;
+    this.oldY = this.y;
+    this.newX = newX;
+    this.newY = newY;
+  }
+
+  moveContextToGrid(newX, newY) {
+    this.oldX = this.x;
+    this.oldY = this.y;
+    this.newX = newX * MapManager.getInstance().getCurrentMap().getGridLength();
+    this.newY = newY * MapManager.getInstance().getCurrentMap().getGridLength();
+  }
+
+  centerOn(x, y) {
+    this.x = x - this.viewportWidth / 2;
+    this.y = y - this.viewportHeight / 2;
+  }
 }
 
-function drawGrids(height, width, gridLength) {
+/* function drawGrids(height, width, gridLength) {
   let ctx = document.getElementById('game').getContext('2d');
   for (let i = 0; i < height; i += gridLength) {
     for (let ii = 0; ii < width; ii += gridLength) {
       ctx.beginPath();
-      ctx.strokeStyle = 'black';
+      ctx.strokeStyle = 'red';
       ctx.lineWidth = '1';
       ctx.rect(i, ii, gridLength, gridLength);
       ctx.stroke();
     }
   }
-}
+} */
 
-function draggable() {
-  console.log(getPixel())
-}
-
-function getPixel(x, y) {
-  let ctx = document.getElementById('game').getContext('2d');
-  return context.getImageData(x, y, 1, 1).data;
-}
-
-
-function drawTextBox(){
-  ChatManager.getInstance().chatting = false;  
-  let ctx = document.getElementById('game').getContext('2d');
-  ctx.strokeStyle = 'white';
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-  ctx.lineWidth = 1;
-  ctx.font = '15px Arial';
-
-  ctx.beginPath();
-  ctx.rect(0, 485, 500, 15);
-  ctx.stroke();
-  ctx.fill();
-
-  //Plus sign behind
-  ctx.fillRect(485, 485, 15, 15);
-  ctx.strokeStyle = 'white';
-  ctx.strokeText('+', 488.5, 497.5);
-
-  //To who
-  ctx.fillRect(0, 485, 50, 15);
-  ctx.font = 'normal 10px Arial';
-  ctx.fillStyle = 'rgba(255, 255, 255, 1)';
-  ctx.fillText('All', 18, 497);
-}
-
-function drawExpandedTextBox() {
-  ChatManager.getInstance().chatting = true;
-
-  const ctx = document.getElementById('game').getContext('2d');
-  ctx.strokeStyle = 'black';
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-  ctx.lineWidth = 1;
-  ctx.font = '15px Arial';
-
-  ctx.beginPath();
-  ctx.rect(0, 485, 500, 15);
-  ctx.stroke();
-  ctx.fill();
-  //Expand top for prev chat
-  ctx.fillRect(0, 330, 500, 150);
-  ctx.fillRect(0, 480, 500, 5);
-
-  //Plus sign behind
-  ctx.fillRect(485, 485, 15, 15);
-  ctx.strokeStyle = 'white';
-  ctx.strokeText('-', 490.5, 497);
-
-  //To who
-  ctx.fillRect(0, 485, 50, 15);
-  ctx.font = 'normal 10px Arial';
-  ctx.fillStyle = 'rgba(255, 255, 255, 1)';
-  ctx.fillText('All', 18, 497);
-  
-  //typing words
-  ctx.fillText(ChatManager.getInstance().textField, 60, 497);
-
-  //chat history
-  for (let i = 0; i < chatManager.bigChatBox.length; i++) {
-    ctx.fillText(chatManager.bigChatBox[i], 5, 345 + (i * 15));
+class UILayer {
+  constructor() {
+    this.domElement = document.getElementById('ui-overlay');
+    this.elements = [];
   }
-  
+
+  addElement(element) {
+    this.elements.push(element);
+    this.domElement.appendChild(element.getDOMNode());
+  }
 }
 
-export default drawer;
+let instance;
+class Renderer {
+  constructor() {
+    this.lastUpdate = 0;
+    this.lastMajorUpdate = 0;
+    this.haltRender = false;
+    this.canvas = document.getElementById('game');
+    this.ctx = this.canvas.getContext('2d', { alpha: false });
+    this.uiLayer = new UILayer();
+
+    this.dimens = {
+      width: this.canvas.width,
+      height: this.canvas.height,
+    };
+
+    this.cameraContext = new CameraContext(this.dimens.width, this.dimens.height);
+  }
+
+  init() {
+    this.dimens = {
+      width: document.documentElement.clientWidth,
+      height: document.documentElement.clientHeight,
+    };
+
+    this.synchronizeCanvasSize();
+    this.cameraContext.updateViewport(this.dimens);
+    window.addEventListener('resize', (() => {
+      this.dimens = {
+        width: document.documentElement.clientWidth,
+        height: document.documentElement.clientHeight,
+      };
+
+      this.synchronizeCanvasSize();
+      this.cameraContext.updateViewport(this.dimens);
+    }));
+  }
+
+  render(timestamp) {
+    let majorUpdate = false;
+    const delta = timestamp - this.lastUpdate;
+
+    if (timestamp - this.lastMajorUpdate > 66) {
+      this.lastMajorUpdate = timestamp;
+      majorUpdate = true;
+    }
+
+    const { ctx } = this;
+    ctx.fillStyle = '#333';
+    ctx.fillRect(0, 0, this.dimens.width, this.dimens.height);
+
+    // Draw using current camera context
+    const camContext = this.cameraContext;
+    if (MapManager.getInstance().getCurrentMap() !== undefined) {
+      MapManager.getInstance().getCurrentMap().draw(ctx, camContext);
+    }
+
+    PlayerManager.getInstance().getPlayers().forEach((player) => {
+      player.drawAt(ctx, player.x, player.y, GameConstants.UNIT, GameConstants.UNIT, camContext);
+      player.animate(delta, majorUpdate);
+    });
+
+    // Checkers
+    drawChecker(this.ctx, camContext);
+
+    // Update Camera
+    camContext.animate(delta);
+
+    this.lastUpdate = timestamp;
+    if (!this.haltRender) {
+      window.requestAnimationFrame(this.render.bind(this));
+    }
+  }
+
+  getCameraContext() {
+    return this.cameraContext;
+  }
+
+  nudgeCamera(deltaX, deltaY) {
+    this.moveCamera(this.cameraContext.x + deltaX, this.cameraContext.y + deltaY);
+  }
+
+  moveCamera(x, y) {
+    this.cameraContext.moveContext(x, y);
+  }
+
+  synchronizeCanvasSize() {
+    this.canvas.width = this.dimens.width;
+    this.canvas.height = this.dimens.height;
+  }
+
+  getUILayer() {
+    return this.uiLayer;
+  }
+
+  static getInstance() {
+    if (instance === undefined) {
+      instance = new Renderer();
+    }
+    return instance;
+  }
+}
+
+export default Renderer.getInstance();

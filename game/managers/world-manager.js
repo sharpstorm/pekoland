@@ -1,23 +1,35 @@
 let instance;
 
 export default class WorldManager {
-
   constructor() {
-    this.peerIdToNameMap = {};
+    this.peerIdToUidMap = {};
+    this.voiceChannelUsers = new Set();
   }
 
-  registerPlayer(peerId, name) {
-    this.peerIdToNameMap[peerId] = name;
+  registerPlayer(peerId, userId) {
+    this.peerIdToUidMap[peerId] = userId;
   }
 
   removePlayer(peerId) {
-    if (this.peerIdToNameMap[peerId] !== undefined) {
-      delete this.peerIdToNameMap[peerId];
+    if (this.peerIdToUidMap[peerId] !== undefined) {
+      delete this.peerIdToUidMap[peerId];
     }
   }
 
-  getPlayerName(peerId) {
-    return this.peerIdToNameMap[peerId];
+  getPlayerId(peerId) {
+    return this.peerIdToUidMap[peerId];
+  }
+
+  registerVoiceChannel(peerId) {
+    this.voiceChannelUsers.add(peerId);
+  }
+
+  getVoiceChannelUsers() {
+    return Array.from(this.voiceChannelUsers.values());
+  }
+
+  removeVoiceChannel(peerId) {
+    this.voiceChannelUsers.delete(peerId);
   }
 
   static getInstance() {
