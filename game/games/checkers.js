@@ -1,4 +1,4 @@
-import CheckerBoard from './CheckerBoard.js';
+import CheckerBoard from './checker-board.js';
 import NetworkManager from '../net/network-manager.js';
 import PlayerManager from '../managers/player-manager.js';
 import buildClientGamePacket from '../net/client/game-data-sender.js';

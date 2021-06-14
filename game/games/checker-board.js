@@ -1,6 +1,6 @@
 import PlayerManager from '../managers/player-manager.js';
-import CheckerPiece from './CheckerPiece.js';
-import Grid from './Grid.js';
+import CheckerPiece from './checker-piece.js';
+import GridBox from './grid-box.js';
 
 export default class Board {
   constructor(player1, player2) {
@@ -94,11 +94,11 @@ export default class Board {
       for (i = 0; i < 8; i += 1) {
         if (this.gridArray.length < 64) {
           if (ii % 2 !== 0 && i % 2 === 0 && ii !== 3 && ii !== 4) {
-            this.gridArray.push(new Grid(width + i * unit, height + unit * ii, 'black', new CheckerPiece(1, width + i * unit, height + ii * unit), true));
+            this.gridArray.push(new GridBox(width + i * unit, height + unit * ii, 'black', new CheckerPiece(1, width + i * unit, height + ii * unit), true));
           } else if (ii % 2 === 0 && i % 2 !== 0 && ii !== 3 && ii !== 4) {
-            this.gridArray.push((new Grid(width + unit * i, height + unit * ii, 'black', new CheckerPiece(1, width + i * unit, height + ii * unit), true)));
+            this.gridArray.push((new GridBox(width + unit * i, height + unit * ii, 'black', new CheckerPiece(1, width + i * unit, height + ii * unit), true)));
           } else {
-            this.gridArray.push((new Grid(width + unit * i, height + unit * ii, 'black', undefined, false)));
+            this.gridArray.push((new GridBox(width + unit * i, height + unit * ii, 'black', undefined, false)));
           }
           if (this.gridArray.length === 64) {
             this.gridArray = this.gridArray.reverse();
