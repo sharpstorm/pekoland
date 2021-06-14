@@ -57,8 +57,20 @@ function createFaunaDB(key) {
       name: 'users_to_peer_id',
       source: q.Collection('users'),
       terms: [{ field: ['data', 'email'] }],
-      values: [{ field: ['data', 'peer_id'] }, { field: ['ref'] }],
-    }))).catch((e) => {
+      values: [
+        { field: ['data', 'peer_id'] },
+        { field: ['ref'] },
+      ],
+    })))
+    .then(() => client.query(q.CreateIndex({
+      name: 'users_to_ref',
+      source: q.Collection('users'),
+      terms: [{ field: ['data', 'email'] }],
+      values: [
+        { field: ['ref'] },
+      ],
+    })))
+    .catch((e) => {
       // Database already exists
       if (e.requestResult.statusCode === 400 && e.message === 'instance not unique') {
         console.log('DB already exists');
