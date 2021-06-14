@@ -27,6 +27,7 @@ export default class Chatbox extends UIElement {
     );
 
     this.inputBox.addEventListener('keydown', (evt) => {
+      evt.stopPropagation();
       if (evt.keyCode === 13) {
         this.triggerListeners();
       }
