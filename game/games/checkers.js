@@ -48,8 +48,7 @@ function checkersMove(data) {
       gameOn = true;
       aa = new CheckerBoard(data.player1, data.player2);
     }
-  }
-  if (data.from !== PlayerManager.getInstance().getSelfId()) {
+  } else if (data.from !== PlayerManager.getInstance().getSelfId()) {
     aa.gridArray[63 - data.action.from].movePieceTo(aa.gridArray[63 - data.action.to]);
     aa.currentTurn = PlayerManager.getInstance().getSelfId();
     if (data.action.remove !== undefined) {

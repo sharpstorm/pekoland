@@ -27,8 +27,8 @@ export default class Board {
     if (this.selectedGrid.color === 'green') {
       this.selectedPiece.movePieceTo(this.selectedGrid);
       const indexDiff = this.selectedGrid.index - this.selectedPiece.index;
-      if (this.currentTurn === this.player1
-        || (this.currentTurn === this.player2 && this.selectedGrid.checkerPiece.isKing)) {
+      if (this.currentTurn === this.me
+        || (this.currentTurn === this.me && this.selectedGrid.checkerPiece.isKing)) {
         if (indexDiff === 14) {
           this.gridArray[this.selectedPiece.index + 7].removePiece();
           dead = this.selectedPiece.index + 7;
@@ -41,8 +41,8 @@ export default class Board {
           king = true;
         }
       }
-      if ((this.currentTurn === this.player1 && this.selectedGrid.checkerPiece.isKing)
-      || this.currentTurn === this.player2) {
+      if ((this.currentTurn === this.me && this.selectedGrid.checkerPiece.isKing)
+      || this.currentTurn === this.me) {
         if (indexDiff === -14) {
           this.gridArray[this.selectedPiece.index - 7].removePiece();
           dead = this.selectedPiece.index - 7;
