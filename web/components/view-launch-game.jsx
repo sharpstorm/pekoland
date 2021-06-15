@@ -21,7 +21,6 @@ export default function LaunchGameView() {
   const [partnerString, setPartnerString] = useState('');
   const [broadcastChannel, setBroadcastChannel] = useState(undefined);
   const [windowId, setWindowId] = useState(undefined);
-  const [peerEmail, setPeerEmail] = useState('');
   const [connectionError, setConnectionError] = useState('');
 
   function launchGame() {
@@ -37,12 +36,12 @@ export default function LaunchGameView() {
     }
   }
 
-  function attemptConnect() {
+  function attemptConnect(email) {
     setLaunchState(2);
     identity.authorizedFetch('/functions/host-id-get', {
       method: 'POST',
       body: JSON.stringify({
-        email: peerEmail,
+        email,
       }),
     })
       .then((res) => res.json())
@@ -98,11 +97,10 @@ export default function LaunchGameView() {
       history.replace('/home');
     } else if (identity.ready) {
       selectMode(location.state.isHost);
-      setPeerEmail(location.state.target);
       if (location.state.isHost) {
         launchGame();
       } else {
-        attemptConnect();
+        attemptConnect(location.state.target);
       }
     }
   }, [identity.ready]);
