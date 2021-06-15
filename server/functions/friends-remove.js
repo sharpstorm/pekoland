@@ -1,5 +1,4 @@
 const faunadb = require('faunadb');
-const { createUserStructure } = require('./util');
 
 const q = faunadb.query;
 
@@ -31,7 +30,7 @@ exports.handler = async function handle(event, context) {
     };
   }
 
-  if (data.peer_id === undefined) {
+  if (data.email === undefined) {
     return {
       statusCode: 400,
       body: JSON.stringify({ message: 'Bad Request' }),
@@ -44,28 +43,32 @@ exports.handler = async function handle(event, context) {
   });
 
   try {
-    const ret = await client.query(q.Paginate(q.Match(q.Index('users_to_peer_id'), user.email.toLowerCase())));
-    if (ret.data.length === 0) {
-      const newUser = createUserStructure(user.email.toLowerCase());
-      newUser.peer_id = data.peer_id;
+    const myData = await client.query(q.Paginate(q.Match(q.Index('users_to_ref'), user.email.toLowerCase())));
+    if (myData.data.length > 0) {
+      const ref = myData.data[0];
+      const userData = await client.query(q.Get(ref));
+      const { friends } = userData.data;
 
-      await client.query(q.Create(q.Collection('users'), {
-        data: newUser,
-      }));
-    } else if (ret.data[0][0] !== data.peer_id) {
-      const ref = ret.data[0][1];
-      await client.query(q.Update(ref, {
-        data: {
-          peer_id: data.peer_id,
-        },
-      }));
+      if (friends !== undefined && friends !== null) {
+        const newFriends = friends.filter((x) => x.email !== data.email.toLowerCase());
+        if (friends.length !== newFriends.length) {
+          await client.query(q.Update(ref, {
+            data: {
+              friends: newFriends,
+            },
+          }));
+        }
+      }
     }
 
     return {
       statusCode: 200,
       body: JSON.stringify({
         email: user.email.toLowerCase(),
-        peer_id: data.peer_id,
+        friend: {
+          email: data.email,
+          nickname: data.nickname,
+        },
       }),
     };
   } catch (ex) {

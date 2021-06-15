@@ -10,6 +10,10 @@ import HomeView from './components/view-home';
 import { RouteAnimatorSwitch } from './components/animator/animator-switch';
 import { AnimCrossFade } from './components/animator/animations';
 import LaunchGameView from './components/view-launch-game';
+import SettingsView from './components/view-settings';
+import FriendsView from './components/view-friends';
+import MailView from './components/view-mail';
+import ReportView from './components/view-report';
 
 function App() {
   const identity = useIdentityContext();
@@ -29,6 +33,10 @@ function App() {
       <RouteAnimatorSwitch animator={AnimCrossFade} path="/:p" fastForward={fastForward} onChange={() => setFastForward(false)}>
         <Route exact path="/login(/register|/forget|/reset|/confirm)?" component={FrontPageView} />
         <Route exact path="/home" component={HomeView} />
+        <Route exact path="/settings" component={SettingsView} />
+        <Route exact path="/friends" component={FriendsView} />
+        <Route exact path="/mail" component={MailView} />
+        <Route exact path="/report" component={ReportView} />
         <Route exact path="/launchgame" component={LaunchGameView} />
         <Redirect from="*" to="/" />
       </RouteAnimatorSwitch>

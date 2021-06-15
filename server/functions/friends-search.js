@@ -1,7 +1,4 @@
-const faunadb = require('faunadb');
-const { createUserStructure } = require('./util');
-
-const q = faunadb.query;
+const fetch = require('node-fetch');
 
 exports.handler = async function handle(event, context) {
   const { identity, user } = context.clientContext;
@@ -31,7 +28,7 @@ exports.handler = async function handle(event, context) {
     };
   }
 
-  if (data.peer_id === undefined) {
+  if (data.email === undefined) {
     return {
       statusCode: 400,
       body: JSON.stringify({ message: 'Bad Request' }),
@@ -39,33 +36,30 @@ exports.handler = async function handle(event, context) {
   }
 
   // Validate OK
-  const client = new faunadb.Client({
-    secret: process.env.FAUNADB_SECRET,
-  });
-
   try {
-    const ret = await client.query(q.Paginate(q.Match(q.Index('users_to_peer_id'), user.email.toLowerCase())));
-    if (ret.data.length === 0) {
-      const newUser = createUserStructure(user.email.toLowerCase());
-      newUser.peer_id = data.peer_id;
+    const usersUrl = `${identity.url}/admin/users`;
+    const adminAuthHeader = `Bearer ${identity.token}`;
+    const userList = await fetch(usersUrl, {
+      method: 'GET',
+      headers: { Authorization: adminAuthHeader },
+    }).then((x) => x.json());
 
-      await client.query(q.Create(q.Collection('users'), {
-        data: newUser,
-      }));
-    } else if (ret.data[0][0] !== data.peer_id) {
-      const ref = ret.data[0][1];
-      await client.query(q.Update(ref, {
-        data: {
-          peer_id: data.peer_id,
-        },
-      }));
+    const { users } = userList;
+    let obj = users.filter((x) => x.email === data.email);
+    if (obj.length === 0) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ message: 'User not Found' }),
+      };
     }
+
+    [obj] = obj;
 
     return {
       statusCode: 200,
       body: JSON.stringify({
-        email: user.email.toLowerCase(),
-        peer_id: data.peer_id,
+        email: obj.email,
+        ign: obj.user_metadata.ign,
       }),
     };
   } catch (ex) {
