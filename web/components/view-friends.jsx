@@ -16,10 +16,19 @@ const friendDataStore = () => {
     method: 'POST',
     body: '{}',
   })
-    .then((x) => x.json())
+    .then((resp) => {
+      if (resp.status > 399) {
+        throw new Error('Failed to Contact Server');
+      }
+      return resp.json();
+    })
     .then((x) => {
-      setFriends(x.friends);
-      setLastUpdate(Date.now());
+      if (x.friends === undefined) {
+        throw new Error('Failed to contact server');
+      } else {
+        setFriends(x.friends);
+        setLastUpdate(Date.now());
+      }
     });
 
   const addFriend = (userObject, fetchAgent) => fetchAgent('/functions/friends-add', {
@@ -28,7 +37,12 @@ const friendDataStore = () => {
       email: userObject.email,
     }),
   })
-    .then((x) => x.json())
+    .then((resp) => {
+      if (resp.status > 399) {
+        throw new Error('Failed to Contact Server');
+      }
+      return resp.json();
+    })
     .then(() => {
       const newFriends = friends;
       newFriends.push(userObject);
@@ -41,7 +55,12 @@ const friendDataStore = () => {
       email,
     }),
   })
-    .then((x) => x.json())
+    .then((resp) => {
+      if (resp.status > 399) {
+        throw new Error('Failed to Contact Server');
+      }
+      return resp.json();
+    })
     .then(() => {
       setFriends(friends.filter((x) => x.email.toLowerCase() !== email.toLowerCase()));
     });
@@ -52,7 +71,12 @@ const friendDataStore = () => {
       email,
     }),
   })
-    .then((x) => x.json());
+    .then((resp) => {
+      if (resp.status > 399) {
+        throw new Error('Failed to Contact Server');
+      }
+      return resp.json();
+    });
 
   return {
     friends,
@@ -108,6 +132,8 @@ export default function FriendsView() {
   const ViewManageFriends = (props) => {
     const [targetEmail, setTargetEmail] = useState('');
     const [searchResult, setSearchResult] = useState(undefined);
+    const [formState, setFormState] = useState(0);
+    // State 0: Wait User Input, State 1: Searching, State 2: Adding new Friend, State 3: Removing
     const { friendContext } = props;
 
     function validateForm() {
@@ -115,14 +141,19 @@ export default function FriendsView() {
     }
 
     function verifyEmail() {
+      setFormState(1);
       friendContext.searchFriend(targetEmail, identity.authorizedFetch)
-        .then((resp) => setSearchResult(resp))
+        .then((resp) => {
+          setSearchResult(resp);
+        })
         .catch(() => {
-          console.log('invalid email');
-        });
+          alert('Invalid Email');
+        })
+        .finally(() => setFormState(0));
     }
 
     function addFriend() {
+      setFormState(2);
       friendContext.addFriend(searchResult, identity.authorizedFetch)
         .then(() => {
           setSearchResult(undefined);
@@ -131,21 +162,24 @@ export default function FriendsView() {
         })
         .catch(() => {
           alert('Failed to add friend!');
-        });
+        })
+        .finally(() => setFormState(0));
     }
 
     function removeFriend(email) {
+      setFormState(3);
       friendContext.removeFriend(email, identity.authorizedFetch)
         .then(() => {
           alert('Successfully removed friend');
         })
         .catch(() => {
           alert('Failed to remove friend!');
-        });
+        })
+        .finally(() => setFormState(0));
     }
 
     function renderManageFriendRow(email, name) {
-      return renderFriendRow(email, name, <Button className="btn-accent" onClick={() => removeFriend(email)}>Remove</Button>);
+      return renderFriendRow(email, name, <Button className={`btn-accent${formState === 3 ? ' loading' : ''}`} onClick={() => removeFriend(email)} disabled={formState !== 0}>Remove</Button>);
     }
 
     return (
@@ -166,7 +200,7 @@ export default function FriendsView() {
                 onChange={(evt) => setTargetEmail(evt.target.checkValidity() ? evt.target.value : '')}
                 value={targetEmail}
               />
-              <div><Button className="btn-accent" onClick={verifyEmail} disabled={!validateForm()}>Search</Button></div>
+              <div><Button className={`btn-accent${formState === 1 ? ' loading' : ''}`} onClick={verifyEmail} disabled={!validateForm() || formState !== 0}>Search</Button></div>
             </div>
           </div>
         ) : (
@@ -183,9 +217,9 @@ export default function FriendsView() {
                 </div>
               </div>
               <div style={{ marginRight: '8px' }}>
-                <Button style={{ height: '100%', padding: '4px 16px' }} className="btn-primary" onClick={() => setSearchResult(undefined)}>Cancel</Button>
+                <Button style={{ height: '100%', padding: '4px 16px' }} className="btn-primary" disabled={formState !== 0} onClick={() => { setSearchResult(undefined); setFormState(0); }}>Cancel</Button>
               </div>
-              <div><Button style={{ height: '100%', padding: '4px 16px' }} className="btn-accent" onClick={addFriend}>Add</Button></div>
+              <div><Button style={{ height: '100%', padding: '4px 16px' }} className={`btn-accent${formState === 2 ? ' loading' : ''}`} onClick={addFriend}>Add</Button></div>
             </div>
           </div>
         )}
