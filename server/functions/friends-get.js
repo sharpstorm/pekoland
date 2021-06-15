@@ -30,8 +30,11 @@ exports.handler = async function handle(event, context) {
     const ret = await client.query(q.Paginate(q.Match(q.Index('users_to_ref'), user.email.toLowerCase())));
     if (ret.data.length === 0) {
       return {
-        statusCode: 404,
-        body: JSON.stringify({ message: 'User Not Found' }),
+        statusCode: 200,
+        body: JSON.stringify({
+          email: user.email.toLowerCase(),
+          friends: [],
+        }),
       };
     }
 

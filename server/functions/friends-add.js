@@ -1,4 +1,5 @@
 const faunadb = require('faunadb');
+const fetch = require('node-fetch');
 const { createUserStructure } = require('./util');
 
 const q = faunadb.query;
@@ -44,8 +45,15 @@ exports.handler = async function handle(event, context) {
   });
 
   try {
-    const targetObject = await client.query(q.Paginate(q.Match(q.Index('users_to_ref'), data.email.toLowerCase())));
-    if (targetObject.data.length === 0) {
+    const usersUrl = `${identity.url}/admin/users`;
+    const adminAuthHeader = `Bearer ${identity.token}`;
+    const userList = await fetch(usersUrl, {
+      method: 'GET',
+      headers: { Authorization: adminAuthHeader },
+    }).then((x) => x.json());
+    const { users } = userList;
+
+    if (users.find((x) => x.email.toLowerCase() === data.email.toLowerCase()) === undefined) {
       return {
         statusCode: 404,
         body: JSON.stringify({ message: 'User Not Found' }),
