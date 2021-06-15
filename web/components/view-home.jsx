@@ -48,7 +48,7 @@ export default function HomeView() {
             }}
           >
             {icon}
-            <div className="flexbox flex-col flex-center" style={{ textAlign: 'center', flex: '1 1 0' }}>
+            <div className="flexbox flex-col flex-equal flex-center" style={{ textAlign: 'center' }}>
               <h1>{text}</h1>
             </div>
           </Link>
@@ -70,7 +70,7 @@ export default function HomeView() {
             }}
           >
             {icon}
-            <div className="flexbox flex-col flex-center" style={{ textAlign: 'center', flex: '1 1 0', height: '100%' }}>
+            <div className="flexbox flex-col flex-equal flex-center" style={{ textAlign: 'center', height: '100%' }}>
               <h1>{text}</h1>
             </div>
           </button>
@@ -84,7 +84,7 @@ export default function HomeView() {
     <>
       <div className="panel panel-dark flexbox flex-col" style={{ textAlign: 'center', paddingBottom: '16px' }}>
         <div className="flexbox">
-          <div style={{ flex: '1 1 0' }}>
+          <div className="flex-equal">
             <h1>
               {`Hello ${identity.user !== undefined ? identity.user.user_metadata.ign : ''}`}
             </h1>
