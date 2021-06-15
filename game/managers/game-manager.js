@@ -187,7 +187,6 @@ class BoardGameManager {
     this.gameList.forEach((game) => game.draw(ctx, camContext));
   }
 
-  // eslint-disable-next-line class-methods-use-this
   propagateEvent(eventID, event, camContext, uiLayer) {
     this.uiLayer = uiLayer; // TO CHECK IF DIS IS ALLOWED. NEEDED FOR SHOWING WAITING SCREEN
     const clickedData = MapManager.getInstance().getCurrentMap()
@@ -220,7 +219,6 @@ class BoardGameManager {
     }
   }
 
-  // eslint-disable-next-line class-methods-use-this
   joinGame(TID) {
     if (NetworkManager.getInstance().getOperationMode() === 2) {
       const data = {
@@ -254,7 +252,6 @@ class BoardGameManager {
   startGame(gameName, p1, p2) {
     this.gameList.forEach((game) => {
       if (game.gameName === gameName) {
-        // eslint-disable-next-line no-param-reassign
         game.startGame(p1, p2);
         this.toggle();
       }
@@ -288,7 +285,6 @@ class BoardGameManager {
     });
   }
 
-  // eslint-disable-next-line class-methods-use-this
   showWaitingScreen() {
     this.uiLayer.elements.forEach((e) => {
       // console.log(e);

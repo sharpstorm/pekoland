@@ -1,5 +1,3 @@
-/* eslint-disable import/no-named-as-default-member */
-/* eslint-disable import/no-named-as-default */
 /* eslint-disable quote-props */
 
 import PlayerManager from '../../managers/player-manager.js';
