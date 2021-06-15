@@ -103,6 +103,13 @@ export default function FriendsView() {
     }
   }, [identity.ready]);
 
+  function triggerGameStart(email) {
+    history.push('/launchgame', {
+      isHost: false,
+      target: email,
+    });
+  }
+
   function renderFriendRow(email, name, buttons) {
     return (
       <div className="flexbox" style={{ padding: '16px 0', borderTop: '1px solid #CCC' }} key={email}>
@@ -124,7 +131,7 @@ export default function FriendsView() {
         </div>
       </div>
       <div className="flexbox flex-col" style={{ textAlign: 'left', margin: '8px' }}>
-        { friendDataStoreInstance.getFriends().map((x) => renderFriendRow(x.email, x.ign, <Button className="btn-accent">Go To House</Button>)) }
+        { friendDataStoreInstance.getFriends().map((x) => renderFriendRow(x.email, x.ign, <Button onClick={() => triggerGameStart(x.email)} className="btn-accent">Go To House</Button>)) }
       </div>
     </>
   );

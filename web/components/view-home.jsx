@@ -20,35 +20,64 @@ export default function HomeView() {
   }, [identity.ready]);
 
   function makeTile(link, imageAsset, text) {
-    return (
-      <div className="panel panel-sm panel-dark" style={{ textAlign: 'center', margin: '8px' }}>
-        <Link
-          to={link}
-          className="flexbox"
-          style={{
-            width: '100%',
-            height: '100%',
-            color: '#FFF',
-            textDecoration: 'none',
-          }}
-        >
-          <img
-            src={imageAsset}
-            alt={text}
-            style={{
-              margin: '8px',
-              padding: '8px',
-              maxWidth: '150px',
-              maxHeight: '150px',
-              width: '50%',
-            }}
-          />
-          <div className="flexbox flex-col flex-center" style={{ textAlign: 'center', flex: '1 1 0' }}>
-            <h1>{text}</h1>
-          </div>
-        </Link>
-      </div>
+    const icon = (
+      <img
+        src={imageAsset}
+        alt={text}
+        style={{
+          margin: '8px',
+          padding: '8px',
+          maxWidth: '150px',
+          maxHeight: '150px',
+          width: '50%',
+        }}
+      />
     );
+
+    if (typeof link === 'string') {
+      return (
+        <div className="panel panel-sm panel-dark" style={{ textAlign: 'center', margin: '8px' }}>
+          <Link
+            to={link}
+            className="flexbox"
+            style={{
+              width: '100%',
+              height: '100%',
+              color: '#FFF',
+              textDecoration: 'none',
+            }}
+          >
+            {icon}
+            <div className="flexbox flex-col flex-center" style={{ textAlign: 'center', flex: '1 1 0' }}>
+              <h1>{text}</h1>
+            </div>
+          </Link>
+        </div>
+      );
+    }
+    if (typeof link === 'function') {
+      return (
+        <div className="panel panel-sm panel-dark" style={{ textAlign: 'center', margin: '8px' }}>
+          <button
+            onClick={link}
+            type="button"
+            className="flexbox btn-invisible"
+            style={{
+              width: '100%',
+              height: '100%',
+              color: '#FFF',
+              textDecoration: 'none',
+            }}
+          >
+            {icon}
+            <div className="flexbox flex-col flex-center" style={{ textAlign: 'center', flex: '1 1 0', height: '100%' }}>
+              <h1>{text}</h1>
+            </div>
+          </button>
+        </div>
+      );
+    }
+    return undefined;
   }
 
   return (
@@ -75,7 +104,12 @@ export default function HomeView() {
           {makeTile('/mail', require('../assets/icon-mail.svg'), 'Mail')}
         </div>
         <div className="flexbox" style={{ marginTop: '16px' }}>
-          {makeTile('/launchgame', require('../assets/icon-launch.svg'), 'Start Game')}
+          {makeTile(() => {
+            history.push('/launchgame', {
+              isHost: true,
+              target: '',
+            });
+          }, require('../assets/icon-launch.svg'), 'Start Game')}
           {makeTile('/report', require('../assets/icon-report.svg'), 'Contact Admins')}
         </div>
       </div>

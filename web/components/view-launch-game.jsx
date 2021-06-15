@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useHistory, Link } from 'react-router-dom';
+import { useHistory, useLocation, Link } from 'react-router-dom';
 // eslint-disable-next-line import/no-unresolved
 import { useIdentityContext } from 'react-netlify-identity-auth';
-import { TextInput, Button } from './forms/form-components';
+import { Button } from './forms/form-components';
 import { ArrowLeft } from './icons';
 
 // Send Message Headers
@@ -15,6 +15,7 @@ const RECVOP_UPDATE_PEERID = 'pekoconn-update-peerid';
 export default function LaunchGameView() {
   const identity = useIdentityContext();
   const history = useHistory();
+  const location = useLocation();
   const [launchState, setLaunchState] = useState(0);
   const [mode, setMode] = useState(0);
   const [partnerString, setPartnerString] = useState('');
@@ -87,13 +88,22 @@ export default function LaunchGameView() {
     };
   }
 
-  function emailValid() {
-    return peerEmail.length > 0;
-  }
-
   useEffect(() => {
     if (identity.ready && !identity.user) {
       history.replace('/login');
+    } else if (identity.ready && (location.state === undefined
+        || location.state.isHost === undefined
+        || location.state.target === undefined)) {
+      console.log('No State');
+      history.replace('/home');
+    } else if (identity.ready) {
+      selectMode(location.state.isHost);
+      setPeerEmail(location.state.target);
+      if (location.state.isHost) {
+        launchGame();
+      } else {
+        attemptConnect();
+      }
     }
   }, [identity.ready]);
 
@@ -136,10 +146,14 @@ export default function LaunchGameView() {
   } else if (launchState === 1 || launchState === 2) {
     page = (
       <div>
-        <h2>Enter the Email Address of Your Friend</h2>
-        <TextInput type="email" placeholder="Email" style={{ flex: '1 1 0', width: '100%', boxSizing: 'border-box' }} onChange={(evt) => setPeerEmail(evt.target.checkValidity() ? evt.target.value : '')} value={peerEmail} disabled={!(launchState === 1)} />
-        <span style={{ display: connectionError === '' ? 'none' : 'block' }}>{connectionError}</span>
-        <Button onClick={attemptConnect} className={`btn-accent${(launchState === 1) ? '' : ' loading'}`} style={{ marginTop: '8px', flex: '1 1 0' }} disabled={!(launchState === 1) || !emailValid()}>Join</Button>
+        {connectionError === '' ? (
+          <h1>Connecting...</h1>
+        ) : (
+          <>
+            <h1>Failed to Connect</h1>
+            <h2>{connectionError}</h2>
+          </>
+        )}
       </div>
     );
   } else {
