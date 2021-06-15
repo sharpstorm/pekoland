@@ -31,7 +31,7 @@ exports.handler = async function handle(event, context) {
     };
   }
 
-  if (data.email === undefined || data.nickname === undefined) {
+  if (data.email === undefined) {
     return {
       statusCode: 400,
       body: JSON.stringify({ message: 'Bad Request' }),
@@ -57,7 +57,6 @@ exports.handler = async function handle(event, context) {
       const newUser = createUserStructure(user.email.toLowerCase());
       newUser.friends = [{
         email: data.email.toLowerCase(),
-        nickname: data.nickname,
       }];
 
       await client.query(q.Create(q.Collection('users'), {
@@ -73,7 +72,6 @@ exports.handler = async function handle(event, context) {
           data: {
             friends: [{
               email: data.email.toLowerCase(),
-              nickname: data.nickname,
             }],
           },
         }));
@@ -83,24 +81,12 @@ exports.handler = async function handle(event, context) {
           // Not a friend, create record
           friends.push({
             email: data.email.toLowerCase(),
-            nickname: data.nickname,
           });
           await client.query(q.Update(ref, {
             data: {
               friends,
             },
           }));
-        } else {
-          const obj = existingObject[0];
-          if (obj.nickname !== data.nickname) {
-            // Update Nickname
-            obj.nickname = data.nickname;
-            await client.query(q.Update(ref, {
-              data: {
-                friends,
-              },
-            }));
-          }
         }
       }
     }
@@ -111,7 +97,6 @@ exports.handler = async function handle(event, context) {
         email: user.email.toLowerCase(),
         friend: {
           email: data.email,
-          nickname: data.nickname,
         },
       }),
     };
