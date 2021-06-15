@@ -8,9 +8,9 @@
   publish = "dist/"
   command = "parcel build web/index.html && cp -r game dist/game"
 
-[context.ZH-dev]
-  publish = "ZH-dev-dist/"
-  command = "parcel build web/index.html --out-dir ZH-dev-dist && cp -r game dist/game"
+[context.react-staging]
+  publish = "react-staging-dist/"
+  command = "parcel build web/index.html --out-dir react-staging-dist && cp -r game react-staging-dist/game"
 
 [context.game-dev]
   publish = "game-dev-dist/"
