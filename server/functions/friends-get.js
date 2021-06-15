@@ -1,3 +1,4 @@
+const fetch = require('node-fetch');
 const faunadb = require('faunadb');
 
 const q = faunadb.query;
@@ -36,12 +37,27 @@ exports.handler = async function handle(event, context) {
 
     const ref = ret.data[0];
     const userData = await client.query(q.Get(ref));
-    console.log(userData);
+
     let { friends } = userData.data;
 
     if (friends === undefined || friends === null) {
       friends = [];
     }
+
+    const usersUrl = `${identity.url}/admin/users`;
+    const adminAuthHeader = `Bearer ${identity.token}`;
+    const userList = await fetch(usersUrl, {
+      method: 'GET',
+      headers: { Authorization: adminAuthHeader },
+    }).then((x) => x.json());
+    const { users } = userList;
+
+    friends = friends.map((friend) => {
+      const newFriend = friend;
+      const obj = users.find((x) => x.email.toLowerCase() === friend.email.toLowerCase());
+      newFriend.ign = obj.user_metadata.ign;
+      return newFriend;
+    });
 
     return {
       statusCode: 200,
