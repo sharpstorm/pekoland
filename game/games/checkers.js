@@ -9,6 +9,7 @@ let instance;
 export default class CheckersGame {
   constructor() {
     this.checkersBoard = undefined;
+    this.gameName = 'Checkers';
     this.gameOn = false;
     document.addEventListener('click', this.checkersMouseClick);
   }
@@ -19,7 +20,7 @@ export default class CheckersGame {
       const clickedGrid = checkersInstance.checkersBoard.getGridIndex(e.pageX, e.pageY);
       if (clickedGrid !== undefined) {
         checkersInstance.checkersBoard.selectedGrid = clickedGrid;
-        const move = checkersInstance .checkersBoard.move();
+        const move = checkersInstance.checkersBoard.move();
         if (move !== undefined) {
           const data = {
             from: PlayerManager.getInstance().getSelfId(),

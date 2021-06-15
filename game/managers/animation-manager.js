@@ -102,6 +102,12 @@ class GameLayer {
   render(ctx, cam) {
     GameManager.getInstance().getBoardGameManager().render(ctx, cam);
   }
+
+  // eslint-disable-next-line class-methods-use-this
+  propagateEvent(eventID, event, camContext, uiLayer) {
+    GameManager.getInstance().getBoardGameManager()
+      .propagateEvent(eventID, event, camContext, uiLayer);
+  }
 }
 
 let instance;
@@ -140,6 +146,11 @@ class Renderer {
       this.synchronizeCanvasSize();
       this.cameraContext.updateViewport(this.dimens);
     }));
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  propagateEvent(eventID, event) {
+    this.gameLayer.propagateEvent(eventID, event, this.cameraContext, this.uiLayer);
   }
 
   render(timestamp) {

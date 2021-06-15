@@ -77,3 +77,63 @@
   justify-content: center;
   text-align: center;
 }
+
+#game-menu-window {
+
+  position: absolute;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+#game-menu-window-title {
+  border: 1px solid white;
+  position: absolute;
+  display: table-row;
+  width: 100%;
+  height: 20%;
+  text-align: center;
+  top: 0;
+  background-color: rgba(0, 0, 0, 0.9);
+}
+
+#game-menu-window-games-holder {
+  border: 1px solid white;
+  position: absolute;
+  display: grid;
+  grid-template-columns: auto auto auto;
+  width: 100%;
+  height: 80%;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.9);
+}
+
+.game-menu-window-games{
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  padding: 20px;
+  font-size: 30px;
+  text-align: center;
+}
+
+.game-menu-window-games:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+#game-menu-window-title-text{
+  margin-top: 20px;
+  display:block;
+  font-weight: bold;
+  color: white;
+}
+
+#game-menu-window-yes-no{
+  border: 1px solid white;
+  position: absolute;
+  display: grid;
+  grid-template-columns: auto auto auto;
+  width: 100%;
+  height: 80%;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.9);
+}
+

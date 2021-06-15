@@ -72,6 +72,28 @@ function handleVoiceChannelData(data, conn) {
   GameManager.getInstance().getVoiceChannelManager().updateChannelUsers(voiceUsers);
 }
 
+function handleGameLobby(data, conn) {
+  console.log(data);
+  if (data.action === 'registerLobbyEcho-success' && data.host === PlayerManager.getInstance().getSelfId()) {
+    // console.log('success');
+    GameManager.getInstance().getBoardGameManager().showWaitingScreen();
+    GameManager.getInstance().getBoardGameManager().currentGame = data.gameName;
+    GameManager.getInstance().getBoardGameManager().gameState = 'pending';
+  } else if (data.action === 'open' && data.host === PlayerManager.getInstance().getSelfId()) {
+    GameManager.getInstance().getBoardGameManager().showGameMenu();
+    console.log('here in open');
+  } else if (data.action === 'canJoin' && data.host === PlayerManager.getInstance().getSelfId()) {
+    if (data.host !== PlayerManager.getInstance().getSelfId()) {
+      GameManager.getInstance().getBoardGameManager().showJoinGame();
+    }
+  } else if ((data.action === 'startGame' && data.host === PlayerManager.getInstance().getSelfId())
+  || (data.action === 'startGame' && data.joiner === PlayerManager.getInstance().getSelfId())) {
+    GameManager.getInstance().getBoardGameManager()
+      .startGame(data.gameName, data.host, data.joiner);
+    // console.log('StartGame');
+  }
+}
+
 const handlers = {
   'handshake': handleHandshake,
   'spawn-reply': handleSpawnReply,
@@ -82,6 +104,7 @@ const handlers = {
   'chat-echo': handleChatEcho,
   'checkers': handleCheckersEcho,
   'voice-channel-data': handleVoiceChannelData,
+  'gameLobby-echo': handleGameLobby,
 };
 
 // Conn will always be the server

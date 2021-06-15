@@ -42,6 +42,17 @@ function buildCheckersUpdate(opCode, data) {
   };
 }
 
+function buildGameLobbyUpdate(opCode, data) {
+  return {
+    opCode,
+    action: data.action,
+    tableID: data.tableID,
+    gameName: data.gameName,
+    host: data.host,
+    joiner: data.joiner,
+  };
+}
+
 const handlers = {
   'handshake': buildEmptyPacket,
   'spawn-request': buildSpawnRequest,
@@ -50,6 +61,7 @@ const handlers = {
   'checkers': buildCheckersUpdate,
   'join-voice': buildEmptyPacket,
   'disconnect-voice': buildEmptyPacket,
+  'gameLobby': buildGameLobbyUpdate,
 };
 
 export default function buildGameDataPacket(opCode, data) {

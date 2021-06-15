@@ -61,7 +61,6 @@ function buildChatEcho(opCode, data) {
   };
 }
 
-
 function buildCheckers(opCode, data) {
   return {
     opCode,
@@ -79,6 +78,17 @@ function buildVoiceChannelData(opCode, data) {
   };
 }
 
+function buildGameLobbyUpdate(opCode, data) {
+  return {
+    opCode,
+    action: data.action,
+    tableID: data.tableID,
+    gameName: data.gameName,
+    host: data.host,
+    joiner: data.joiner,
+  };
+}
+
 const handlers = {
   'handshake': buildEmptyPacket,
   'spawn-reply': buildSpawnReply,
@@ -89,6 +99,7 @@ const handlers = {
   'chat-echo': buildChatEcho,
   'checkers': buildCheckers,
   'voice-channel-data': buildVoiceChannelData,
+  'gameLobby-echo': buildGameLobbyUpdate,
 };
 
 export default function buildGamePacket(opCode, data) {

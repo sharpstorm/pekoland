@@ -22,11 +22,13 @@ import {
 
 import Chatbox from './ui/ui-chatbox.js';
 import Button, { LongButton } from './ui/ui-button.js';
+import GameMenu from './ui/ui-game.js';
 import { UIAnchor } from './ui/ui-element.js';
+
 import CheckersGame from './games/checkers.js';
 
 const networkManager = NetworkManager.getInstance();
-const inputSystem = new InputSystem(document.getElementById('ui'), document);
+const inputSystem = new InputSystem(document.getElementById('ui-overlay'), document);
 
 networkManager.on('connected', () => {
   console.log('Connected to remote');
@@ -154,6 +156,45 @@ Promise.all([netSetupPromise, assetSetupPromise])
         micBtn.setContent(SpriteManager.getInstance().getSprite('icon-mic-muted'));
       }
     });
+
+    const gameMenu = new GameMenu(boardGameManager.gameList);
+    gameMenu.cardList.forEach((card) => {
+      card.addEventListener('click', () => {
+        // TODO: GET ID / POSITION OF BOARD TABLE INTERACTED
+        console.log(networkManager.getOperationMode()); // 1 = server, 2 = client
+        if (networkManager.getOperationMode() === 2) {
+          const data = {
+            host: PlayerManager.getInstance().getSelfId(),
+            tableID: GameManager.getInstance().getBoardGameManager().tableID,
+            gameName: card.innerHTML,
+            action: 'registerLobbyRequest',
+          };
+          NetworkManager.getInstance().send(buildClientGamePacket('gameLobby', data));
+        } else if (networkManager.getOperationMode() === 1) {
+          WorldManager.getInstance().registerLobby(GameManager.getInstance()
+            .getBoardGameManager().tableID,
+          PlayerManager.getInstance().getSelfId(), card.innerHTML);
+          GameManager.getInstance().getBoardGameManager().showWaitingScreen();
+        }
+      });
+    });
+
+    gameMenu.options.forEach((option) => {
+      option.addEventListener('click', () => {
+        console.log(option.id);
+        if (option.id === 'gameJoinYes') {
+          // join game
+          GameManager.getInstance().getBoardGameManager()
+            .joinGame(GameManager.getInstance().getBoardGameManager().tableID);
+        } else if (option.id === 'gameJoinNo') {
+          // close
+          if (GameManager.getInstance().getBoardGameManager() !== undefined) {
+            GameManager.getInstance().getBoardGameManager().toggle();
+          }
+        }
+      });
+    });
+    uiRenderer.addElement(gameMenu);
     uiRenderer.addElement(menuBtn);
     uiRenderer.addElement(connectBtn);
     uiRenderer.addElement(micBtn);

@@ -10,6 +10,7 @@ export default class Map {
     this.heightGrids = heightGrids;
 
     this.initCollisionMap();
+    document.addEventListener('click', this.getColor);
   }
 
   initCollisionMap() {
@@ -33,6 +34,21 @@ export default class Map {
       }
       this.collisionMatrix.push(col);
     }
+  }
+
+  getFuniture(x, y) {
+    const colorCanvas = document.createElement('canvas');
+    colorCanvas.width = this.mapWidth;
+    colorCanvas.height = this.mapHeight;
+    const ctx = colorCanvas.getContext('2d');
+    if (this.CollisionMap !== undefined) {
+      ctx.drawImage(this.CollisionMap, 0, 0, this.mapWidth, this.mapHeight);
+      const pixel = (ctx.getImageData(x / 2, y / 2, 1, 1).data);
+      if (pixel[3] === 255 && pixel[0] === 255 && pixel[1] === 0 && pixel[2] === 0) {
+        return 'BoardGame';
+      }
+    }
+    return undefined;
   }
 
   draw(ctx, camContext) {
