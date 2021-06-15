@@ -94,6 +94,7 @@ h1 { font-weight: 300; font-size: 2.2rem; }
 .flexbox { display: flex; }
 .flexbox.flex-col { flex-direction: column; }
 .flexbox.flex-center { justify-content: center; }
+.flex-equal { flex: 1 1 0; }
 .center { text-align: center; }
 
 hr {
@@ -103,6 +104,11 @@ hr {
 
 .link {
   color: var(--color-font-light);
+}
+
+.btn-invisible {
+  background: none;
+  border: none;
 }
 
 @media (max-width: 768px) {
