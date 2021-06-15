@@ -8,7 +8,7 @@ import buildGamePacket from './game-data-sender.js';
 import handleClientGamePacket from '../client/game-data-handler.js';
 import NetworkManager from '../network-manager.js';
 import GameManager from '../../managers/game-manager.js';
-import { checkersMove } from '../../games/checkers.js';
+import CheckersGame from '../../games/checkers.js';
 
 const chatManager = GameManager.getInstance().getTextChannelManager();
 
@@ -58,7 +58,7 @@ function handleChat(data, conn) {
 
 function handleCheckersGame(data, conn) {
   console.log(data);
-  checkersMove(data);
+  CheckersGame.getInstance().checkersMove(data);
   NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('checkers', data, conn.peer));
 }
 

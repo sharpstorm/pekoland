@@ -23,7 +23,7 @@ import {
 import Chatbox from './ui/ui-chatbox.js';
 import Button, { LongButton } from './ui/ui-button.js';
 import { UIAnchor } from './ui/ui-element.js';
-import { startGame } from './games/checkers.js';
+import CheckersGame from './games/checkers.js';
 
 const networkManager = NetworkManager.getInstance();
 const inputSystem = new InputSystem(document.getElementById('ui'), document);
@@ -96,14 +96,18 @@ Promise.all([netSetupPromise, assetSetupPromise])
 
     const voiceChannelManager = GameManager.getInstance().getVoiceChannelManager();
     const uiRenderer = Renderer.getUILayer();
+    const gameRenderer = Renderer.getGameLayer();
     const playerManager = PlayerManager.getInstance();
     const chatManager = GameManager.getInstance().getTextChannelManager();
+    const boardGameManager = GameManager.getInstance().getBoardGameManager();
+
+    gameRenderer.register(CheckersGame.getInstance());
 
     const chatbox = new Chatbox();
     chatbox.addSubmitListener((msg) => {
       if (msg.startsWith('start-game-checker ')) {
         const parts = msg.split(' ');
-        startGame(parts[1], parts[2]);
+        boardGameManager.gameList[0].startGame(parts[1], parts[2]);
         return;
       }
 

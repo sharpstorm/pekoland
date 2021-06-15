@@ -166,10 +166,25 @@ class TextChannelManager {
   }
 }
 
+class BoardGameManager {
+  constructor() {
+    this.gameList = [];
+  }
+
+  register(game) {
+    this.gameList.push(game);
+  }
+
+  render(ctx, camContext) {
+    this.gameList.forEach((game) => game.draw(ctx, camContext));
+  }
+}
+
 export default class GameManager {
   constructor() {
     this.voiceChannelManager = new VoiceChannelManager();
     this.textChannelManager = new TextChannelManager();
+    this.boardGameManager = new BoardGameManager();
   }
 
   getVoiceChannelManager() {
@@ -178,6 +193,10 @@ export default class GameManager {
 
   getTextChannelManager() {
     return this.textChannelManager;
+  }
+
+  getBoardGameManager() {
+    return this.boardGameManager;
   }
 
   static getInstance() {

@@ -1,7 +1,7 @@
 import PlayerManager from './player-manager.js';
 import MapManager from './map-manager.js';
 import GameConstants from '../game-constants.js';
-import { drawChecker } from '../games/checkers.js';
+import GameManager from './game-manager.js';
 
 class CameraContext {
   constructor(viewportWidth, viewportHeight) {
@@ -89,6 +89,21 @@ class UILayer {
   }
 }
 
+class GameLayer {
+  constructor() {
+    this.drawables = [];
+  }
+
+  register(game) {
+    GameManager.getInstance().getBoardGameManager().register(game);
+    this.drawables.push(game);
+  }
+
+  render(ctx, cam) {
+    GameManager.getInstance().getBoardGameManager().render(ctx, cam);
+  }
+}
+
 let instance;
 class Renderer {
   constructor() {
@@ -98,6 +113,7 @@ class Renderer {
     this.canvas = document.getElementById('game');
     this.ctx = this.canvas.getContext('2d', { alpha: false });
     this.uiLayer = new UILayer();
+    this.gameLayer = new GameLayer();
 
     this.dimens = {
       width: this.canvas.width,
@@ -150,8 +166,8 @@ class Renderer {
       player.animate(delta, majorUpdate);
     });
 
-    // Checkers
-    drawChecker(this.ctx, camContext);
+    // Game Renderer
+    this.gameLayer.render(this.ctx, camContext);
 
     // Update Camera
     camContext.animate(delta);
@@ -181,6 +197,10 @@ class Renderer {
 
   getUILayer() {
     return this.uiLayer;
+  }
+
+  getGameLayer() {
+    return this.gameLayer;
   }
 
   static getInstance() {

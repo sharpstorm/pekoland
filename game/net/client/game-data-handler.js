@@ -6,7 +6,7 @@ import SpriteManager from '../../managers/sprite-manager.js';
 import Player from '../../models/player.js';
 import NetworkManager from '../network-manager.js';
 import buildClientGamePacket from './game-data-sender.js';
-import { checkersMove } from '../../games/checkers.js';
+import CheckersGame from '../../games/checkers.js';
 import Renderer from '../../managers/animation-manager.js';
 import GameManager from '../../managers/game-manager.js';
 
@@ -64,7 +64,7 @@ function handleChatEcho(data, conn) {
 
 function handleCheckersEcho(data, conn) {
   console.log(data);
-  checkersMove(data);
+  CheckersGame.getInstance().checkersMove(data);
 }
 
 function handleVoiceChannelData(data, conn) {
