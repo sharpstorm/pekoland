@@ -137,10 +137,8 @@ export default function LaunchGameView() {
   let page;
   if (launchState === 0) {
     page = (
-      <div className="flexbox flex-mobile-col" style={{ height: '250px' }}>
-        <Button onClick={() => selectMode(true)} className="btn-primary btn-primary-dark" style={{ marginTop: '8px', flex: '1 1 0' }}>Host A Room</Button>
-        <span className="flexbox flex-col flex-center" style={{ margin: '16px', fontSize: '2em' }}>OR</span>
-        <Button onClick={() => selectMode(false)} className="btn-accent" style={{ marginTop: '8px', flex: '1 1 0' }}>Join A Friend</Button>
+      <div>
+        <h1>An error has occurred</h1>
       </div>
     );
   } else if (launchState === 1 || launchState === 2) {
