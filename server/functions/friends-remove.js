@@ -67,7 +67,6 @@ exports.handler = async function handle(event, context) {
         email: user.email.toLowerCase(),
         friend: {
           email: data.email,
-          nickname: data.nickname,
         },
       }),
     };
