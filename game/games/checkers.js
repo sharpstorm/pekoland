@@ -59,25 +59,27 @@ export default class CheckersGame {
   }
 
   checkersMove(data) {
-    if (data.action === 'startGame') {
-      if (PlayerManager.getInstance().getSelfId() === data.player1
-      || PlayerManager.getInstance().getSelfId() === data.player2) {
-        this.gameOn = true;
-        this.checkersBoard = new CheckerBoard(data.player1, data.player2);
-      }
-    } else if (data.from !== PlayerManager.getInstance().getSelfId()) {
-      // if self is server, echo to all spectators
-      if (NetworkManager.getInstance().getOperationMode() === 1) {
-        
-      }
-      this.checkersBoard.gridArray[63 - data.action.from]
-        .movePieceTo(this.checkersBoard.gridArray[63 - data.action.to]);
-      this.checkersBoard.currentTurn = PlayerManager.getInstance().getSelfId();
-      if (data.action.remove !== undefined) {
-        this.checkersBoard.gridArray[63 - data.action.remove].removePiece();
-      }
-      if (data.action.k) {
-        this.checkersBoard.gridArray[63 - data.action.to].checkerPiece.isKing = true;
+    if (this.gameOn) {
+      if (data.action === 'startGame') {
+        if (PlayerManager.getInstance().getSelfId() === data.player1
+        || PlayerManager.getInstance().getSelfId() === data.player2) {
+          this.gameOn = true;
+          if (PlayerManager.getInstance().getSelfId() === data.player1) {
+            this.checkersBoard = new CheckerBoard(data.player1, data.player2);
+          } else {
+            this.checkersBoard = new CheckerBoard(data.player2, data.player1);
+          }
+        }
+      } else if (data.from === this.checkersBoard.player2) {
+        this.checkersBoard.gridArray[63 - data.action.from]
+          .movePieceTo(this.checkersBoard.gridArray[63 - data.action.to]);
+        this.checkersBoard.currentTurn = PlayerManager.getInstance().getSelfId();
+        if (data.action.remove !== undefined) {
+          this.checkersBoard.gridArray[63 - data.action.remove].removePiece();
+        }
+        if (data.action.k) {
+          this.checkersBoard.gridArray[63 - data.action.to].checkerPiece.isKing = true;
+        }
       }
     }
     console.log(this);
