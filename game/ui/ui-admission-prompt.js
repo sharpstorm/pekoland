@@ -39,8 +39,11 @@ export default class AdmissionPrompt extends UIElement {
     this.textArea.textContent = 'Sharpie is requesting to join!';
     this.panelContainer.appendChild(this.textArea);
 
-    this.acceptButton = new Button(-40, 8, 36, 36, new UIAnchor(false, true, true, true), 'Yes');
-    this.rejectButton = new Button(40, 8, 36, 36, new UIAnchor(false, true, true, true), 'No');
+    this.acceptButton = new Button(-40, 8, 36, 36, new UIAnchor(false, true, true, true),
+      SpriteManager.getInstance().getSprite('icon-tick'));
+    this.rejectButton = new Button(40, 8, 36, 36, new UIAnchor(false, true, true, true),
+      SpriteManager.getInstance().getSprite('icon-cross'));
+
     this.panelContainer.appendChild(this.acceptButton.node);
     this.panelContainer.appendChild(this.rejectButton.node);
 
