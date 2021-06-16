@@ -23,6 +23,10 @@ export default class WorldManager {
     this.gameLobbies[key].spectators.push(player);
   }
 
+  removeSpectator(key, player) {
+    this.gameLobbies[key].spectators.pop(player);
+  }
+
   joinLobby(key, j) {
     const h = this.gameLobbies[key].host;
     const gn = this.gameLobbies[key].gameName;

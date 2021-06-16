@@ -181,6 +181,9 @@ function handleGameLobby(data, conn) {
       NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('gameLobby-echo', newData, conn.peer));
     }
     WorldManager.getInstance().closeLobby(data.tableID);
+  } else if (data.action === 'leave-spectate') {
+    WorldManager.getInstance().removeSpectator(data.tableID, data.host);
+    console.log(WorldManager.getInstance().gameLobbies);
   } else if (data.action === 'spectate') {
     WorldManager.getInstance().addSpectator(data.tableID, data.host);
     const historyList = WorldManager.getInstance()

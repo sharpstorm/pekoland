@@ -358,18 +358,33 @@ class BoardGameManager {
   leaveGame() {
     // MIGHT BE A BUGGY IMPLEMENTATION
     if (NetworkManager.getInstance().getOperationMode() === 2) {
-      const data = {
-        host: PlayerManager.getInstance().getSelfId(),
-        tableID: this.tableID,
-        action: 'leaveGame',
-      };
-      NetworkManager.getInstance().send(buildClientGamePacket('gameLobby', data));
-      this.gameList.forEach((game) => {
-        if (game.gameName === this.currentGame) {
-          game.endGame();
-          this.closeGameOverlay();
-        }
-      });
+      if (this.gameState === 'spectating') {
+        this.gameList.forEach((game) => {
+          if (game.gameName === this.currentGame) {
+            game.endGame();
+            this.closeGameOverlay();
+          }
+        });
+        const data = {
+          host: PlayerManager.getInstance().getSelfId(),
+          tableID: this.tableID,
+          action: 'leave-spectate',
+        };
+        NetworkManager.getInstance().send(buildClientGamePacket('gameLobby', data));
+      } else {
+        const data = {
+          host: PlayerManager.getInstance().getSelfId(),
+          tableID: this.tableID,
+          action: 'leaveGame',
+        };
+        NetworkManager.getInstance().send(buildClientGamePacket('gameLobby', data));
+        this.gameList.forEach((game) => {
+          if (game.gameName === this.currentGame) {
+            game.endGame();
+            this.closeGameOverlay();
+          }
+        });
+      }
     } else if (NetworkManager.getInstance().getOperationMode() === 1) {
       if (this.gameState === 'spectating') {
         this.gameList.forEach((game) => {
