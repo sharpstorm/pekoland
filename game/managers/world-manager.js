@@ -25,6 +25,13 @@ export default class WorldManager {
     console.log(this.gameLobbies);
   }
 
+  getLobbyPartner(key, id) {
+    if (id === this.gameLobbies[key].host) {
+      return this.gameLobbies[key].joiner;
+    }
+    return this.gameLobbies[key].host;
+  }
+
   lobbyExist(key) {
     console.log(this.gameLobbies);
     return (this.gameLobbies[key]) !== undefined;

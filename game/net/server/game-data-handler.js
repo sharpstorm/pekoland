@@ -165,13 +165,20 @@ function handleGameLobby(data, conn) {
     WorldManager.getInstance().closeLobby(data.tableID);
     console.log(WorldManager.getInstance().gameLobbies);
   } else if (data.action === 'leaveGame') {
-    console.log('here in leave game');
     if (WorldManager.getInstance()
       .getLobbyHost(data.tableID) === PlayerManager.getInstance().getSelfId()
     || WorldManager.getInstance()
       .getLobbyJoiner(data.tableID) === PlayerManager.getInstance().getSelfId()) {
       GameManager.getInstance().getBoardGameManager().endGame();
-      console.log('sdf');
+    } else {
+      const newData = {
+        host: data.host,
+        joiner: WorldManager.getInstance().getLobbyPartner(data.tableID, data.host),
+        tableID: data.tableID,
+        gameName: data.gameName,
+        action: 'leaveGame',
+      };
+      NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('gameLobby-echo', newData, conn.peer));
     }
     WorldManager.getInstance().closeLobby(data.tableID);
   }

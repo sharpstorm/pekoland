@@ -204,6 +204,7 @@ class BoardGameManager {
           action: 'checkLobby',
         };
         NetworkManager.getInstance().send(buildClientGamePacket('gameLobby', data));
+        this.gameState = 'waitingCheck';
       } else if (NetworkManager.getInstance().getOperationMode() === 1) {
         if (WorldManager.getInstance().lobbyExist(this.tableID)) {
           if (WorldManager.getInstance().getLobbyJoiner(this.tableID) === undefined) {
@@ -213,6 +214,7 @@ class BoardGameManager {
             }
           } else {
             // OCCUPIED. SPECTATE
+            this.showSpectate();
           }
         } else {
           // LOBBY WITH TABLE ID DOESNT EXIST
@@ -241,6 +243,7 @@ class BoardGameManager {
         console.log(WorldManager.getInstance().gameLobbies);
       }
     }
+    this.gameState = undefined;
   }
 
   joinGame() {
@@ -264,6 +267,7 @@ class BoardGameManager {
       };
       NetworkManager.getInstance().send(buildServerGamePacket('gameLobby-echo', data));
       this.currentGame = data.gameName;
+      this.gameState = 'playing';
       this.showGameOverlay();
       this.toggle();
     }
@@ -277,6 +281,7 @@ class BoardGameManager {
         this.toggle();
       }
     });
+    this.gameState = 'playing';
     this.showGameOverlay();
   }
 
@@ -285,6 +290,15 @@ class BoardGameManager {
       // console.log(e);
       if (e.constructor.name === 'GameMenu') {
         e.toggle();
+      }
+    });
+  }
+
+  showSpectate() {
+    this.uiLayer.elements.forEach((e) => {
+      // console.log(e);
+      if (e.constructor.name === 'GameMenu') {
+        e.showSpectate();
       }
     });
   }
@@ -308,11 +322,22 @@ class BoardGameManager {
   }
 
   endGame() {
-    alert('The other party has ended the game');
+    alert('The other party has left the game');
     this.gameList.forEach((game) => {
       if (game.gameName === this.currentGame) {
         game.endGame();
         this.closeGameOverlay();
+        this.gameState = undefined;
+      }
+    });
+  }
+
+  endGameNo() {
+    this.gameList.forEach((game) => {
+      if (game.gameName === this.currentGame) {
+        game.endGame();
+        this.closeGameOverlay();
+        this.gameState = undefined;
       }
     });
   }
@@ -321,6 +346,7 @@ class BoardGameManager {
     // MIGHT BE A BUGGY IMPLEMENTATION
     if (NetworkManager.getInstance().getOperationMode() === 2) {
       const data = {
+        host: PlayerManager.getInstance().getSelfId(),
         tableID: this.tableID,
         action: 'leaveGame',
       };
@@ -347,6 +373,7 @@ class BoardGameManager {
         }
       });
     }
+    this.gameState = undefined;
   }
 
   showGameOverlay() {

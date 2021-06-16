@@ -66,6 +66,10 @@ export default class CheckersGame {
         this.checkersBoard = new CheckerBoard(data.player1, data.player2);
       }
     } else if (data.from !== PlayerManager.getInstance().getSelfId()) {
+      // if self is server, echo to all spectators
+      if (NetworkManager.getInstance().getOperationMode() === 1) {
+        
+      }
       this.checkersBoard.gridArray[63 - data.action.from]
         .movePieceTo(this.checkersBoard.gridArray[63 - data.action.to]);
       this.checkersBoard.currentTurn = PlayerManager.getInstance().getSelfId();

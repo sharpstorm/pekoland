@@ -9,6 +9,7 @@ import buildClientGamePacket from './game-data-sender.js';
 import CheckersGame from '../../games/checkers.js';
 import Renderer from '../../managers/animation-manager.js';
 import GameManager from '../../managers/game-manager.js';
+import { GameOverlay } from '../../ui/ui-game.js';
 
 const chatManager = GameManager.getInstance().getTextChannelManager();
 
@@ -73,6 +74,7 @@ function handleVoiceChannelData(data, conn) {
 }
 
 function handleGameLobby(data, conn) {
+  console.log(GameManager.getInstance().getBoardGameManager());
   console.log(data);
   if (data.action === 'registerLobbyEcho-success' && data.host === PlayerManager.getInstance().getSelfId()) {
     GameManager.getInstance().getBoardGameManager().showWaitingScreen();
@@ -80,15 +82,25 @@ function handleGameLobby(data, conn) {
     GameManager.getInstance().getBoardGameManager().gameState = 'hosting';
   } else if (data.action === 'open' && data.host === PlayerManager.getInstance().getSelfId()) {
     GameManager.getInstance().getBoardGameManager().showGameMenu();
-  } else if (data.action === 'canJoin') {
-    GameManager.getInstance().getBoardGameManager().showJoinGame();
+  } else if (data.action === 'canJoin' && GameManager.getInstance().getBoardGameManager().gameState === 'waitingCheck') {
+    console.log('here in ca join');
+    if (data.tableID === GameManager.getInstance().getBoardGameManager().tableID) {
+      console.log('here in ca join');
+      GameManager.getInstance().getBoardGameManager().showJoinGame();
+    }
+  } else if ((data.action === 'occupied' && GameManager.getInstance().getBoardGameManager().gameState === 'waitingCheck')) {
+    GameManager.getInstance().getBoardGameManager().showSpectate();
   } else if ((data.action === 'startGame' && data.host === PlayerManager.getInstance().getSelfId())
   || (data.action === 'startGame' && data.joiner === PlayerManager.getInstance().getSelfId())) {
     GameManager.getInstance().getBoardGameManager()
       .startGame(data.gameName, data.host, data.joiner);
   } else if ((data.action === 'leaveGame' && data.host === PlayerManager.getInstance().getSelfId())
   || (data.action === 'leaveGame' && data.joiner === PlayerManager.getInstance().getSelfId())) {
-    GameManager.getInstance().getBoardGameManager().endGame();
+    if (data.host === PlayerManager.getInstance().getSelfId()) {
+      GameManager.getInstance().getBoardGameManager().endGameNo();
+    } else {
+      GameManager.getInstance().getBoardGameManager().endGame();
+    }
   }
 }
 

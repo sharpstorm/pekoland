@@ -50,6 +50,18 @@ class GameMenu extends UIElement {
     this.yesNoScreen.appendChild(card);
     this.options.push(card);
 
+    this.spectateScreen = createElement('div', { id: 'game-menu-window-spectate' });
+    this.spectateScreen.style.display = 'none';
+    this.gameMenuWindow.appendChild(this.spectateScreen);
+
+    card = createElement('div', { className: 'game-menu-window-games', id: 'spectateYes' });
+    card.innerHTML = 'Yes';
+    this.spectateScreen.appendChild(card);
+
+    card = createElement('div', { className: 'game-menu-window-games', id: 'spectateNo' });
+    card.innerHTML = 'No';
+    this.spectateScreen.appendChild(card);
+
     this.gameMenuWindow.appendChild(this.gamesHolder);
     this.titleWindow.appendChild(this.titleText);
     this.node.appendChild(this.gameMenuWindow);
@@ -73,6 +85,7 @@ class GameMenu extends UIElement {
     this.titleText.innerHTML = 'Join Game?';
     this.gameMenuWindow.style.display = 'block';
     this.gamesHolder.style.display = 'none';
+    this.spectateScreen.style.display = 'none';
     // eslint-disable-next-line no-param-reassign
     this.gamesHolder.childNodes.forEach((cn) => { cn.style.display = 'none'; });
     this.yesNoScreen.style.display = 'block';
@@ -80,6 +93,16 @@ class GameMenu extends UIElement {
 
   close() {
     this.gameMenuWindow.style.display = 'none';
+  }
+
+  showSpectate() {
+    this.titleText.innerHTML = 'Spectate Game?';
+    this.gameMenuWindow.style.display = 'block';
+    this.gamesHolder.style.display = 'none';
+    // eslint-disable-next-line no-param-reassign
+    this.gamesHolder.childNodes.forEach((cn) => { cn.style.display = 'none'; });
+    this.yesNoScreen.style.display = 'none';
+    this.spectateScreen.style.display = 'block';
   }
 
   showGameMenu() {

@@ -160,7 +160,6 @@ Promise.all([netSetupPromise, assetSetupPromise])
     const gameMenu = new GameMenu(boardGameManager.gameList);
     gameMenu.cardList.forEach((card) => {
       card.addEventListener('click', () => {
-        // TODO: GET ID / POSITION OF BOARD TABLE INTERACTED
         console.log(networkManager.getOperationMode()); // 1 = server, 2 = client
         if (networkManager.getOperationMode() === 2) {
           const data = {
@@ -184,17 +183,18 @@ Promise.all([netSetupPromise, assetSetupPromise])
       option.addEventListener('click', () => {
         if (option.id === 'gameJoinYes') {
           // join game
+          console.log('yes yes');
           GameManager.getInstance().getBoardGameManager()
             .joinGame();
         } else if (option.id === 'gameJoinNo') {
           // close
+          console.log('no no');
           if (GameManager.getInstance().getBoardGameManager() !== undefined) {
             GameManager.getInstance().getBoardGameManager().toggle();
           }
         }
       });
     });
-
     const gameOverlay = new GameOverlay();
     gameOverlay.leaveBtn.addEventListener('click', () => {
       GameManager.getInstance().getBoardGameManager().leaveGame();
