@@ -34,9 +34,6 @@ networkManager.on('connected', () => {
 networkManager.on('clientConnected', () => {
   console.log('Remote has connected');
 });
-networkManager.on('modeChanged', (mode) => {
-  console.log(`Currently in ${mode === NetworkManager.Mode.SERVER ? 'server' : 'client'} mode`);
-});
 networkManager.on('connectionFailed', () => {
   alert('Could not connect to partner! Please Try Again!');
   window.close();
@@ -80,6 +77,51 @@ addJoystickEventHandler((evt) => {
     networkManager.send(buildClientGamePacket('move', evt));
   } else {
     networkManager.send(buildServerGamePacket('move-echo', buildClientGamePacket('move', evt)));
+  }
+});
+
+function setupServerHooks() {
+  const worldManager = WorldManager.getInstance();
+  const roomController = worldManager.getRoomController();
+
+  roomController.on('playerRequestJoin', (playerInfo) => {
+    // eslint-disable-next-line no-restricted-globals
+    if (confirm(`${playerInfo.name} is requesting to join. Admit?`)) {
+      roomController.admitIntoWorld(playerInfo.peerId);
+    } else {
+      roomController.rejectAdmit(playerInfo.peerId);
+    }
+  });
+
+  roomController.on('playerAdmit', (playerInfo) => {
+    const playerId = roomController.getPlayerId(playerInfo.peerId);
+    if (playerId === undefined) {
+      return;
+    }
+
+    const player = new Player(playerId, playerInfo.name, SpriteManager.getInstance().getSprite('rabbit-avatar'));
+    // Update connection
+    NetworkManager.getInstance().getConnection().sendTo(buildServerGamePacket('spawn-reply', {
+      self: player,
+      others: PlayerManager.getInstance().getPlayers(),
+    }), playerInfo.peerId);
+
+    // Broadcast to everyone else
+    NetworkManager.getInstance().getConnection().sendAllExcept(buildServerGamePacket('spawn-player', player), playerInfo.peerId);
+
+    // Register User to Server Player Manager
+    PlayerManager.getInstance().addPlayer(player);
+  });
+
+  roomController.on('playerReject', (playerInfo) => {
+    NetworkManager.getInstance().getConnection().sendTo(buildServerGamePacket('spawn-reject', 'Host Rejected Your Admission'), playerInfo.peerId);
+  });
+}
+
+networkManager.on('modeChanged', (mode) => {
+  console.log(`Currently in ${mode === NetworkManager.Mode.SERVER ? 'server' : 'client'} mode`);
+  if (networkManager.getOperationMode() === NetworkManager.Mode.SERVER) {
+    setupServerHooks();
   }
 });
 
