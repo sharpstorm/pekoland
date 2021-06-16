@@ -130,10 +130,20 @@ networkManager.on('modeChanged', (mode) => {
 
 const netSetupPromise = timeout(networkManager.setup(), 5000);
 const assetSetupPromise = loadAssets();
+const spawnPromise = new Promise((resolve) => {
+  PlayerManager.getInstance().on('spawnSelf', () => {
+    PlayerManager.getInstance().on('spawnSelf', undefined);
+    resolve();
+  });
+});
 Promise.all([netSetupPromise, assetSetupPromise])
   .then(() => {
+    document.getElementById('loading-panel').classList.add('joining');
+    return spawnPromise;
+  })
+  .then(() => {
     console.log('setup successful');
-    document.getElementById('connecting-msg').style.display = 'none';
+    document.getElementById('loading-panel').style.display = 'none';
     document.getElementById('game-container').style.display = 'block';
 
     inputSystem.addListener('keydown', joystickWorker);
