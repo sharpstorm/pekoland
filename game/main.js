@@ -107,12 +107,6 @@ Promise.all([netSetupPromise, assetSetupPromise])
 
     const chatbox = new Chatbox();
     chatbox.addSubmitListener((msg) => {
-      if (msg.startsWith('start-game-checker ')) {
-        const parts = msg.split(' ');
-        boardGameManager.gameList[0].startGame(parts[1], parts[2]);
-        return;
-      }
-
       chatManager.addToHistory(playerManager.getSelf().name, msg);
       playerManager.getSelf().chat.updateMessage(msg);
 
@@ -198,6 +192,38 @@ Promise.all([netSetupPromise, assetSetupPromise])
     const gameOverlay = new GameOverlay();
     gameOverlay.leaveBtn.addEventListener('click', () => {
       GameManager.getInstance().getBoardGameManager().leaveGame();
+    });
+
+    gameMenu.spectateScreen.childNodes[0].addEventListener('click', () => {
+      if (NetworkManager.getInstance().getOperationMode() === 1) {
+        GameManager.getInstance().getBoardGameManager().toggle();
+        GameManager.getInstance().getBoardGameManager().gameState = 'spectating';
+        GameManager.getInstance().getBoardGameManager().spectateGame(
+          WorldManager.getInstance()
+            .getGameName(GameManager.getInstance().getBoardGameManager().tableID),
+          WorldManager.getInstance()
+            .getLobbyHost(GameManager.getInstance().getBoardGameManager().tableID),
+          WorldManager.getInstance()
+            .getLobbyJoiner(GameManager.getInstance().getBoardGameManager().tableID),
+        );
+        // GameManager.getInstance().getBoardGameManager().gameList[0].checkersMove
+
+        GameManager.getInstance().getBoardGameManager().toggle();
+        const historyList = WorldManager.getInstance()
+          .getHistory(GameManager.getInstance().getBoardGameManager().tableID);
+
+        setTimeout(() => {
+          historyList.forEach((hist) => {
+            GameManager.getInstance().getBoardGameManager()
+              .gameList[0].processMove(hist); // hard coded
+          });
+        }, 1000);
+      }
+    });
+
+    gameMenu.spectateScreen.childNodes[1].addEventListener('click', () => {
+      GameManager.getInstance().getBoardGameManager().toggle();
+      GameManager.getInstance().getBoardManager().gameState = undefined;
     });
 
     uiRenderer.addElement(gameOverlay);

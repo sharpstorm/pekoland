@@ -285,6 +285,18 @@ class BoardGameManager {
     this.showGameOverlay();
   }
 
+  spectateGame(gameName, p1, p2) {
+    this.gameList.forEach((game) => {
+      if (game.gameName === gameName) {
+        game.spectateGame(p1, p2);
+        this.currentGame = gameName;
+        this.toggle();
+      }
+    });
+    this.gameState = 'spectating';
+    this.showGameOverlay();
+  }
+
   toggle() {
     this.uiLayer.elements.forEach((e) => {
       // console.log(e);

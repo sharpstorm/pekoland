@@ -8,7 +8,13 @@ export default class WorldManager {
   }
 
   registerLobby(key, h, gn) {
-    this.gameLobbies[key] = { host: h, joiner: undefined, gameName: gn };
+    this.gameLobbies[key] = {
+      host: h,
+      joiner: undefined,
+      gameName: gn,
+      spectators: [],
+      history: [],
+    };
     console.log(this.gameLobbies);
     // console.log(this.gameLobbies);
   }
@@ -16,13 +22,34 @@ export default class WorldManager {
   joinLobby(key, j) {
     const h = this.gameLobbies[key].host;
     const gn = this.gameLobbies[key].gameName;
-    this.gameLobbies[key] = { host: h, joiner: j, gameName: gn };
+    const s = this.gameLobbies[key].spectators;
+    const hist = this.gameLobbies[key].history;
+    this.gameLobbies[key] = {
+      host: h,
+      joiner: j,
+      gameName: gn,
+      spectators: s,
+      history: hist,
+    };
     // console.log(this.gameLobbies);
   }
 
   closeLobby(key) {
     delete this.gameLobbies[key];
     console.log(this.gameLobbies);
+  }
+
+  getHistory(key) {
+    return this.gameLobbies[key].history;
+  }
+
+  addHistory(player, action) {
+    // eslint-disable-next-line no-restricted-syntax
+    for (const entry in this.gameLobbies) {
+      if (this.gameLobbies[entry].host === player || this.gameLobbies[entry].joiner === player) {
+        this.gameLobbies[entry].history.push(action);
+      }
+    }
   }
 
   getLobbyPartner(key, id) {
