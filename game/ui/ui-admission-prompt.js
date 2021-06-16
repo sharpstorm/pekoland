@@ -13,6 +13,8 @@ export default class AdmissionPrompt extends UIElement {
     this.historyObjects = [];
     this.acceptHandler = undefined;
     this.rejectHandler = undefined;
+    this.waitingQueue = [];
+    this.showing = false;
   }
 
   initObject() {
@@ -68,13 +70,26 @@ export default class AdmissionPrompt extends UIElement {
     this.rejectHandler = undefined;
     this.textArea.textContent = '';
     this.node.classList.remove('show');
+    this.showing = false;
+
+    if (this.waitingQueue.length > 0) {
+      // Something in waiting queue
+      const nextItem = this.waitingQueue[0];
+      this.waitingQueue.splice(0, 1);
+      this.prompt(nextItem.text, nextItem.accept, nextItem.reject);
+    }
   }
 
   prompt(text, accept, reject) {
-    this.textArea.textContent = text;
-    this.acceptHandler = accept;
-    this.rejectHandler = reject;
-    this.node.classList.add('show');
+    if (!this.showing) {
+      this.textArea.textContent = text;
+      this.acceptHandler = accept;
+      this.rejectHandler = reject;
+      this.node.classList.add('show');
+      this.showing = true;
+    } else {
+      this.waitingQueue.push({ text, accept, reject });
+    }
   }
 
   drawImage(drawFunc) {
