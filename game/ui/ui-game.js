@@ -20,6 +20,7 @@ class GameMenu extends UIElement {
     this.closeBtn = createElement('div', { id: 'game-menu-window-close-btn' });
     this.closeBtn.addEventListener('click', () => {
       GameManager.getInstance().getBoardGameManager().closeMenu();
+      GameManager.getInstance().getBoardGameManager().gameState = undefined;
       this.close();
     });
 

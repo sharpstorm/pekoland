@@ -188,13 +188,22 @@ class BoardGameManager {
     this.gameList.forEach((game) => game.draw(ctx, camContext));
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  checkPlayer(x, y) {
+    if (Math.abs(x - PlayerManager.getInstance().getSelf().x) <= 100
+    && Math.abs(y - PlayerManager.getInstance().getSelf().y) <= 100) {
+      return true;
+    }
+    return false;
+  }
+
   propagateEvent(eventID, event, camContext, uiLayer) {
     this.uiLayer = uiLayer; // TO CHANGE TO CONSTRUCTOR
     const clickedData = MapManager.getInstance().getCurrentMap()
       .getFuniture(camContext.x + event.clientX, camContext.y + event.clientY);
     const floorX = Math.floor((camContext.x + event.clientX) / 100) * 100;
     const floorY = Math.floor((camContext.y + event.clientY) / 100) * 100;
-    if (clickedData === 'BoardGame') {
+    if (clickedData === 'BoardGame' && this.gameState === undefined && this.checkPlayer(floorX, floorY)) {
       this.tableID = `${floorX}-${floorY}`;
       console.log(this.tableID);
       if (NetworkManager.getInstance().getOperationMode() === 2) {
