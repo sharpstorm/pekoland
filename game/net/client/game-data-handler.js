@@ -77,7 +77,7 @@ function handleGameLobby(data, conn) {
   if (data.action === 'registerLobbyEcho-success' && data.host === PlayerManager.getInstance().getSelfId()) {
     GameManager.getInstance().getBoardGameManager().showWaitingScreen();
     GameManager.getInstance().getBoardGameManager().currentGame = data.gameName;
-    GameManager.getInstance().getBoardGameManager().gameState = 'pending';
+    GameManager.getInstance().getBoardGameManager().gameState = 'hosting';
   } else if (data.action === 'open' && data.host === PlayerManager.getInstance().getSelfId()) {
     GameManager.getInstance().getBoardGameManager().showGameMenu();
   } else if (data.action === 'canJoin') {

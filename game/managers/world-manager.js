@@ -20,6 +20,11 @@ export default class WorldManager {
     // console.log(this.gameLobbies);
   }
 
+  closeLobby(key) {
+    delete this.gameLobbies[key];
+    console.log(this.gameLobbies);
+  }
+
   lobbyExist(key) {
     console.log(this.gameLobbies);
     return (this.gameLobbies[key]) !== undefined;

@@ -161,6 +161,9 @@ function handleGameLobby(data, conn) {
       };
       NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('gameLobby-echo', newData, conn.peer));
     }
+  } else if (data.action === 'closeLobby') {
+    WorldManager.getInstance().closeLobby(data.tableID);
+    console.log(WorldManager.getInstance().gameLobbies);
   }
 }
 

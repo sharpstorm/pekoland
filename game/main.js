@@ -174,6 +174,7 @@ Promise.all([netSetupPromise, assetSetupPromise])
           WorldManager.getInstance().registerLobby(GameManager.getInstance()
             .getBoardGameManager().tableID,
           PlayerManager.getInstance().getSelfId(), card.innerHTML);
+          GameManager.getInstance().getBoardGameManager().gameState = 'hosting';
           GameManager.getInstance().getBoardGameManager().showWaitingScreen();
         }
       });

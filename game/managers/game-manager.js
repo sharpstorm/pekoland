@@ -193,8 +193,9 @@ class BoardGameManager {
       .getFuniture(camContext.x + event.clientX, camContext.y + event.clientY);
     const floorX = Math.floor((camContext.x + event.clientX) / 100) * 100;
     const floorY = Math.floor((camContext.y + event.clientY) / 100) * 100;
-    this.tableID = `${floorX}-${floorY}`;
     if (clickedData === 'BoardGame') {
+      this.tableID = `${floorX}-${floorY}`;
+      console.log(this.tableID);
       if (NetworkManager.getInstance().getOperationMode() === 2) {
         // IF MODE = CLIENT, CHECK CLICKED LOBBY SATUS
         const data = {
@@ -215,8 +216,29 @@ class BoardGameManager {
           }
         } else {
           // LOBBY WITH TABLE ID DOESNT EXIST
+          // console.log('server game menu');
           this.showGameMenu();
         }
+      }
+    }
+  }
+
+  closeMenu() {
+    if (NetworkManager.getInstance().getOperationMode() === 2) {
+      if (this.gameState === 'hosting') {
+        // SEND CLOSE LOBBY REQ
+        const data = {
+          host: PlayerManager.getInstance().getSelfId(),
+          tableID: this.tableID,
+          action: 'closeLobby',
+        };
+        NetworkManager.getInstance().send(buildClientGamePacket('gameLobby', data));
+      }
+    } else if (NetworkManager.getInstance().getOperationMode() === 1) {
+      if (this.gameState === 'hosting') {
+        console.log(WorldManager.getInstance().gameLobbies);
+        WorldManager.getInstance().closeLobby(this.tableID);
+        console.log(WorldManager.getInstance().gameLobbies);
       }
     }
   }

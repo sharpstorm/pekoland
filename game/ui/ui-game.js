@@ -1,5 +1,6 @@
 import { createElement } from './ui-utils.js';
 import UIElement, { UIAnchor } from './ui-element.js';
+import GameManager from '../managers/game-manager.js';
 
 class GameMenu extends UIElement {
   constructor(gameList) {
@@ -18,6 +19,7 @@ class GameMenu extends UIElement {
     this.titleText = createElement('div', { id: 'game-menu-window-title-text' });
     this.closeBtn = createElement('div', { id: 'game-menu-window-close-btn' });
     this.closeBtn.addEventListener('click', () => {
+      GameManager.getInstance().getBoardGameManager().closeMenu();
       this.close();
     });
 
@@ -83,7 +85,7 @@ class GameMenu extends UIElement {
   showGameMenu() {
     this.titleText.innerHTML = 'Games';
     // eslint-disable-next-line no-param-reassign
-    // this.gamesHolder.childNodes.forEach((cn) => { cn.style.display = 'block'; });
+    this.gamesHolder.childNodes.forEach((cn) => { cn.style.display = 'block'; });
     this.gamesHolder.style.backgroundImage = '';
     this.gamesHolder.style.display = 'block';
     this.gameMenuWindow.style.display = 'block';
