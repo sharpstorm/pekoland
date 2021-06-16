@@ -108,7 +108,7 @@
   background-color: rgba(0, 0, 0, 0.9);
 }
 
-.game-menu-window-games{
+.game-menu-window-games {
   border: 1px solid rgba(255, 255, 255, 0.9);
   padding: 20px;
   font-size: 30px;
@@ -119,14 +119,14 @@
   background-color: rgba(255, 255, 255, 0.2);
 }
 
-#game-menu-window-title-text{
+#game-menu-window-title-text {
   margin-top: 20px;
   display:block;
   font-weight: bold;
   color: white;
 }
 
-#game-menu-window-yes-no{
+#game-menu-window-yes-no {
   border: 1px solid white;
   position: absolute;
   display: grid;
@@ -137,3 +137,14 @@
   background-color: rgba(0, 0, 0, 0.9);
 }
 
+#game-menu-window-close-btn{
+  position:absolute;
+  right: 0;
+  height: 50%;
+  width: 5%;
+  text-align: center;
+  margin: 5px;
+  background-image: url(../Images/x.png);
+  background-size: contain;
+  background-repeat: no-repeat;
+}

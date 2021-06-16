@@ -16,6 +16,13 @@ class GameMenu extends UIElement {
     this.titleWindow = createElement('div', { id: 'game-menu-window-title' });
     this.gamesHolder = createElement('div', { id: 'game-menu-window-games-holder' });
     this.titleText = createElement('div', { id: 'game-menu-window-title-text' });
+    this.closeBtn = createElement('div', { id: 'game-menu-window-close-btn' });
+    this.closeBtn.addEventListener('click', () => {
+      this.close();
+    });
+
+    // this.closeBtn.innerHTML = 'X';
+    this.titleWindow.appendChild(this.closeBtn);
     this.titleText.innerHTML = 'Games';
     this.gameMenuWindow.style.display = 'none';
     this.gameMenuWindow.appendChild(this.titleWindow);
@@ -67,6 +74,10 @@ class GameMenu extends UIElement {
     // eslint-disable-next-line no-param-reassign
     this.gamesHolder.childNodes.forEach((cn) => { cn.style.display = 'none'; });
     this.yesNoScreen.style.display = 'block';
+  }
+
+  close() {
+    this.gameMenuWindow.style.display = 'none';
   }
 
   showGameMenu() {
