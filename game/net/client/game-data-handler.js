@@ -86,6 +86,9 @@ function handleGameLobby(data, conn) {
   || (data.action === 'startGame' && data.joiner === PlayerManager.getInstance().getSelfId())) {
     GameManager.getInstance().getBoardGameManager()
       .startGame(data.gameName, data.host, data.joiner);
+  } else if ((data.action === 'leaveGame' && data.host === PlayerManager.getInstance().getSelfId())
+  || (data.action === 'leaveGame' && data.joiner === PlayerManager.getInstance().getSelfId())) {
+    GameManager.getInstance().getBoardGameManager().endGame();
   }
 }
 

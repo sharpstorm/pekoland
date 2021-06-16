@@ -41,6 +41,10 @@ export default class CheckersGame {
     }
   }
 
+  endGame() {
+    this.gameOn = false;
+  }
+
   startGame(p1, p2) {
     this.gameOn = true;
     this.checkersBoard = new CheckerBoard(p1, p2);

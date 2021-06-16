@@ -22,7 +22,7 @@ import {
 
 import Chatbox from './ui/ui-chatbox.js';
 import Button, { LongButton } from './ui/ui-button.js';
-import GameMenu from './ui/ui-game.js';
+import GameMenu, { GameOverlay } from './ui/ui-game.js';
 import { UIAnchor } from './ui/ui-element.js';
 
 import CheckersGame from './games/checkers.js';
@@ -194,6 +194,13 @@ Promise.all([netSetupPromise, assetSetupPromise])
         }
       });
     });
+
+    const gameOverlay = new GameOverlay();
+    gameOverlay.leaveBtn.addEventListener('click', () => {
+      GameManager.getInstance().getBoardGameManager().leaveGame();
+    });
+
+    uiRenderer.addElement(gameOverlay);
     uiRenderer.addElement(gameMenu);
     uiRenderer.addElement(menuBtn);
     uiRenderer.addElement(connectBtn);

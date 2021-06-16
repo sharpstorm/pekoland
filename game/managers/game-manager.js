@@ -263,6 +263,8 @@ class BoardGameManager {
         action: 'startGame',
       };
       NetworkManager.getInstance().send(buildServerGamePacket('gameLobby-echo', data));
+      this.currentGame = data.gameName;
+      this.showGameOverlay();
       this.toggle();
     }
   }
@@ -271,9 +273,11 @@ class BoardGameManager {
     this.gameList.forEach((game) => {
       if (game.gameName === gameName) {
         game.startGame(p1, p2);
+        this.currentGame = gameName;
         this.toggle();
       }
     });
+    this.showGameOverlay();
   }
 
   toggle() {
@@ -299,6 +303,66 @@ class BoardGameManager {
       // console.log(e);
       if (e.constructor.name === 'GameMenu') {
         e.showJoinGame();
+      }
+    });
+  }
+
+  endGame() {
+    alert('The other party has ended the game');
+    this.gameList.forEach((game) => {
+      if (game.gameName === this.currentGame) {
+        game.endGame();
+        this.closeGameOverlay();
+      }
+    });
+  }
+
+  leaveGame() {
+    // MIGHT BE A BUGGY IMPLEMENTATION
+    if (NetworkManager.getInstance().getOperationMode() === 2) {
+      const data = {
+        tableID: this.tableID,
+        action: 'leaveGame',
+      };
+      NetworkManager.getInstance().send(buildClientGamePacket('gameLobby', data));
+      this.gameList.forEach((game) => {
+        if (game.gameName === this.currentGame) {
+          game.endGame();
+          this.closeGameOverlay();
+        }
+      });
+    } else if (NetworkManager.getInstance().getOperationMode() === 1) {
+      this.gameList.forEach((game) => {
+        if (game.gameName === this.currentGame) {
+          game.endGame();
+          this.closeGameOverlay();
+          const data = {
+            host: WorldManager.getInstance().getLobbyHost(this.tableID),
+            joiner: WorldManager.getInstance().getLobbyJoiner(this.tableID),
+            tableID: this.tableID,
+            action: 'leaveGame',
+          };
+          WorldManager.getInstance().closeLobby(this.tableID);
+          NetworkManager.getInstance().send(buildServerGamePacket('gameLobby-echo', data));
+        }
+      });
+    }
+  }
+
+  showGameOverlay() {
+    this.uiLayer.elements.forEach((e) => {
+      // console.log(e);
+      if (e.constructor.name === 'GameOverlay') {
+        e.show();
+      }
+    });
+  }
+
+  closeGameOverlay() {
+    this.uiLayer.elements.forEach((e) => {
+      // console.log(e);
+      if (e.constructor.name === 'GameOverlay') {
+        e.close();
       }
     });
   }

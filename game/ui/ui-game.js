@@ -102,4 +102,33 @@ class GameMenu extends UIElement {
   }
 }
 
-export { GameMenu as default };
+class GameOverlay extends UIElement {
+  // SHOW PLAYER TURN HERE? OR IN GAME
+  constructor() {
+    super('80%', '10%', '15%', '80%', new UIAnchor(false, false, false, false)); // Center
+    this.initObject();
+  }
+
+  initObject() {
+    this.node.id = 'game-overlay';
+    this.gameOverlayWindow = createElement('div', { id: 'game-overlay-window' });
+    this.turnCounter = createElement('div', { id: 'game-overlay-window-turn' });
+    this.leaveBtn = createElement('div', { id: 'game-overlay-window-leave' });
+    this.leaveBtn.innerHTML = '<Pre> Leave Game';
+    this.turnCounter.innerHTML = 'Your Move';
+    this.gameOverlayWindow.appendChild(this.turnCounter);
+    this.gameOverlayWindow.appendChild(this.leaveBtn);
+    this.node.appendChild(this.gameOverlayWindow);
+    this.gameOverlayWindow.style.display = 'none';
+  }
+
+  show() {
+    this.gameOverlayWindow.style.display = 'block';
+  }
+
+  close() {
+    this.gameOverlayWindow.style.display = 'none';
+  }
+}
+
+export { GameMenu as default, GameOverlay };

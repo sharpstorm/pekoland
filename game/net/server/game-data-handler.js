@@ -164,6 +164,16 @@ function handleGameLobby(data, conn) {
   } else if (data.action === 'closeLobby') {
     WorldManager.getInstance().closeLobby(data.tableID);
     console.log(WorldManager.getInstance().gameLobbies);
+  } else if (data.action === 'leaveGame') {
+    console.log('here in leave game');
+    if (WorldManager.getInstance()
+      .getLobbyHost(data.tableID) === PlayerManager.getInstance().getSelfId()
+    || WorldManager.getInstance()
+      .getLobbyJoiner(data.tableID) === PlayerManager.getInstance().getSelfId()) {
+      GameManager.getInstance().getBoardGameManager().endGame();
+      console.log('sdf');
+    }
+    WorldManager.getInstance().closeLobby(data.tableID);
   }
 }
 
