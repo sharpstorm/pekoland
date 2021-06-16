@@ -6,6 +6,7 @@ import MapManager from './map-manager.js';
 import { timeout } from '../utils.js';
 // import Player from '../models/player.js';
 import PlayerManager from './player-manager.js';
+import Player from '../models/player.js';
 // import PlayerManager from './player-manager.js';
 
 let instance;
@@ -370,20 +371,33 @@ class BoardGameManager {
         }
       });
     } else if (NetworkManager.getInstance().getOperationMode() === 1) {
-      this.gameList.forEach((game) => {
-        if (game.gameName === this.currentGame) {
-          game.endGame();
-          this.closeGameOverlay();
-          const data = {
-            host: WorldManager.getInstance().getLobbyHost(this.tableID),
-            joiner: WorldManager.getInstance().getLobbyJoiner(this.tableID),
-            tableID: this.tableID,
-            action: 'leaveGame',
-          };
-          WorldManager.getInstance().closeLobby(this.tableID);
-          NetworkManager.getInstance().send(buildServerGamePacket('gameLobby-echo', data));
-        }
-      });
+      if (this.gameState === 'spectating') {
+        this.gameList.forEach((game) => {
+          if (game.gameName === this.currentGame) {
+            game.endGame();
+            this.closeGameOverlay();
+            WorldManager.getInstance()
+              .gameLobbies[this.tableID].spectators.pop((PlayerManager.getInstance().getSelfId()));
+            console.log(WorldManager.getInstance().gameLobbies);
+          }
+        });
+        this.closeGameOverlay();
+      } else {
+        this.gameList.forEach((game) => {
+          if (game.gameName === this.currentGame) {
+            game.endGame();
+            this.closeGameOverlay();
+            const data = {
+              host: WorldManager.getInstance().getLobbyHost(this.tableID),
+              joiner: WorldManager.getInstance().getLobbyJoiner(this.tableID),
+              tableID: this.tableID,
+              action: 'leaveGame',
+            };
+            WorldManager.getInstance().closeLobby(this.tableID);
+            NetworkManager.getInstance().send(buildServerGamePacket('gameLobby-echo', data));
+          }
+        });
+      }
     }
     this.gameState = undefined;
   }
