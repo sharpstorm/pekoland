@@ -19,6 +19,10 @@ export default class WorldManager {
     // console.log(this.gameLobbies);
   }
 
+  addSpectator(key, player) {
+    this.gameLobbies[key].spectators.push(player);
+  }
+
   joinLobby(key, j) {
     const h = this.gameLobbies[key].host;
     const gn = this.gameLobbies[key].gameName;
@@ -50,6 +54,11 @@ export default class WorldManager {
         this.gameLobbies[entry].history.push(action);
       }
     }
+  }
+
+  getSpectators(key) {
+    // eslint-disable-next-line no-restricted-syntax
+    return this.gameLobbies[key].spectators;
   }
 
   getLobbyPartner(key, id) {

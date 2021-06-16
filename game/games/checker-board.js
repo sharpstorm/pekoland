@@ -7,6 +7,7 @@ export default class Board {
     this.player1 = player1;
     this.player2 = player2;
     this.gridArray = [];
+    this.set = false;
     this.selectedGrid = undefined;
     this.selectedPiece = undefined;
     this.currentTurn = this.player1;
@@ -121,30 +122,33 @@ export default class Board {
   }
 
   setPlayers() {
-    if (this.selectedGrid === undefined) {
-      let i;
-      for (i = 0; i < 32; i += 1) {
-        if (this.gridArray[i] !== undefined) {
-          if (this.gridArray[i].hasPiece) {
-            this.gridArray[i].checkerPiece.player = PlayerManager.getInstance().getSelfId();
-            this.me = PlayerManager.getInstance().getSelfId();
-            this.gridArray[i].checkerPiece.color = 'red';
-          }
-        }
-      }
-      for (i = 32; i < 64; i += 1) {
-        if (this.gridArray[i] !== undefined) {
-          if (this.gridArray[i].hasPiece) {
-            if (PlayerManager.getInstance().getSelfId() === this.player1) {
-              this.gridArray[i].checkerPiece.player = this.player2;
-              this.opponent = this.player2;
-            } else {
-              this.gridArray[i].checkerPiece.player = this.player1;
-              this.opponent = this.player1;
+    if (!this.set) {
+      if (this.selectedGrid === undefined) {
+        let i;
+        for (i = 0; i < 32; i += 1) {
+          if (this.gridArray[i] !== undefined) {
+            if (this.gridArray[i].hasPiece) {
+              this.gridArray[i].checkerPiece.player = PlayerManager.getInstance().getSelfId();
+              this.me = PlayerManager.getInstance().getSelfId();
+              this.gridArray[i].checkerPiece.color = 'red';
             }
-            this.gridArray[i].checkerPiece.color = 'blue';
           }
         }
+        for (i = 32; i < 64; i += 1) {
+          if (this.gridArray[i] !== undefined) {
+            if (this.gridArray[i].hasPiece) {
+              if (PlayerManager.getInstance().getSelfId() === this.player1) {
+                this.gridArray[i].checkerPiece.player = this.player2;
+                this.opponent = this.player2;
+              } else {
+                this.gridArray[i].checkerPiece.player = this.player1;
+                this.opponent = this.player1;
+              }
+              this.gridArray[i].checkerPiece.color = 'blue';
+            }
+          }
+        }
+        this.set = true;
       }
     }
   }

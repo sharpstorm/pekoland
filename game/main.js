@@ -208,16 +208,22 @@ Promise.all([netSetupPromise, assetSetupPromise])
         );
         // GameManager.getInstance().getBoardGameManager().gameList[0].checkersMove
 
+        WorldManager.getInstance().addSpectator(GameManager.getInstance()
+          .getBoardGameManager().tableID, PlayerManager.getInstance().getSelfId());
+
         GameManager.getInstance().getBoardGameManager().toggle();
         const historyList = WorldManager.getInstance()
           .getHistory(GameManager.getInstance().getBoardGameManager().tableID);
 
+        // TO CHANGE THIS
         setTimeout(() => {
           historyList.forEach((hist) => {
             GameManager.getInstance().getBoardGameManager()
               .gameList[0].processMove(hist); // hard coded
           });
-        }, 1000);
+        }, 500);
+
+        console.log(WorldManager.getInstance().gameLobbies);
       }
     });
 

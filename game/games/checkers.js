@@ -35,7 +35,7 @@ export default class CheckersGame {
 
             if (NetworkManager.getInstance().getOperationMode() === 2) {
               data = {
-                host: checkersInstance.checkersBoard.player1,
+                host: PlayerManager.getInstance().getSelfId(),
                 joiner: checkersInstance.checkersBoard.player2,
                 action: { history: move },
               };
@@ -118,7 +118,7 @@ export default class CheckersGame {
     if (this.checkersBoard.gridArray[0] !== undefined) {
       console.log(data);
       console.log(this.checkersBoard);
-      if (data.joiner === this.checkersBoard.player1) {
+      if (data.host === this.checkersBoard.player2) {
         console.log(data.action.history.from);
         console.log(this.checkersBoard);
         console.log(this.checkersBoard.gridArray[44]);
@@ -127,22 +127,23 @@ export default class CheckersGame {
         console.log(this.checkersBoard.gridArray[0]);
         this.checkersBoard.gridArray[63 - data.action.history.from]
           .movePieceTo(this.checkersBoard.gridArray[63 - data.action.history.to]);
-        if (data.action.history.remove !== undefined) {
+        if (data.action.history.remove !== undefined && data.action.history.remove !== null) {
           this.checkersBoard.gridArray[63 - data.action.history.remove].removePiece();
         }
         if (data.action.history.k) {
           this.checkersBoard.gridArray[63 - data.action.history.to].checkerPiece.isKing = true;
         }
-      } /* else if (data.joiner === this.checkersBoard.player1) {
+      } else if (data.host === this.checkersBoard.player1) {
         this.checkersBoard.gridArray[data.action.history.from]
           .movePieceTo(this.checkersBoard.gridArray[data.action.history.to]);
-        if (data.action.history.remove !== undefined) {
+        console.log(data);
+        if (data.action.history.remove !== undefined && data.action.history.remove !== null) {
           this.checkersBoard.gridArray[data.action.history.remove].removePiece();
         }
         if (data.action.history.k) {
           this.checkersBoard.gridArray[data.action.history.to].checkerPiece.isKing = true;
         }
-      } */
+      }
     }
   }
 

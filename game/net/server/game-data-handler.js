@@ -182,8 +182,26 @@ function handleGameLobby(data, conn) {
     }
     WorldManager.getInstance().closeLobby(data.tableID);
   } else if (data.action.history !== undefined) {
-    console.log(data);
+    console.log('hHERER');
+
     WorldManager.getInstance().addHistory(data.host, data);
+    console.log(GameManager.getInstance().getBoardGameManager());
+    if (GameManager.getInstance().getBoardGameManager().tableID !== undefined) {
+      const spectators = WorldManager.getInstance()
+        .getSpectators(GameManager.getInstance().getBoardGameManager().tableID);
+      console.log(spectators);
+      console.log(PlayerManager.getInstance().getSelfId());
+      console.log(PlayerManager.getInstance().getSelfId() in spectators);
+      // console.log(spectators);
+      if (spectators !== undefined) {
+        if (spectators.includes(PlayerManager.getInstance().getSelfId())) { // IS DIS RACE CONDITION
+          console.log(data);
+          console.log('ooolllalala im here???0');
+          GameManager.getInstance()
+            .getBoardGameManager().gameList[0].processMove(data); // HARD CODED 0
+        }
+      }
+    }
   }
 }
 
