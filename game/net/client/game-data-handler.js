@@ -90,6 +90,24 @@ function handleGameLobby(data, conn) {
     }
   } else if ((data.action === 'occupied' && GameManager.getInstance().getBoardGameManager().gameState === 'waitingCheck')) {
     GameManager.getInstance().getBoardGameManager().showSpectate();
+  } else if (data.action.action === 'spectate-start' && PlayerManager.getInstance().getSelfId() === data.action.from) {
+    GameManager.getInstance().getBoardGameManager().gameState = 'spectating';
+    GameManager.getInstance().getBoardGameManager().spectateGame(
+      'Checkers', // hardcoded
+      data.host,
+      data.joiner,
+    );
+    const historyList = data.action.history;
+    // TO CHANGE THIS
+    setTimeout(() => {
+      historyList.forEach((hist) => {
+        GameManager.getInstance().getBoardGameManager()
+          .gameList[0].processMove(hist); // hard coded
+      });
+    }, 500);
+  } else if (data.action.action === 'spectate-update' && data.action.s.includes(PlayerManager.getInstance().getSelfId())) {
+    console.log('IM HERERERERERERER');
+    GameManager.getInstance().getBoardGameManager().gameList[0].processMove(data.action.move);
   } else if ((data.action === 'startGame' && data.host === PlayerManager.getInstance().getSelfId())
   || (data.action === 'startGame' && data.joiner === PlayerManager.getInstance().getSelfId())) {
     GameManager.getInstance().getBoardGameManager()

@@ -181,6 +181,17 @@ function handleGameLobby(data, conn) {
       NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('gameLobby-echo', newData, conn.peer));
     }
     WorldManager.getInstance().closeLobby(data.tableID);
+  } else if (data.action === 'spectate') {
+    WorldManager.getInstance().addSpectator(data.tableID, data.host);
+    const historyList = WorldManager.getInstance()
+      .getHistory(GameManager.getInstance().getBoardGameManager().tableID);
+    const newData = {
+      host: WorldManager.getInstance().getLobbyHost(data.tableID),
+      joiner: WorldManager.getInstance().getLobbyJoiner(data.tableID),
+      action: { action: 'spectate-start', from: data.host, history: historyList }, // TO CHANGE
+    };
+
+    NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('gameLobby-echo', newData, conn.peer));
   } else if (data.action.history !== undefined) {
     console.log('hHERER');
 
@@ -201,6 +212,10 @@ function handleGameLobby(data, conn) {
             .getBoardGameManager().gameList[0].processMove(data); // HARD CODED 0
         }
       }
+      const newData = {
+        action: { action: 'spectate-update', s: spectators, move: data },
+      };
+      NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('gameLobby-echo', newData, conn.peer));
     }
   }
 }

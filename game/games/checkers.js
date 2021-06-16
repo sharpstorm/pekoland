@@ -3,6 +3,7 @@ import CheckerBoard from './checker-board.js';
 import NetworkManager from '../net/network-manager.js';
 import PlayerManager from '../managers/player-manager.js';
 import buildClientGamePacket from '../net/client/game-data-sender.js';
+import buildServerGamePacket from '../net/server/game-data-sender.js';
 import WorldManager from '../managers/world-manager.js'; // TO FIX
 
 let instance;
@@ -47,6 +48,12 @@ export default class CheckersGame {
                 action: { history: move },
               };
               WorldManager.getInstance().addHistory(data.host, data);
+              const spectators = WorldManager.getInstance()
+                .getSpectatorsPlayer(checkersInstance.checkersBoard.player1);
+              const newData = {
+                action: { action: 'spectate-update', s: spectators, move: data },
+              };
+              NetworkManager.getInstance().send(buildServerGamePacket('gameLobby-echo', newData));
             }
           }
           checkersInstance.checkersBoard.resetBoard();

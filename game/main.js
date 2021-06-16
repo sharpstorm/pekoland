@@ -212,6 +212,7 @@ Promise.all([netSetupPromise, assetSetupPromise])
           .getBoardGameManager().tableID, PlayerManager.getInstance().getSelfId());
 
         GameManager.getInstance().getBoardGameManager().toggle();
+        // NO IDEA Y TOGGLE 2 times. right in spectate game
         const historyList = WorldManager.getInstance()
           .getHistory(GameManager.getInstance().getBoardGameManager().tableID);
 
@@ -224,6 +225,16 @@ Promise.all([netSetupPromise, assetSetupPromise])
         }, 500);
 
         console.log(WorldManager.getInstance().gameLobbies);
+      } else if (NetworkManager.getInstance().getOperationMode() === 2) {
+        GameManager.getInstance().getBoardGameManager().toggle();
+
+        const data = {
+          host: PlayerManager.getInstance().getSelfId(),
+          tableID: GameManager.getInstance().getBoardGameManager().tableID,
+          action: 'spectate',
+        };
+        NetworkManager.getInstance().send(buildClientGamePacket('gameLobby', data));
+        GameManager.getInstance().getBoardGameManager().toggle();
       }
     });
 

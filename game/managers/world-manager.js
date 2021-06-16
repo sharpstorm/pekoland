@@ -61,6 +61,16 @@ export default class WorldManager {
     return this.gameLobbies[key].spectators;
   }
 
+  getSpectatorsPlayer(player) {
+    // eslint-disable-next-line no-restricted-syntax
+    for (const entry in this.gameLobbies) {
+      if (this.gameLobbies[entry].host === player || this.gameLobbies[entry].joiner === player) {
+        return this.gameLobbies[entry].spectators;
+      }
+    }
+    return undefined;
+  }
+
   getLobbyPartner(key, id) {
     if (id === this.gameLobbies[key].host) {
       return this.gameLobbies[key].joiner;
