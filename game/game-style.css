@@ -77,3 +77,13 @@
   justify-content: center;
   text-align: center;
 }
+
+#admit-prompt {
+  transition: transform 1s ease-in-out;
+  will-change: transform;
+  transform: translateX(100%);
+}
+
+#admit-prompt.show {
+  transform: translateX(0);
+}

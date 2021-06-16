@@ -63,6 +63,7 @@ class UIElement {
     } else if (xAlignMode === UIAnchor.AlignMode.MIDDLE) {
       this.node.style.left = this.marginX;
       this.node.style.right = 0;
+      this.node.style.margin = 'auto';
     } else {
       this.node.style.right = this.marginX;
     }
@@ -72,6 +73,7 @@ class UIElement {
     } else if (yAlignMode === UIAnchor.AlignMode.MIDDLE) {
       this.node.style.top = this.marginY;
       this.node.style.bottom = 0;
+      this.node.style.margin = 'auto';
     } else {
       this.node.style.bottom = this.marginY;
     }

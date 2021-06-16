@@ -24,6 +24,7 @@ import Chatbox from './ui/ui-chatbox.js';
 import Button, { LongButton } from './ui/ui-button.js';
 import { UIAnchor } from './ui/ui-element.js';
 import { startGame } from './games/checkers.js';
+import AdmissionPrompt from './ui/ui-admission-prompt.js';
 
 const networkManager = NetworkManager.getInstance();
 const inputSystem = new InputSystem(document.getElementById('ui'), document);
@@ -33,9 +34,6 @@ networkManager.on('connected', () => {
 });
 networkManager.on('clientConnected', () => {
   console.log('Remote has connected');
-});
-networkManager.on('modeChanged', (mode) => {
-  console.log(`Currently in ${mode === NetworkManager.Mode.SERVER ? 'server' : 'client'} mode`);
 });
 networkManager.on('connectionFailed', () => {
   alert('Could not connect to partner! Please Try Again!');
@@ -83,12 +81,69 @@ addJoystickEventHandler((evt) => {
   }
 });
 
+function setupServerHooks() {
+  const worldManager = WorldManager.getInstance();
+  const roomController = worldManager.getRoomController();
+  const uiRenderer = Renderer.getUILayer();
+
+  const admissionPrompt = new AdmissionPrompt();
+  uiRenderer.addElement(admissionPrompt);
+
+  roomController.on('playerRequestJoin', (playerInfo) => {
+    // eslint-disable-next-line no-restricted-globals
+    admissionPrompt.prompt(`${playerInfo.name} is requesting to join. Admit?`,
+      () => { roomController.admitIntoWorld(playerInfo.peerId); },
+      () => { roomController.rejectAdmit(playerInfo.peerId); });
+  });
+
+  roomController.on('playerAdmit', (playerInfo) => {
+    const playerId = roomController.getPlayerId(playerInfo.peerId);
+    if (playerId === undefined) {
+      return;
+    }
+
+    const player = new Player(playerId, playerInfo.name, SpriteManager.getInstance().getSprite('rabbit-avatar'));
+    // Update connection
+    NetworkManager.getInstance().getConnection().sendTo(buildServerGamePacket('spawn-reply', {
+      self: player,
+      others: PlayerManager.getInstance().getPlayers(),
+    }), playerInfo.peerId);
+
+    // Broadcast to everyone else
+    NetworkManager.getInstance().getConnection().sendAllExcept(buildServerGamePacket('spawn-player', player), playerInfo.peerId);
+
+    // Register User to Server Player Manager
+    PlayerManager.getInstance().addPlayer(player);
+  });
+
+  roomController.on('playerReject', (playerInfo) => {
+    NetworkManager.getInstance().getConnection().sendTo(buildServerGamePacket('spawn-reject', 'Host Rejected Your Admission'), playerInfo.peerId);
+  });
+}
+
+networkManager.on('modeChanged', (mode) => {
+  console.log(`Currently in ${mode === NetworkManager.Mode.SERVER ? 'server' : 'client'} mode`);
+  if (networkManager.getOperationMode() === NetworkManager.Mode.SERVER) {
+    setupServerHooks();
+  }
+});
+
 const netSetupPromise = timeout(networkManager.setup(), 5000);
 const assetSetupPromise = loadAssets();
+const spawnPromise = new Promise((resolve) => {
+  PlayerManager.getInstance().on('spawnSelf', () => {
+    PlayerManager.getInstance().on('spawnSelf', undefined);
+    resolve();
+  });
+});
 Promise.all([netSetupPromise, assetSetupPromise])
   .then(() => {
+    document.getElementById('loading-panel').classList.add('joining');
+    return spawnPromise;
+  })
+  .then(() => {
     console.log('setup successful');
-    document.getElementById('connecting-msg').style.display = 'none';
+    document.getElementById('loading-panel').style.display = 'none';
     document.getElementById('game-container').style.display = 'block';
 
     inputSystem.addListener('keydown', joystickWorker);
