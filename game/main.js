@@ -24,6 +24,7 @@ import Chatbox from './ui/ui-chatbox.js';
 import Button, { LongButton } from './ui/ui-button.js';
 import { UIAnchor } from './ui/ui-element.js';
 import { startGame } from './games/checkers.js';
+import AdmissionPrompt from './ui/ui-admission-prompt.js';
 
 const networkManager = NetworkManager.getInstance();
 const inputSystem = new InputSystem(document.getElementById('ui'), document);
@@ -83,14 +84,16 @@ addJoystickEventHandler((evt) => {
 function setupServerHooks() {
   const worldManager = WorldManager.getInstance();
   const roomController = worldManager.getRoomController();
+  const uiRenderer = Renderer.getUILayer();
+
+  const admissionPrompt = new AdmissionPrompt();
+  uiRenderer.addElement(admissionPrompt);
 
   roomController.on('playerRequestJoin', (playerInfo) => {
     // eslint-disable-next-line no-restricted-globals
-    if (confirm(`${playerInfo.name} is requesting to join. Admit?`)) {
-      roomController.admitIntoWorld(playerInfo.peerId);
-    } else {
-      roomController.rejectAdmit(playerInfo.peerId);
-    }
+    admissionPrompt.prompt(`${playerInfo.name} is requesting to join. Admit?`,
+      () => { roomController.admitIntoWorld(playerInfo.peerId); },
+      () => { roomController.rejectAdmit(playerInfo.peerId); });
   });
 
   roomController.on('playerAdmit', (playerInfo) => {

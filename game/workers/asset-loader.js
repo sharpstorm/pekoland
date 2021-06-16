@@ -75,6 +75,18 @@ export default function loadAssets() {
           [47, 132, 18, 19],
         ]);
         spriteManager.registerSprite('button-long-shaded', longBtnDark);
+        const panel = SlicedSprite.from(x, [
+          [67, 77, 12, 25],
+          [79, 77, 84, 25],
+          [163, 77, 12, 25],
+          [67, 102, 18, 28],
+          [79, 102, 28, 28],
+          [163, 102, 18, 28],
+          [67, 130, 18, 25],
+          [79, 130, 28, 25],
+          [163, 130, 18, 25],
+        ]);
+        spriteManager.registerSprite('panel', panel);
       });
 
     Promise.all([load1, load2, load3, load4]).then(resolve);
