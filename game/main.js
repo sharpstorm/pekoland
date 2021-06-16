@@ -181,11 +181,10 @@ Promise.all([netSetupPromise, assetSetupPromise])
 
     gameMenu.options.forEach((option) => {
       option.addEventListener('click', () => {
-        console.log(option.id);
         if (option.id === 'gameJoinYes') {
           // join game
           GameManager.getInstance().getBoardGameManager()
-            .joinGame(GameManager.getInstance().getBoardGameManager().tableID);
+            .joinGame();
         } else if (option.id === 'gameJoinNo') {
           // close
           if (GameManager.getInstance().getBoardGameManager() !== undefined) {

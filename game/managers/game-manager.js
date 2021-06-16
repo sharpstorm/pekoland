@@ -174,8 +174,8 @@ class BoardGameManager {
   constructor() {
     this.gameList = [];
     this.uiLayer = undefined;
-    this.currentGame = undefined;
-    this.gameState = undefined;
+    this.currentGame = undefined; // USELESS?
+    this.gameState = undefined; // USELESS
     this.tableID = undefined;
   }
 
@@ -188,64 +188,60 @@ class BoardGameManager {
   }
 
   propagateEvent(eventID, event, camContext, uiLayer) {
-    this.uiLayer = uiLayer; // TO CHECK IF DIS IS ALLOWED. NEEDED FOR SHOWING WAITING SCREEN
+    this.uiLayer = uiLayer; // TO CHANGE TO CONSTRUCTOR
     const clickedData = MapManager.getInstance().getCurrentMap()
       .getFuniture(camContext.x + event.clientX, camContext.y + event.clientY);
     const floorX = Math.floor((camContext.x + event.clientX) / 100) * 100;
     const floorY = Math.floor((camContext.y + event.clientY) / 100) * 100;
     this.tableID = `${floorX}-${floorY}`;
-    const data = {
-      host: PlayerManager.getInstance().getSelfId(),
-      tableID: this.tableID,
-      action: 'checkLobby',
-    };
     if (clickedData === 'BoardGame') {
       if (NetworkManager.getInstance().getOperationMode() === 2) {
+        // IF MODE = CLIENT, CHECK CLICKED LOBBY SATUS
+        const data = {
+          host: PlayerManager.getInstance().getSelfId(),
+          tableID: this.tableID,
+          action: 'checkLobby',
+        };
         NetworkManager.getInstance().send(buildClientGamePacket('gameLobby', data));
-        // console.log(data);
       } else if (NetworkManager.getInstance().getOperationMode() === 1) {
         if (WorldManager.getInstance().lobbyExist(this.tableID)) {
           if (WorldManager.getInstance().getLobbyJoiner(this.tableID) === undefined) {
-            this.showJoinGame();
-            console.log('can join');
+            if (WorldManager.getInstance().getLobbyHost(this.tableID) !== PlayerManager
+              .getInstance().getSelfId()) {
+              this.showJoinGame();
+            }
           } else {
-            console.log('occupied');
+            // OCCUPIED. SPECTATE
           }
         } else {
-          console.log('can cr8');
+          // LOBBY WITH TABLE ID DOESNT EXIST
           this.showGameMenu();
         }
       }
     }
   }
 
-  joinGame(TID) {
+  joinGame() {
     if (NetworkManager.getInstance().getOperationMode() === 2) {
       const data = {
-        host: PlayerManager.getInstance().getSelfId(),
-        tableID: TID,
-        action: 'checkLobby',
+        joiner: PlayerManager.getInstance().getSelfId(),
+        tableID: this.tableID,
+        action: 'joinGame',
       };
       NetworkManager.getInstance().send(buildClientGamePacket('gameLobby', data));
     } else if (NetworkManager.getInstance().getOperationMode() === 1) {
-      // console.log(WorldManager.getInstance().gameLobbies);
-      // console.log(this.tableID);
-      WorldManager.getInstance().joinLobby(TID, PlayerManager
+      WorldManager.getInstance().joinLobby(this.tableID, PlayerManager
         .getInstance().getSelfId());
       console.log(WorldManager.getInstance().gameLobbies);
       const data = {
-        host: WorldManager.getInstance().getLobbyHost(TID),
-        joiner: WorldManager.getInstance().getLobbyJoiner(TID),
-        tableID: TID,
-        gameName: WorldManager.getInstance().getGameName(TID),
+        host: WorldManager.getInstance().getLobbyHost(this.tableID),
+        joiner: WorldManager.getInstance().getLobbyJoiner(this.tableID),
+        tableID: this.tableID,
+        gameName: WorldManager.getInstance().getGameName(this.tableID),
         action: 'startGame',
       };
-      console.log(data);
       NetworkManager.getInstance().send(buildServerGamePacket('gameLobby-echo', data));
       this.toggle();
-      // networkManager.send(buildServerGamePacket
-      // ('voice-channel-data', WorldManager.getInstance().getVoiceChannelUsers()));
-      // NetworkManager.getInstance().send(buildClientGamePacket('gameLobby', data));
     }
   }
 

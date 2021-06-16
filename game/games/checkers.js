@@ -50,6 +50,7 @@ export default class CheckersGame {
       player2: p2,
       action: 'startGame',
     };
+    // TO CHECK. MAYBE MOVE IT UP
     NetworkManager.getInstance().send(buildClientGamePacket('checkers', data));
   }
 

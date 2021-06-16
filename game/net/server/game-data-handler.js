@@ -79,6 +79,7 @@ function handleDisconnectVoice(data, conn) {
 function handleGameLobby(data, conn) {
   console.log(data);
   // TODO REPEAT CODE
+  // CHANGE TO SEND ALL INSTEAD OF SENDALLEXCEPT
   if (data.action === 'registerLobbyRequest') {
     console.log('here???????');
     if (!WorldManager.getInstance().lobbyExist(data.tableID)) {
@@ -96,6 +97,37 @@ function handleGameLobby(data, conn) {
         tableID: data.tableID,
         gameName: data.gameName,
         action: 'registerLobbyEcho-fail',
+      };
+      NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('gameLobby-echo', newData, conn.peer));
+    }
+  } else if (data.action === 'joinGame') {
+    console.log('join game');
+    if (WorldManager.getInstance().lobbyExist(data.tableID)
+    && WorldManager.getInstance().getLobbyJoiner(data.tableID) === undefined) {
+      WorldManager.getInstance().joinLobby(data.tableID, data.joiner);
+      const newData = {
+        host: WorldManager.getInstance().getLobbyHost(data.tableID),
+        joiner: data.joiner,
+        tableID: data.tableID,
+        gameName: WorldManager.getInstance().getGameName(data.tableID),
+        action: 'startGame',
+      };
+      // TO CHANGE
+      if (WorldManager.getInstance().getLobbyHost(data.tableID) === PlayerManager
+        .getInstance().getSelfId()
+        || WorldManager.getInstance()
+          .getLobbyHost(data.tableID) === PlayerManager.getInstance().getSelfId()) {
+        GameManager.getInstance().getBoardGameManager()
+          .startGame(newData.gameName, newData.host, newData.joiner);
+      }
+      console.log(WorldManager.getInstance().gameLobbies);
+      NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('gameLobby-echo', newData, conn.peer));
+    } else {
+      const newData = {
+        host: data.host,
+        tableID: data.tableID,
+        gameName: data.gameName,
+        action: 'joinGame-fail',
       };
       NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('gameLobby-echo', newData, conn.peer));
     }
@@ -117,7 +149,7 @@ function handleGameLobby(data, conn) {
         gameName: data.gameName,
         action: 'canJoin',
       };
-      console.log('here in can join');
+      // console.log('here in can join');
       NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('gameLobby-echo', newData, conn.peer));
       // LOBBY EXIST, ON GOING GAME BETWEEN
     } else {
