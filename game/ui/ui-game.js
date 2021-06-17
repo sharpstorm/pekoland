@@ -81,14 +81,18 @@ class GameOverlay extends UIElement {
   constructor() {
     super('80%', '70%', '15%', '20%', new UIAnchor(true, true, true, true)); // Center
     this.initObject();
+    this.leaveListener = undefined;
   }
 
   initObject() {
     this.node.id = 'game-overlay';
-    this.gameOverlayWindow = createElement('div', { id: 'game-overlay-window' });
-    this.leaveBtn = createElement('div', { id: 'game-overlay-window-leave' });
-    this.leaveBtn.innerHTML = 'Leave Game';
-    this.gameOverlayWindow.appendChild(this.leaveBtn);
+    this.leaveBtn = createElement('div', { id: 'game-overlay-window-leave' }, 'LeaveGame');
+    this.leaveBtn.addEventListener('click', () => {
+      if (this.leaveListener !== undefined) {
+        this.leaveListener();
+      }
+    });
+    this.gameOverlayWindow = createElement('div', { id: 'game-overlay-window' }, this.leaveBtn);
     this.node.appendChild(this.gameOverlayWindow);
     this.close();
   }
@@ -99,6 +103,10 @@ class GameOverlay extends UIElement {
 
   close() {
     this.gameOverlayWindow.style.display = 'none';
+  }
+
+  registerLeaveListener(leaveListener) {
+    this.leaveListener = leaveListener;
   }
 }
 
