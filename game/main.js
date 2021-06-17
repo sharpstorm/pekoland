@@ -153,6 +153,8 @@ Promise.all([netSetupPromise, assetSetupPromise])
     });
 
     const gameMenu = new GameMenu(boardGameManager.gameList);
+    GameManager.getInstance().getBoardGameManager().registerGameMenuUI(gameMenu);
+
     gameMenu.on('joinYes', () => boardGameManager.joinGame());
     gameMenu.on('joinNo', () => {
       boardGameManager.displayPage(-1);

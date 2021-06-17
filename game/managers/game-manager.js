@@ -174,7 +174,7 @@ class TextChannelManager {
 class BoardGameManager {
   constructor() {
     this.gameList = [];
-    this.uiLayer = undefined; // cant define here. cyclic
+    this.gameMenuUI = undefined;
     this.currentGame = undefined; // USELESS? NOPE
     this.gameState = undefined; // change to number
     this.tableID = undefined;
@@ -184,6 +184,10 @@ class BoardGameManager {
     SPECTATING
     WAITING CHECK
     */
+  }
+
+  registerGameMenuUI(gameMenuUI) {
+    this.gameMenuUI = gameMenuUI;
   }
 
   register(game) {
@@ -203,10 +207,9 @@ class BoardGameManager {
     return false;
   }
 
-  propagateEvent(eventID, event, camContext, uiLayer) {
+  propagateEvent(eventID, event, camContext) {
     const floorX = Math.floor((camContext.x + event.clientX) / 100) * 100;
     const floorY = Math.floor((camContext.y + event.clientY) / 100) * 100;
-    this.uiLayer = uiLayer; // TO CHANGE TO CONSTRUCTOR
     const clickedData = MapManager.getInstance().getCurrentMap()
       .getFurniture(camContext.x + event.clientX, camContext.y + event.clientY);
     if (clickedData === 'BoardGame' && this.gameState === undefined && this.checkPlayer(floorX, floorY)) {
@@ -248,11 +251,11 @@ class BoardGameManager {
   }
 
   displayPage(page) {
-    this.uiLayer.elements.forEach((e) => {
-      if (e.constructor.name === 'GameMenu') {
-        if (page === -1) { e.close(); } else { e.displayWindow(page); }
-      }
-    });
+    if (page === -1) {
+      this.gameMenuUI.close();
+    } else {
+      this.gameMenuUI.displayWindow(page);
+    }
   }
 
   closeGameMenu() {
