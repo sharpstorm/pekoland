@@ -208,7 +208,7 @@ class BoardGameManager {
     const floorY = Math.floor((camContext.y + event.clientY) / 100) * 100;
     this.uiLayer = uiLayer; // TO CHANGE TO CONSTRUCTOR
     const clickedData = MapManager.getInstance().getCurrentMap()
-      .getFuniture(camContext.x + event.clientX, camContext.y + event.clientY);
+      .getFurniture(camContext.x + event.clientX, camContext.y + event.clientY);
     if (clickedData === 'BoardGame' && this.gameState === undefined && this.checkPlayer(floorX, floorY)) {
       this.tableID = `${floorX}-${floorY}`;
       let data;
