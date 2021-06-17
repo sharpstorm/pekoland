@@ -54,19 +54,10 @@ export default class WorldManager {
   }
 
   updateCurrentBoard(player, newBoard) {
-    console.log(newBoard);
-    console.log(player);
-    // eslint-disable-next-line no-restricted-syntax
-    for (const entry in this.gameLobbies) {
-      if (this.gameLobbies[entry].host === player || this.gameLobbies[entry].joiner === player) {
-        if (player === this.gameLobbies[entry].joiner) {
-          // eslint-disable-next-line no-nested-ternary
-          const mm = newBoard.map((x) => (x !== 0 ? (x === 1 ? 2 : 1) : 0));
-          this.gameLobbies[entry].currentBoard = mm.reverse();
-        } else {
-          this.gameLobbies[entry].currentBoard = newBoard;
-        }
-      }
+    const lobby = Object.values(this.gameLobbies)
+      .find((x) => x.host === player || x.joiner === player);
+    if (lobby !== undefined) {
+      lobby.currentBoard = newBoard;
     }
   }
 

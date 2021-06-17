@@ -68,22 +68,37 @@ export default class CheckersGame {
     }
   }
 
-  updateSpectateBoard(newBoard) {
-    console.log(newBoard);
+  flipArray(newBoard) {
+    let i;
+    const tempBoard = newBoard;
+    for (i = 0; i < tempBoard.length; i += 1) {
+      if (tempBoard[i] !== 0) {
+        tempBoard[i] = tempBoard[i] === 1 ? 2 : 1;
+      }
+    }
+    return tempBoard.reverse();
+  }
+
+  updateSpectateBoard(newBoard, from) {
+    console.log(from);
     if (newBoard !== undefined) {
       let i;
+      const tempBoard = newBoard;
       const cb = this.checkersBoard;
+      if (from === cb.player2) {
+        this.flipArray(tempBoard);
+      }
       console.log('changed');
       for (i = 0; i < 64; i += 1) {
-        if (newBoard[i] === 0) {
+        if (tempBoard[i] === 0) {
           if (cb.gridArray[i].hasPiece) {
             cb.gridArray[i].removePiece();
           }
-        } else if (newBoard[i] === 1) {
+        } else if (tempBoard[i] === 1) {
           const newPiece = new CheckerPiece(cb.player2, 0, 0);
           newPiece.color = 'red';
           cb.gridArray[i].assignPiece(newPiece);
-        } else if (newBoard[i] === 2) {
+        } else if (tempBoard[i] === 2) {
           const newPiece = new CheckerPiece(cb.player1, 0, 0);
           newPiece.color = 'blue';
           cb.gridArray[i].assignPiece(newPiece);

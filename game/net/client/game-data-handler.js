@@ -99,7 +99,7 @@ function handleGameLobby(data, conn) {
       .updateSpectateBoard(data.action.currentBoard); // hard coded
   } else if (data.action.action === 'spectate-update' && data.action.s.includes(PlayerManager.getInstance().getSelfId())) {
     GameManager.getInstance().getBoardGameManager().getGame(data.gameName)
-      .updateSpectateBoard(data.action.newBoard);
+      .updateSpectateBoard(data.action.newBoard, data.host);
   } else if ((data.action === 'startGame' && data.host === PlayerManager.getInstance().getSelfId())
   || (data.action === 'startGame' && data.joiner === PlayerManager.getInstance().getSelfId())) {
     GameManager.getInstance().getBoardGameManager()

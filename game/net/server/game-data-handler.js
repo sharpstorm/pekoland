@@ -166,12 +166,13 @@ function handleGameLobby(data, conn) {
       if (spectators !== undefined) {
         if (spectators.includes(PlayerManager.getInstance().getSelfId())) {
           boardGameManager.getGame(WorldManager.getInstance().getGameNamePlayer(data.host))
-            .updateSpectateBoard(worldManager.getCurrentBoard(data.host)); // HARD CODED 0
+            .updateSpectateBoard(worldManager.getCurrentBoard(data.host), data.host);
         }
       }
     }
     newDataAction = { action: 'spectate-update', s: worldManager.getSpectatorsPlayer(data.host), newBoard: worldManager.getCurrentBoard(data.host) };
     newDataGameName = worldManager.getGameNamePlayer(data.host);
+    newDataHost = data.host;
   }
   const newData = {
     host: newDataHost,
