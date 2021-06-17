@@ -175,6 +175,7 @@ class BoardGameManager {
   constructor() {
     this.gameList = [];
     this.gameMenuUI = undefined;
+    this.gameOverlayUI = undefined;
     this.currentGame = undefined; // USELESS? NOPE
     this.gameState = undefined; // change to number
     this.tableID = undefined;
@@ -188,6 +189,10 @@ class BoardGameManager {
 
   registerGameMenuUI(gameMenuUI) {
     this.gameMenuUI = gameMenuUI;
+  }
+
+  registerGameOverlayUI(gameOverlayUI) {
+    this.gameOverlayUI = gameOverlayUI;
   }
 
   register(game) {
@@ -420,21 +425,11 @@ class BoardGameManager {
   }
 
   showGameOverlay() {
-    this.uiLayer.elements.forEach((e) => {
-      // console.log(e);
-      if (e.constructor.name === 'GameOverlay') {
-        e.show();
-      }
-    });
+    this.gameOverlayUI.show();
   }
 
   closeGameOverlay() {
-    this.uiLayer.elements.forEach((e) => {
-      // console.log(e);
-      if (e.constructor.name === 'GameOverlay') {
-        e.close();
-      }
-    });
+    this.gameOverlayUI.close();
   }
 }
 

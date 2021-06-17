@@ -214,6 +214,7 @@ Promise.all([netSetupPromise, assetSetupPromise])
     });
 
     const gameOverlay = new GameOverlay();
+    GameManager.getInstance().getBoardGameManager().registerGameOverlayUI(gameOverlay);
     gameOverlay.leaveBtn.addEventListener('click', () => { boardGameManager.leaveGame(); });
 
     uiRenderer.addElement(gameMenu);

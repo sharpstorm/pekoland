@@ -38,13 +38,6 @@ class GameMenu extends UIElement {
     this.node.style.display = 'none';
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  createCard(text) {
-    const card = createElement('div', { className: 'game-menu-cards' });
-    card.innerHTML = text;
-    return card;
-  }
-
   close() {
     this.node.style.display = 'none';
     this.emitEvent('close');
@@ -87,7 +80,7 @@ class GameMenu extends UIElement {
 class GameOverlay extends UIElement {
   // SHOW PLAYER TURN HERE? OR IN GAME
   constructor() {
-    super('80%', '10%', '15%', '80%', new UIAnchor(false, false, false, false)); // Center
+    super('80%', '10%', '15%', '80%', new UIAnchor(true, true, true, true)); // Center
     this.initObject();
   }
 
