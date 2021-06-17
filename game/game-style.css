@@ -161,29 +161,21 @@
 }
 
 #game-overlay-window {
-  position: absolute;
-  display: block;
+  position: relative;
+  display: flex;
   width: 100%;
   height: 100%;
   text-align: center;
-}
-
-#game-overlay-window-turn {
-  position: absolute;
-  width: 100%;
-  height: 10%;
-  margin-top: 100%;
-  font-size: 30px;
-  display:none;
+  justify-content: center;
 }
 
 #game-overlay-window-leave {
-  position: absolute;
-  width: 100%;
-  height: 10%;
-  background-color: rgba(0, 0, 0, 0.9);
-  border: 1px white solid;
-  bottom: 0;
+  text-align: center;
+  height: 40%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.9);;
 }
 
 #game-overlay-window-leave:hover {

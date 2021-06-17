@@ -78,23 +78,19 @@ class GameMenu extends UIElement {
 }
 
 class GameOverlay extends UIElement {
-  // SHOW PLAYER TURN HERE? OR IN GAME
   constructor() {
-    super('80%', '10%', '15%', '80%', new UIAnchor(true, true, true, true)); // Center
+    super('80%', '70%', '15%', '20%', new UIAnchor(true, true, true, true)); // Center
     this.initObject();
   }
 
   initObject() {
     this.node.id = 'game-overlay';
     this.gameOverlayWindow = createElement('div', { id: 'game-overlay-window' });
-    this.turnCounter = createElement('div', { id: 'game-overlay-window-turn' });
     this.leaveBtn = createElement('div', { id: 'game-overlay-window-leave' });
-    this.leaveBtn.innerHTML = '<Pre> Leave Game';
-    this.turnCounter.innerHTML = 'Your Move';
-    this.gameOverlayWindow.appendChild(this.turnCounter);
+    this.leaveBtn.innerHTML = 'Leave Game';
     this.gameOverlayWindow.appendChild(this.leaveBtn);
     this.node.appendChild(this.gameOverlayWindow);
-    this.gameOverlayWindow.style.display = 'none';
+    this.close();
   }
 
   show() {
