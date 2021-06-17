@@ -78,15 +78,14 @@
   text-align: center;
 }
 
-#game-menu-window {
-
+#game-menu {
   position: absolute;
   display: block;
   width: 100%;
   height: 100%;
 }
 
-#game-menu-window-title {
+#game-menu__title {
   border: 1px solid white;
   position: absolute;
   display: table-row;
@@ -97,7 +96,7 @@
   background-color: rgba(0, 0, 0, 0.9);
 }
 
-#game-menu-window-games-holder {
+#game-menu__games {
   border: 1px solid white;
   position: absolute;
   display: grid;
@@ -108,57 +107,65 @@
   background-color: rgba(0, 0, 0, 0.9);
 }
 
-.game-menu-window-games {
+#game-menu__join {
+  border: 1px solid white;
+  position: absolute;
+  display: grid;
+  grid-template-columns: auto auto auto;
+  width: 100%;
+  height: 80%;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.9);
+}
+
+#game-menu__spectate {
+  border: 1px solid white;
+  position: absolute;
+  display: grid;
+  grid-template-columns: auto auto auto;
+  width: 100%;
+  height: 80%;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.9);
+}
+
+#game-menu__waiting {
+  border: 1px solid white;
+  position: absolute;
+  width: 100%;
+  height: 80%;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.9);
+  background-image: url(../Images/waiting.gif);
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+}
+
+#game-menu__title__closebtn {
+  z-index:99;
+  position:absolute;
+  right: 0;
+  height: 50%;
+  width: 5%;
+  display: block;
+  margin: 5px;
+  background-image: url(../Images/x.png);
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.game-menu-cards {
   border: 1px solid rgba(255, 255, 255, 0.9);
   padding: 20px;
   font-size: 30px;
   text-align: center;
 }
 
-.game-menu-window-games:hover {
+.game-menu-cards:hover {
   background-color: rgba(255, 255, 255, 0.2);
 }
 
-#game-menu-window-title-text {
-  margin-top: 20px;
-  display:block;
-  font-weight: bold;
-  color: white;
-}
-
-#game-menu-window-yes-no {
-  border: 1px solid white;
-  position: absolute;
-  display: grid;
-  grid-template-columns: auto auto auto;
-  width: 100%;
-  height: 80%;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.9);
-}
-
-#game-menu-window-spectate {
-  border: 1px solid white;
-  position: absolute;
-  display: grid;
-  grid-template-columns: auto auto auto;
-  width: 100%;
-  height: 80%;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.9);
-}
-
-#game-menu-window-close-btn{
-  position:absolute;
-  right: 0;
-  height: 50%;
-  width: 5%;
-  text-align: center;
-  margin: 5px;
-  background-image: url(../Images/x.png);
-  background-size: contain;
-  background-repeat: no-repeat;
-}
 
 #game-overlay-window {
   position: absolute;

@@ -7,122 +7,88 @@ class GameMenu extends UIElement {
     super('30%', '30%', '40%', '40%', new UIAnchor(false, false, false, false)); // Center
     this.cardList = [];
     this.gameNameList = [];
-    this.options = [];
     this.initObject(gameList);
   }
 
   initObject(gameList) {
     this.node.id = 'gameMenu';
-    this.gameMenuWindow = createElement('div', { id: 'game-menu-window' });
-    this.titleWindow = createElement('div', { id: 'game-menu-window-title' });
-    this.gamesHolder = createElement('div', { id: 'game-menu-window-games-holder' });
-    this.titleText = createElement('div', { id: 'game-menu-window-title-text' });
-    this.closeBtn = createElement('div', { id: 'game-menu-window-close-btn' });
+    this.gameMenu = createElement('div', { id: 'game-menu' });
+    this.titleWindow = createElement('div', { id: 'game-menu__title' });
+    this.gamesWindow = createElement('div', { id: 'game-menu__games' });
+    this.joinWindow = createElement('div', { id: 'game-menu__join' });
+    this.waitingWindow = createElement('div', { id: 'game-menu__waiting' });
+    this.spectateWindow = createElement('div', { id: 'game-menu__spectate' });
+    this.closeBtn = createElement('div', { id: 'game-menu__title__closebtn' });
+    this.node.appendChild(this.gameMenu);
+    this.gameMenu.appendChild(this.titleWindow);
+    this.gameMenu.appendChild(this.gamesWindow);
+    this.gameMenu.appendChild(this.joinWindow);
+    this.gameMenu.appendChild(this.spectateWindow);
+    this.gameMenu.appendChild(this.waitingWindow);
+    this.gameMenu.appendChild(this.closeBtn);
+    gameList.forEach((game) => {
+      this.gameNameList.push(game.gameName);
+      this.gamesWindow.appendChild(this.createCard(game.gameName));
+    });
+    this.joinWindow.appendChild(this.createCard('Yes')); // JoinWindow - Child Node[0]
+    this.joinWindow.appendChild(this.createCard('No')); // JoinWindow - Child Node[1]
+    this.spectateWindow.appendChild(this.createCard('Yes')); // spectateWidnow - Child Node[0]
+    this.spectateWindow.appendChild(this.createCard('No')); // spectateWidnow - Child Node[1]
     this.closeBtn.addEventListener('click', () => {
-      GameManager.getInstance().getBoardGameManager().closeMenu();
+      GameManager.getInstance().getBoardGameManager().closeGameMenu();
       GameManager.getInstance().getBoardGameManager().gameState = undefined;
       this.close();
     });
-
-    // this.closeBtn.innerHTML = 'X';
-    this.titleWindow.appendChild(this.closeBtn);
-    this.titleText.innerHTML = 'Games';
-    this.gameMenuWindow.style.display = 'none';
-    this.gameMenuWindow.appendChild(this.titleWindow);
-    gameList.forEach((game) => {
-      const card = createElement('div', { className: 'game-menu-window-games' });
-      card.innerHTML = game.gameName;
-      this.cardList.push(card);
-      this.gameNameList.push(game.gameName);
-      this.gamesHolder.appendChild(card);
-    });
-    // this.gamesHolder.appendChild(createElement('div', { className: 'game-menu-window-games' }));
-    this.yesNoScreen = createElement('div', { id: 'game-menu-window-yes-no' });
-    this.yesNoScreen.style.display = 'none';
-    this.gameMenuWindow.appendChild(this.yesNoScreen);
-
-    let card = createElement('div', { className: 'game-menu-window-games', id: 'gameJoinYes' });
-    card.innerHTML = 'Yes';
-    this.yesNoScreen.appendChild(card);
-    this.options.push(card);
-
-    card = createElement('div', { className: 'game-menu-window-games', id: 'gameJoinNo' });
-    card.innerHTML = 'No';
-    this.yesNoScreen.appendChild(card);
-    this.options.push(card);
-
-    this.spectateScreen = createElement('div', { id: 'game-menu-window-spectate' });
-    this.spectateScreen.style.display = 'none';
-    this.gameMenuWindow.appendChild(this.spectateScreen);
-
-    card = createElement('div', { className: 'game-menu-window-games', id: 'spectateYes' });
-    card.innerHTML = 'Yes';
-    this.spectateScreen.appendChild(card);
-
-    card = createElement('div', { className: 'game-menu-window-games', id: 'spectateNo' });
-    card.innerHTML = 'No';
-    this.spectateScreen.appendChild(card);
-
-    this.gameMenuWindow.appendChild(this.gamesHolder);
-    this.titleWindow.appendChild(this.titleText);
-    this.node.appendChild(this.gameMenuWindow);
-    // console.log(this.gameList);
+    this.close();
   }
 
-  toggle() {
-    if (this.gameMenuWindow.style.display === 'none') {
-      this.titleText.innerHTML = 'Games';
-      // eslint-disable-next-line no-param-reassign
-      // this.gamesHolder.childNodes.forEach((cn) => { cn.style.display = 'block'; });
-      this.gamesHolder.style.display = 'block';
-      this.gamesHolder.style.backgroundImage = '';
-      this.gameMenuWindow.style.display = 'block';
-    } else {
-      this.gameMenuWindow.style.display = 'none';
-    }
-  }
-
-  showJoinGame() {
-    this.titleText.innerHTML = 'Join Game?';
-    this.gameMenuWindow.style.display = 'block';
-    this.gamesHolder.style.display = 'none';
-    this.spectateScreen.style.display = 'none';
-    // eslint-disable-next-line no-param-reassign
-    this.gamesHolder.childNodes.forEach((cn) => { cn.style.display = 'none'; });
-    this.yesNoScreen.style.display = 'block';
+  // eslint-disable-next-line class-methods-use-this
+  createCard(text) {
+    const card = createElement('div', { className: 'game-menu-cards' });
+    card.innerHTML = text;
+    return card;
   }
 
   close() {
-    this.gameMenuWindow.style.display = 'none';
+    this.gameMenu.style.display = 'none';
   }
 
-  showSpectate() {
-    this.titleText.innerHTML = 'Spectate Game?';
-    this.gameMenuWindow.style.display = 'block';
-    this.gamesHolder.style.display = 'none';
-    // eslint-disable-next-line no-param-reassign
-    this.gamesHolder.childNodes.forEach((cn) => { cn.style.display = 'none'; });
-    this.yesNoScreen.style.display = 'none';
-    this.spectateScreen.style.display = 'block';
-  }
-
-  showGameMenu() {
-    this.titleText.innerHTML = 'Games';
-    // eslint-disable-next-line no-param-reassign
-    this.gamesHolder.childNodes.forEach((cn) => { cn.style.display = 'block'; });
-    this.gamesHolder.style.backgroundImage = '';
-    this.gamesHolder.style.display = 'block';
-    this.gameMenuWindow.style.display = 'block';
-  }
-
-  waiting() {
-    // eslint-disable-next-line no-param-reassign
-    this.gamesHolder.childNodes.forEach((cn) => { cn.style.display = 'none'; });
-    this.titleText.innerHTML = 'Waiting for someone to join';
-    this.gamesHolder.style.backgroundImage = 'url(../Images/waiting.gif)';
-    this.gamesHolder.style.backgroundRepeat = 'no-repeat';
-    this.gamesHolder.style.backgroundPosition = 'center';
-    this.gamesHolder.style.backgroundSize = 'contain';
+  displayWindow(page) {
+    switch (page) {
+      case 0: // Games Window
+        this.titleWindow.innerHTML = '<Pre> Games';
+        this.gameMenu.style.display = 'block';
+        this.joinWindow.style.display = 'none';
+        this.gamesWindow.style.display = 'block';
+        this.spectateWindow.style.display = 'none';
+        this.waitingWindow.style.display = 'none';
+        break;
+      case 1: // Join Window
+        this.titleWindow.innerHTML = '<Pre> Join Game?';
+        this.gameMenu.style.display = 'block';
+        this.joinWindow.style.display = 'block';
+        this.gamesWindow.style.display = 'none';
+        this.spectateWindow.style.display = 'none';
+        this.waitingWindow.style.display = 'none';
+        break;
+      case 2: // Spectate Window
+        this.titleWindow.innerHTML = '<Pre> Spectate Game?';
+        this.gameMenu.style.display = 'block';
+        this.joinWindow.style.display = 'none';
+        this.gamesWindow.style.display = 'none';
+        this.spectateWindow.style.display = 'block';
+        this.waitingWindow.style.display = 'none';
+        break;
+      case 3: // Waiting Window
+        this.titleWindow.innerHTML = '<Pre> Waiting for someone to join';
+        this.gameMenu.style.display = 'block';
+        this.joinWindow.style.display = 'none';
+        this.gamesWindow.style.display = 'none';
+        this.spectateWindow.style.display = 'none';
+        this.waitingWindow.style.display = 'block';
+        break;
+      default:
+    }
   }
 }
 

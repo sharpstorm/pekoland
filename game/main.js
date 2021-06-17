@@ -100,6 +100,7 @@ Promise.all([netSetupPromise, assetSetupPromise])
     const uiRenderer = Renderer.getUILayer();
     const gameRenderer = Renderer.getGameLayer();
     const playerManager = PlayerManager.getInstance();
+    const worldManager = WorldManager.getInstance();
     const chatManager = GameManager.getInstance().getTextChannelManager();
     const boardGameManager = GameManager.getInstance().getBoardGameManager();
 
@@ -152,70 +153,37 @@ Promise.all([netSetupPromise, assetSetupPromise])
     });
 
     const gameMenu = new GameMenu(boardGameManager.gameList);
-    gameMenu.cardList.forEach((card) => {
+    gameMenu.joinWindow.childNodes[0].addEventListener('click', () => { boardGameManager.joinGame(); });
+    gameMenu.joinWindow.childNodes[1].addEventListener('click', () => { boardGameManager.closeMenu(); });
+    gameMenu.gamesWindow.childNodes.forEach((card) => {
       card.addEventListener('click', () => {
-        console.log(networkManager.getOperationMode()); // 1 = server, 2 = client
         if (networkManager.getOperationMode() === 2) {
           const data = {
-            host: PlayerManager.getInstance().getSelfId(),
-            tableID: GameManager.getInstance().getBoardGameManager().tableID,
+            host: playerManager.getSelfId(),
+            tableID: boardGameManager.tableID,
             gameName: card.innerHTML,
             action: 'registerLobbyRequest',
           };
           NetworkManager.getInstance().send(buildClientGamePacket('gameLobby', data));
         } else if (networkManager.getOperationMode() === 1) {
-          WorldManager.getInstance().registerLobby(GameManager.getInstance()
-            .getBoardGameManager().tableID,
-          PlayerManager.getInstance().getSelfId(), card.innerHTML);
-          GameManager.getInstance().getBoardGameManager().gameState = 'hosting';
-          GameManager.getInstance().getBoardGameManager().showWaitingScreen();
+          worldManager.registerLobby(boardGameManager.tableID,
+            playerManager.getSelfId(), card.innerHTML);
+          boardGameManager.gameState = 'hosting';
+          boardGameManager.displayPage(3);
         }
       });
     });
-
-    gameMenu.options.forEach((option) => {
-      option.addEventListener('click', () => {
-        if (option.id === 'gameJoinYes') {
-          // join game
-          console.log('yes yes');
-          GameManager.getInstance().getBoardGameManager()
-            .joinGame();
-        } else if (option.id === 'gameJoinNo') {
-          // close
-          console.log('no no');
-          if (GameManager.getInstance().getBoardGameManager() !== undefined) {
-            GameManager.getInstance().getBoardGameManager().toggle();
-          }
-        }
-      });
-    });
-    const gameOverlay = new GameOverlay();
-    gameOverlay.leaveBtn.addEventListener('click', () => {
-      GameManager.getInstance().getBoardGameManager().leaveGame();
-    });
-
-    gameMenu.spectateScreen.childNodes[0].addEventListener('click', () => {
+    gameMenu.spectateWindow.childNodes[0].addEventListener('click', () => {
       if (NetworkManager.getInstance().getOperationMode() === 1) {
-        GameManager.getInstance().getBoardGameManager().toggle();
-        GameManager.getInstance().getBoardGameManager().gameState = 'spectating';
-        GameManager.getInstance().getBoardGameManager().spectateGame(
-          WorldManager.getInstance()
-            .getGameName(GameManager.getInstance().getBoardGameManager().tableID),
-          WorldManager.getInstance()
-            .getLobbyHost(GameManager.getInstance().getBoardGameManager().tableID),
-          WorldManager.getInstance()
-            .getLobbyJoiner(GameManager.getInstance().getBoardGameManager().tableID),
+        boardGameManager.gameState = 'spectating';
+        boardGameManager.spectateGame(
+          worldManager.getGameName(boardGameManager.tableID),
+          worldManager.getLobbyHost(boardGameManager.tableID),
+          worldManager.getLobbyJoiner(boardGameManager.tableID),
         );
-        // GameManager.getInstance().getBoardGameManager().gameList[0].checkersMove
-
-        WorldManager.getInstance().addSpectator(GameManager.getInstance()
-          .getBoardGameManager().tableID, PlayerManager.getInstance().getSelfId());
-
-        GameManager.getInstance().getBoardGameManager().toggle();
-        // NO IDEA Y TOGGLE 2 times. right in spectate game
-        const historyList = WorldManager.getInstance()
-          .getHistory(GameManager.getInstance().getBoardGameManager().tableID);
-
+        worldManager.addSpectator(boardGameManager.tableID, playerManager.getSelfId());
+        boardGameManager.closeMenu();
+        const historyList = worldManager.getHistory(boardGameManager.tableID);
         // TO CHANGE THIS
         setTimeout(() => {
           historyList.forEach((hist) => {
@@ -223,28 +191,26 @@ Promise.all([netSetupPromise, assetSetupPromise])
               .gameList[0].processMove(hist); // hard coded
           });
         }, 500);
-
-        console.log(WorldManager.getInstance().gameLobbies);
       } else if (NetworkManager.getInstance().getOperationMode() === 2) {
-        GameManager.getInstance().getBoardGameManager().toggle();
-
         const data = {
           host: PlayerManager.getInstance().getSelfId(),
           tableID: GameManager.getInstance().getBoardGameManager().tableID,
           action: 'spectate',
         };
         NetworkManager.getInstance().send(buildClientGamePacket('gameLobby', data));
-        GameManager.getInstance().getBoardGameManager().toggle();
+        boardGameManager.closeMenu();
       }
     });
-
-    gameMenu.spectateScreen.childNodes[1].addEventListener('click', () => {
-      GameManager.getInstance().getBoardGameManager().toggle();
-      GameManager.getInstance().getBoardManager().gameState = undefined;
+    gameMenu.spectateWindow.childNodes[1].addEventListener('click', () => {
+      boardGameManager.closeMenu();
+      boardGameManager.gameState = undefined;
     });
 
-    uiRenderer.addElement(gameOverlay);
+    const gameOverlay = new GameOverlay();
+    gameOverlay.leaveBtn.addEventListener('click', () => { boardGameManager.leaveGame(); });
+
     uiRenderer.addElement(gameMenu);
+    uiRenderer.addElement(gameOverlay);
     uiRenderer.addElement(menuBtn);
     uiRenderer.addElement(connectBtn);
     uiRenderer.addElement(micBtn);

@@ -4,6 +4,7 @@ import buildClientGamePacket from '../net/client/game-data-sender.js';
 import buildServerGamePacket from '../net/server/game-data-sender.js';
 import MapManager from './map-manager.js';
 import { timeout } from '../utils.js';
+
 // import Player from '../models/player.js';
 import PlayerManager from './player-manager.js';
 import Player from '../models/player.js';
@@ -174,10 +175,16 @@ class TextChannelManager {
 class BoardGameManager {
   constructor() {
     this.gameList = [];
-    this.uiLayer = undefined;
-    this.currentGame = undefined; // USELESS?
-    this.gameState = undefined; // USELESS
+    this.uiLayer = undefined; // cant define here. cyclic
+    this.currentGame = undefined; // USELESS? NOPE
+    this.gameState = undefined; // change to number
     this.tableID = undefined;
+    /* GAME STATES
+    PLAYING
+    HOSTING
+    SPECTATING
+    WAITING CHECK
+    */
   }
 
   register(game) {
@@ -198,88 +205,91 @@ class BoardGameManager {
   }
 
   propagateEvent(eventID, event, camContext, uiLayer) {
+    const floorX = Math.floor((camContext.x + event.clientX) / 100) * 100;
+    const floorY = Math.floor((camContext.y + event.clientY) / 100) * 100;
     this.uiLayer = uiLayer; // TO CHANGE TO CONSTRUCTOR
     const clickedData = MapManager.getInstance().getCurrentMap()
       .getFuniture(camContext.x + event.clientX, camContext.y + event.clientY);
-    const floorX = Math.floor((camContext.x + event.clientX) / 100) * 100;
-    const floorY = Math.floor((camContext.y + event.clientY) / 100) * 100;
     if (clickedData === 'BoardGame' && this.gameState === undefined && this.checkPlayer(floorX, floorY)) {
       this.tableID = `${floorX}-${floorY}`;
-      console.log(this.tableID);
-      if (NetworkManager.getInstance().getOperationMode() === 2) {
-        // IF MODE = CLIENT, CHECK CLICKED LOBBY SATUS
-        const data = {
-          host: PlayerManager.getInstance().getSelfId(),
-          tableID: this.tableID,
-          action: 'checkLobby',
-        };
-        NetworkManager.getInstance().send(buildClientGamePacket('gameLobby', data));
-        this.gameState = 'waitingCheck';
-      } else if (NetworkManager.getInstance().getOperationMode() === 1) {
-        if (WorldManager.getInstance().lobbyExist(this.tableID)) {
-          if (WorldManager.getInstance().getLobbyJoiner(this.tableID) === undefined) {
-            if (WorldManager.getInstance().getLobbyHost(this.tableID) !== PlayerManager
-              .getInstance().getSelfId()) {
-              this.showJoinGame();
+      let data;
+      switch (NetworkManager.getInstance().getOperationMode()) {
+        case 2:
+          data = { host: PlayerManager.getInstance().getSelfId(), tableID: this.tableID, action: 'checkLobby' };
+          NetworkManager.getInstance().send(buildClientGamePacket('gameLobby', data));
+          this.gameState = 'waitingCheck';
+          break;
+        case 1:
+          if (WorldManager.getInstance().lobbyExist(this.tableID)) {
+            if (WorldManager.getInstance().getLobbyJoiner(this.tableID) === undefined) {
+              if (WorldManager.getInstance().getLobbyHost(this.tableID) !== PlayerManager
+                .getInstance().getSelfId()) {
+                this.displayPage(1);
+              }
+            } else {
+              this.displayPage(2);
             }
           } else {
-            // OCCUPIED. SPECTATE
-            this.showSpectate();
+            this.displayPage(0);
           }
-        } else {
-          // LOBBY WITH TABLE ID DOESNT EXIST
-          // console.log('server game menu');
-          this.showGameMenu();
-        }
+          break;
+        default:
       }
     }
   }
 
-  closeMenu() {
-    if (NetworkManager.getInstance().getOperationMode() === 2) {
-      if (this.gameState === 'hosting') {
-        // SEND CLOSE LOBBY REQ
+  displayPage(page) {
+    this.uiLayer.elements.forEach((e) => {
+      if (e.constructor.name === 'GameMenu') {
+        e.displayWindow(page);
+      }
+    });
+  }
+
+  closeGameMenu() {
+    if (this.gameState === 'hosting') {
+      if (NetworkManager.getInstance().getOperationMode() === 2) {
         const data = {
           host: PlayerManager.getInstance().getSelfId(),
           tableID: this.tableID,
           action: 'closeLobby',
         };
         NetworkManager.getInstance().send(buildClientGamePacket('gameLobby', data));
-      }
-    } else if (NetworkManager.getInstance().getOperationMode() === 1) {
-      if (this.gameState === 'hosting') {
-        console.log(WorldManager.getInstance().gameLobbies);
+      } else if (NetworkManager.getInstance().getOperationMode() === 1) {
         WorldManager.getInstance().closeLobby(this.tableID);
-        console.log(WorldManager.getInstance().gameLobbies);
       }
     }
     this.gameState = undefined;
   }
 
   joinGame() {
-    if (NetworkManager.getInstance().getOperationMode() === 2) {
-      const data = {
-        joiner: PlayerManager.getInstance().getSelfId(),
-        tableID: this.tableID,
-        action: 'joinGame',
-      };
-      NetworkManager.getInstance().send(buildClientGamePacket('gameLobby', data));
-    } else if (NetworkManager.getInstance().getOperationMode() === 1) {
-      WorldManager.getInstance().joinLobby(this.tableID, PlayerManager
-        .getInstance().getSelfId());
-      console.log(WorldManager.getInstance().gameLobbies);
-      const data = {
-        host: WorldManager.getInstance().getLobbyHost(this.tableID),
-        joiner: WorldManager.getInstance().getLobbyJoiner(this.tableID),
-        tableID: this.tableID,
-        gameName: WorldManager.getInstance().getGameName(this.tableID),
-        action: 'startGame',
-      };
-      NetworkManager.getInstance().send(buildServerGamePacket('gameLobby-echo', data));
-      this.currentGame = data.gameName;
-      this.gameState = 'playing';
-      this.showGameOverlay();
-      this.toggle();
+    let data;
+    switch (NetworkManager.getInstance().getOperationMode) {
+      case 2:
+        data = {
+          joiner: PlayerManager.getInstance().getSelfId(),
+          tableID: this.tableID,
+          action: 'joinGame',
+        };
+        NetworkManager.getInstance().send(buildClientGamePacket('gameLobby', data));
+        break;
+      case 1:
+        WorldManager.getInstance().joinLobby(this.tableID, PlayerManager
+          .getInstance().getSelfId());
+        console.log(WorldManager.getInstance().gameLobbies);
+        data = {
+          host: WorldManager.getInstance().getLobbyHost(this.tableID),
+          joiner: WorldManager.getInstance().getLobbyJoiner(this.tableID),
+          tableID: this.tableID,
+          gameName: WorldManager.getInstance().getGameName(this.tableID),
+          action: 'startGame',
+        };
+        NetworkManager.getInstance().send(buildServerGamePacket('gameLobby-echo', data));
+        this.currentGame = data.gameName;
+        this.gameState = 'playing';
+        this.showGameOverlay();
+        break;
+      default:
     }
   }
 
@@ -288,7 +298,7 @@ class BoardGameManager {
       if (game.gameName === gameName) {
         game.startGame(p1, p2);
         this.currentGame = gameName;
-        this.toggle();
+        this.closeGameMenu();
       }
     });
     this.gameState = 'playing';
@@ -305,42 +315,6 @@ class BoardGameManager {
     });
     this.gameState = 'spectating';
     this.showGameOverlay();
-  }
-
-  toggle() {
-    this.uiLayer.elements.forEach((e) => {
-      // console.log(e);
-      if (e.constructor.name === 'GameMenu') {
-        e.toggle();
-      }
-    });
-  }
-
-  showSpectate() {
-    this.uiLayer.elements.forEach((e) => {
-      // console.log(e);
-      if (e.constructor.name === 'GameMenu') {
-        e.showSpectate();
-      }
-    });
-  }
-
-  showGameMenu() {
-    this.uiLayer.elements.forEach((e) => {
-      // console.log(e);
-      if (e.constructor.name === 'GameMenu') {
-        e.showGameMenu();
-      }
-    });
-  }
-
-  showJoinGame() {
-    this.uiLayer.elements.forEach((e) => {
-      // console.log(e);
-      if (e.constructor.name === 'GameMenu') {
-        e.showJoinGame();
-      }
-    });
   }
 
   endGame() {
@@ -440,15 +414,6 @@ class BoardGameManager {
       // console.log(e);
       if (e.constructor.name === 'GameOverlay') {
         e.close();
-      }
-    });
-  }
-
-  showWaitingScreen() {
-    this.uiLayer.elements.forEach((e) => {
-      // console.log(e);
-      if (e.constructor.name === 'GameMenu') {
-        e.waiting();
       }
     });
   }
