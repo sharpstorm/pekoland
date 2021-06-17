@@ -151,13 +151,13 @@ function handleGameLobby(data, conn) {
   } else if (data.action === 'spectate') {
     console.log(data);
     WorldManager.getInstance().addSpectator(data.tableID, data.host);
-    const cb = worldManager.gameLobbies[data.tableID].currentBoard;
-    console.log(cb);
+    const currentState = worldManager.getCurrentState(data.tableID);
+    console.log(currentState);
     console.log(worldManager.gameLobbies);
     newDataHost = WorldManager.getInstance().getLobbyHost(data.tableID);
     newDataJoiner = WorldManager.getInstance().getLobbyJoiner(data.tableID);
-    newDataGameName = WorldManager.getInstance().gameLobbies[data.tableID].gameName;
-    newDataAction = { action: 'spectate-start', from: data.host, currentBoard: cb };
+    newDataGameName = WorldManager.getInstance().getGameName(data.tableID);
+    newDataAction = { action: 'spectate-start', from: data.host, currentState };
   } else if (data.action.newBoard !== undefined) {
     worldManager.updateCurrentState(data.host, data.action.newBoard);
     console.log(worldManager);
