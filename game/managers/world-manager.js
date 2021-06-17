@@ -13,10 +13,8 @@ export default class WorldManager {
       joiner: undefined,
       gameName: gn,
       spectators: [],
-      history: [],
+      currentBoard: undefined,
     };
-    console.log(this.gameLobbies);
-    // console.log(this.gameLobbies);
   }
 
   addSpectator(key, player) {
@@ -31,31 +29,43 @@ export default class WorldManager {
     const h = this.gameLobbies[key].host;
     const gn = this.gameLobbies[key].gameName;
     const s = this.gameLobbies[key].spectators;
-    const hist = this.gameLobbies[key].history;
+    const cb = this.gameLobbies[key].currentBoard;
     this.gameLobbies[key] = {
       host: h,
       joiner: j,
       gameName: gn,
       spectators: s,
-      history: hist,
+      currentBoard: cb,
     };
-    // console.log(this.gameLobbies);
   }
 
   closeLobby(key) {
     delete this.gameLobbies[key];
-    console.log(this.gameLobbies);
   }
 
-  getHistory(key) {
-    return this.gameLobbies[key].history;
-  }
-
-  addHistory(player, action) {
+  getCurrentBoard(player) {
     // eslint-disable-next-line no-restricted-syntax
     for (const entry in this.gameLobbies) {
       if (this.gameLobbies[entry].host === player || this.gameLobbies[entry].joiner === player) {
-        this.gameLobbies[entry].history.push(action);
+        return this.gameLobbies[entry].currentBoard;
+      }
+    }
+    return undefined;
+  }
+
+  updateCurrentBoard(player, newBoard) {
+    console.log(newBoard);
+    console.log(player);
+    // eslint-disable-next-line no-restricted-syntax
+    for (const entry in this.gameLobbies) {
+      if (this.gameLobbies[entry].host === player || this.gameLobbies[entry].joiner === player) {
+        if (player === this.gameLobbies[entry].joiner) {
+          // eslint-disable-next-line no-nested-ternary
+          const mm = newBoard.map((x) => (x !== 0 ? (x === 1 ? 2 : 1) : 0));
+          this.gameLobbies[entry].currentBoard = mm.reverse();
+        } else {
+          this.gameLobbies[entry].currentBoard = newBoard;
+        }
       }
     }
   }
@@ -97,6 +107,16 @@ export default class WorldManager {
 
   getGameName(key) {
     return this.gameLobbies[key].gameName;
+  }
+
+  getGameNamePlayer(player) {
+    // eslint-disable-next-line no-restricted-syntax
+    for (const entry in this.gameLobbies) {
+      if (this.gameLobbies[entry].host === player || this.gameLobbies[entry].joiner === player) {
+        return this.gameLobbies[entry].gameName;
+      }
+    }
+    return undefined;
   }
 
   registerPlayer(peerId, userId) {

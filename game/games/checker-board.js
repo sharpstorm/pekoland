@@ -13,11 +13,19 @@ export default class Board {
     this.currentTurn = this.player1;
     this.opponent = undefined;
     this.me = undefined;
+    this.setUp();
   }
 
   drawBoard(ctx) {
     ctx.beginPath();
     this.gridArray.forEach((grid) => grid.drawAt(ctx));
+  }
+
+  gridArrayInit() {
+    let i;
+    for (i = 0; i < 64; i += 1) {
+      this.gridArray.push(new GridBox(0, 0, 'white', undefined, false));
+    }
   }
 
   move() {
@@ -85,12 +93,31 @@ export default class Board {
     return 0;
   }
 
-  setUp(camContext) {
+  reDraw(camContext) {
+    // console.log(this.gridArray.length);
     let i;
     let ii;
+    let iii = 63;
     const unit = 900 / 8;
     const width = (camContext.viewportWidth / 2 - 450);
     const height = (camContext.viewportHeight / 2 - 450);
+    for (ii = 0; ii < 8; ii += 1) {
+      for (i = 0; i < 8; i += 1) {
+        if (iii > 0) {
+          this.gridArray[iii].setXY(width + i * unit, height + unit * ii);
+          iii -= 1;
+        }
+      }
+    }
+    this.gridArray[0].setXY(width + 7 * unit, height + unit * 7);
+  }
+
+  setUp() {
+    let i;
+    let ii;
+    const unit = 900 / 8;
+    const width = 0;
+    const height = 0;
     for (ii = 0; ii < 8; ii += 1) {
       for (i = 0; i < 8; i += 1) {
         if (this.gridArray.length < 64) {

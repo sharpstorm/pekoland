@@ -74,51 +74,41 @@ function handleVoiceChannelData(data, conn) {
 }
 
 function handleGameLobby(data, conn) {
-  console.log(GameManager.getInstance().getBoardGameManager());
   console.log(data);
   if (data.action === 'registerLobbyEcho-success' && data.host === PlayerManager.getInstance().getSelfId()) {
-    GameManager.getInstance().getBoardGameManager().showWaitingScreen();
+    GameManager.getInstance().getBoardGameManager().displayPage(3);
     GameManager.getInstance().getBoardGameManager().currentGame = data.gameName;
     GameManager.getInstance().getBoardGameManager().gameState = 'hosting';
   } else if (data.action === 'open' && data.host === PlayerManager.getInstance().getSelfId()) {
-    GameManager.getInstance().getBoardGameManager().showGameMenu();
+    GameManager.getInstance().getBoardGameManager().displayPage(0);
   } else if (data.action === 'canJoin' && GameManager.getInstance().getBoardGameManager().gameState === 'waitingCheck') {
-    console.log('here in ca join');
     if (data.tableID === GameManager.getInstance().getBoardGameManager().tableID) {
-      console.log('here in ca join');
-      GameManager.getInstance().getBoardGameManager().showJoinGame();
+      GameManager.getInstance().getBoardGameManager().displayPage(1);
     }
   } else if ((data.action === 'occupied' && GameManager.getInstance().getBoardGameManager().gameState === 'waitingCheck')) {
-    GameManager.getInstance().getBoardGameManager().showSpectate();
+    GameManager.getInstance().getBoardGameManager().displayPage(2);
   } else if (data.action.action === 'spectate-start' && PlayerManager.getInstance().getSelfId() === data.action.from) {
+    console.log('im here');
+    console.log(data);
     GameManager.getInstance().getBoardGameManager().gameState = 'spectating';
     GameManager.getInstance().getBoardGameManager().spectateGame(
       'Checkers', // hardcoded
       data.host,
       data.joiner,
     );
-    const historyList = data.action.history;
     // TO CHANGE THIS
-    setTimeout(() => {
-      historyList.forEach((hist) => {
-        GameManager.getInstance().getBoardGameManager()
-          .gameList[0].processMove(hist); // hard coded
-      });
-    }, 500);
+    GameManager.getInstance().getBoardGameManager().getGame(data.gameName)
+      .updateSpectateBoard(data.action.currentBoard); // hard coded
   } else if (data.action.action === 'spectate-update' && data.action.s.includes(PlayerManager.getInstance().getSelfId())) {
-    console.log('IM HERERERERERERER');
-    GameManager.getInstance().getBoardGameManager().gameList[0].processMove(data.action.move);
+    GameManager.getInstance().getBoardGameManager().getGame(data.gameName)
+      .updateSpectateBoard(data.action.newBoard);
   } else if ((data.action === 'startGame' && data.host === PlayerManager.getInstance().getSelfId())
   || (data.action === 'startGame' && data.joiner === PlayerManager.getInstance().getSelfId())) {
     GameManager.getInstance().getBoardGameManager()
       .startGame(data.gameName, data.host, data.joiner);
   } else if ((data.action === 'leaveGame' && data.host === PlayerManager.getInstance().getSelfId())
   || (data.action === 'leaveGame' && data.joiner === PlayerManager.getInstance().getSelfId())) {
-    if (data.host === PlayerManager.getInstance().getSelfId()) {
-      GameManager.getInstance().getBoardGameManager().endGameNo();
-    } else {
-      GameManager.getInstance().getBoardGameManager().endGame();
-    }
+    GameManager.getInstance().getBoardGameManager().endGame();
   }
 }
 

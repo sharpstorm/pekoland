@@ -1,5 +1,6 @@
 /* eslint-disable class-methods-use-this */
 import CheckerBoard from './checker-board.js';
+import CheckerPiece from './checker-piece.js';
 import NetworkManager from '../net/network-manager.js';
 import PlayerManager from '../managers/player-manager.js';
 import buildClientGamePacket from '../net/client/game-data-sender.js';
@@ -26,7 +27,7 @@ export default class CheckersGame {
           checkersInstance.checkersBoard.selectedGrid = clickedGrid;
           const move = checkersInstance.checkersBoard.move();
           if (move !== undefined) {
-            let data = {
+            const data = {
               from: PlayerManager.getInstance().getSelfId(),
               player1: checkersInstance.checkersBoard.player1,
               player2: checkersInstance.checkersBoard.player2,
@@ -35,24 +36,23 @@ export default class CheckersGame {
             NetworkManager.getInstance().send(buildClientGamePacket('checkers', data));
 
             if (NetworkManager.getInstance().getOperationMode() === 2) {
-              data = {
+              const newData = {
                 host: PlayerManager.getInstance().getSelfId(),
-                joiner: checkersInstance.checkersBoard.player2,
-                action: { history: move },
+                action: { action: 'spectate-update', newBoard: instance.gridToArray() },
               };
-              NetworkManager.getInstance().send(buildClientGamePacket('gameLobby', data));
+              console.log(instance.gridToArray());
+              NetworkManager.getInstance().send(buildClientGamePacket('gameLobby', newData));
             } else if (NetworkManager.getInstance().getOperationMode() === 1) {
-              data = {
-                host: checkersInstance.checkersBoard.player1,
-                joiner: checkersInstance.checkersBoard.player2,
-                action: { history: move },
-              };
-              WorldManager.getInstance().addHistory(data.host, data);
+              WorldManager.getInstance().updateCurrentBoard(data.host, instance.gridToArray());
               const spectators = WorldManager.getInstance()
                 .getSpectatorsPlayer(checkersInstance.checkersBoard.player1);
               const newData = {
-                action: { action: 'spectate-update', s: spectators, move: data },
+                host: PlayerManager.getInstance().getSelfId(),
+                gameName: 'Checkers',
+                action: { action: 'spectate-update', s: spectators, newBoard: instance.gridToArray() },
               };
+              WorldManager.getInstance().updateCurrentBoard(PlayerManager
+                .getInstance().getSelfId(), instance.gridToArray());
               NetworkManager.getInstance().send(buildServerGamePacket('gameLobby-echo', newData));
             }
           }
@@ -66,6 +66,46 @@ export default class CheckersGame {
         }
       }
     }
+  }
+
+  updateSpectateBoard(newBoard) {
+    console.log(newBoard);
+    if (newBoard !== undefined) {
+      let i;
+      const cb = this.checkersBoard;
+      console.log('changed');
+      for (i = 0; i < 64; i += 1) {
+        if (newBoard[i] === 0) {
+          if (cb.gridArray[i].hasPiece) {
+            cb.gridArray[i].removePiece();
+          }
+        } else if (newBoard[i] === 1) {
+          const newPiece = new CheckerPiece(cb.player2, 0, 0);
+          newPiece.color = 'red';
+          cb.gridArray[i].assignPiece(newPiece);
+        } else if (newBoard[i] === 2) {
+          const newPiece = new CheckerPiece(cb.player1, 0, 0);
+          newPiece.color = 'blue';
+          cb.gridArray[i].assignPiece(newPiece);
+        }
+      }
+    }
+  }
+
+  gridToArray() {
+    const gArray = [];
+    this.checkersBoard.gridArray.forEach((grid) => {
+      if (grid.hasPiece) {
+        if (grid.checkerPiece.player === this.checkersBoard.player1) {
+          gArray.push(1);
+        } else if (grid.checkerPiece.player === this.checkersBoard.player2) {
+          gArray.push(2);
+        }
+      } else {
+        gArray.push(0);
+      }
+    });
+    return gArray;
   }
 
   endGame() {
@@ -156,7 +196,7 @@ export default class CheckersGame {
 
   draw(ctx, camContext) {
     if (this.gameOn) {
-      this.checkersBoard.setUp(camContext);
+      this.checkersBoard.reDraw(camContext);
       this.checkersBoard.drawBoard(ctx);
     }
   }

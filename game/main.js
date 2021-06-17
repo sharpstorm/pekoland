@@ -154,7 +154,7 @@ Promise.all([netSetupPromise, assetSetupPromise])
 
     const gameMenu = new GameMenu(boardGameManager.gameList);
     gameMenu.joinWindow.childNodes[0].addEventListener('click', () => { boardGameManager.joinGame(); });
-    gameMenu.joinWindow.childNodes[1].addEventListener('click', () => { boardGameManager.closeMenu(); });
+    gameMenu.joinWindow.childNodes[1].addEventListener('click', () => { boardGameManager.displayPage(-1); boardGameManager.gameState = undefined; });
     gameMenu.gamesWindow.childNodes.forEach((card) => {
       card.addEventListener('click', () => {
         if (networkManager.getOperationMode() === 2) {
@@ -182,27 +182,22 @@ Promise.all([netSetupPromise, assetSetupPromise])
           worldManager.getLobbyJoiner(boardGameManager.tableID),
         );
         worldManager.addSpectator(boardGameManager.tableID, playerManager.getSelfId());
-        boardGameManager.closeMenu();
-        const historyList = worldManager.getHistory(boardGameManager.tableID);
-        // TO CHANGE THIS
-        setTimeout(() => {
-          historyList.forEach((hist) => {
-            GameManager.getInstance().getBoardGameManager()
-              .gameList[0].processMove(hist); // hard coded
-          });
-        }, 500);
+        boardGameManager.displayPage(-1);
+        const currentBoard = worldManager.getCurrentBoard(boardGameManager.tableID);
+        boardGameManager.getGame(worldManager.gameLobbies[boardGameManager.tableID].gameName)
+          .updateSpectateBoard(currentBoard); // hard coded
       } else if (NetworkManager.getInstance().getOperationMode() === 2) {
         const data = {
-          host: PlayerManager.getInstance().getSelfId(),
-          tableID: GameManager.getInstance().getBoardGameManager().tableID,
+          host: playerManager.getSelfId(),
+          tableID: boardGameManager.tableID,
           action: 'spectate',
         };
         NetworkManager.getInstance().send(buildClientGamePacket('gameLobby', data));
-        boardGameManager.closeMenu();
+        boardGameManager.displayPage(-1);
       }
     });
     gameMenu.spectateWindow.childNodes[1].addEventListener('click', () => {
-      boardGameManager.closeMenu();
+      boardGameManager.displayPage(-1);
       boardGameManager.gameState = undefined;
     });
 

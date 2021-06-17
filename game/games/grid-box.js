@@ -19,6 +19,15 @@ export default class Grid {
     }
   }
 
+  setXY(x, y) {
+    this.x = x;
+    this.y = y;
+    if (this.hasPiece) {
+      this.checkerPiece.x = x;
+      this.checkerPiece.y = y;
+    }
+  }
+
   setIndex(index) {
     this.index = index;
   }

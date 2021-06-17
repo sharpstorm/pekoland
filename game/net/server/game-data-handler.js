@@ -77,149 +77,113 @@ function handleDisconnectVoice(data, conn) {
 
 // eslint-disable-next-line no-unused-vars
 function handleGameLobby(data, conn) {
-  console.log(data);
-  // TODO REPEAT CODE
-  // CHANGE TO SEND ALL INSTEAD OF SENDALLEXCEPT
+  let newDataHost;
+  let newDataJoiner;
+  let newDataTableID;
+  let newDataGameName;
+  let newDataAction;
+  const worldManager = WorldManager.getInstance();
+  const boardGameManager = GameManager.getInstance().getBoardGameManager();
+
   if (data.action === 'registerLobbyRequest') {
-    console.log('here???????');
+    newDataHost = data.host;
+    newDataTableID = data.tableID;
+    newDataGameName = data.gameName;
+    newDataAction = WorldManager.getInstance().lobbyExist(data.tableID) ? 'registerLobbyEcho-fail' : 'registerLobbyEcho-success';
     if (!WorldManager.getInstance().lobbyExist(data.tableID)) {
-      WorldManager.getInstance().registerLobby(data.tableID, data.host, data.gameName);
-      const newData = {
-        host: data.host,
-        tableID: data.tableID,
-        gameName: data.gameName,
-        action: 'registerLobbyEcho-success',
-      };
-      NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('gameLobby-echo', newData, conn.peer));
-    } else {
-      const newData = {
-        host: data.host,
-        tableID: data.tableID,
-        gameName: data.gameName,
-        action: 'registerLobbyEcho-fail',
-      };
-      NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('gameLobby-echo', newData, conn.peer));
+      worldManager.registerLobby(newDataTableID, newDataHost, newDataGameName);
     }
   } else if (data.action === 'joinGame') {
     console.log('join game');
-    if (WorldManager.getInstance().lobbyExist(data.tableID)
-    && WorldManager.getInstance().getLobbyJoiner(data.tableID) === undefined) {
-      WorldManager.getInstance().joinLobby(data.tableID, data.joiner);
-      const newData = {
-        host: WorldManager.getInstance().getLobbyHost(data.tableID),
-        joiner: data.joiner,
-        tableID: data.tableID,
-        gameName: WorldManager.getInstance().getGameName(data.tableID),
-        action: 'startGame',
-      };
-      // TO CHANGE
-      if (WorldManager.getInstance().getLobbyHost(data.tableID) === PlayerManager
-        .getInstance().getSelfId()
-        || WorldManager.getInstance()
-          .getLobbyHost(data.tableID) === PlayerManager.getInstance().getSelfId()) {
-        GameManager.getInstance().getBoardGameManager()
-          .startGame(newData.gameName, newData.host, newData.joiner);
+    if (worldManager.lobbyExist(data.tableID)
+    && worldManager.getLobbyJoiner(data.tableID) === undefined) {
+      worldManager.joinLobby(data.tableID, data.joiner);
+      newDataHost = WorldManager.getInstance().getLobbyHost(data.tableID);
+      newDataJoiner = data.joiner;
+      newDataTableID = data.tableID;
+      newDataGameName = WorldManager.getInstance().getGameName(data.tableID);
+      newDataAction = 'startGame';
+      if (worldManager.getLobbyHost(data.tableID) === PlayerManager.getInstance().getSelfId()
+        || worldManager.getLobbyJoiner(data.tableID) === PlayerManager.getInstance().getSelfId()) {
+        boardGameManager.startGame(newDataGameName, newDataHost, newDataJoiner);
       }
-      console.log(WorldManager.getInstance().gameLobbies);
-      NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('gameLobby-echo', newData, conn.peer));
     } else {
-      const newData = {
-        host: data.host,
-        tableID: data.tableID,
-        gameName: data.gameName,
-        action: 'joinGame-fail',
-      };
-      NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('gameLobby-echo', newData, conn.peer));
+      newDataHost = data.host;
+      newDataTableID = data.tableID;
+      newDataGameName = data.gameName;
+      newDataAction = 'joinGame-fail'; // TODO: UNHANDLED ON CLIENT SIDE
     }
   } else if (data.action === 'checkLobby') {
-    // LOBBY DOESNT EXIST
-    if (!WorldManager.getInstance().lobbyExist(data.tableID)) {
-      const newData = {
-        host: data.host,
-        tableID: data.tableID,
-        gameName: data.gameName,
-        action: 'open',
-      };
-      NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('gameLobby-echo', newData, conn.peer));
-      // LOBBY EXIST, BUT WITHOUT JOINER
+    newDataHost = data.host;
+    newDataTableID = data.tableID;
+    newDataGameName = data.gameName;
+    if (!worldManager.lobbyExist(data.tableID)) {
+      newDataAction = 'open';
     } else if (WorldManager.getInstance().getLobbyJoiner(data.tableID) === undefined) {
-      const newData = {
-        host: data.host,
-        tableID: data.tableID,
-        gameName: data.gameName,
-        action: 'canJoin',
-      };
-      // console.log('here in can join');
-      NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('gameLobby-echo', newData, conn.peer));
-      // LOBBY EXIST, ON GOING GAME BETWEEN
-    } else {
-      const newData = {
-        host: data.host,
-        tableID: data.tableID,
-        gameName: data.gameName,
-        action: 'occupied',
-      };
-      NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('gameLobby-echo', newData, conn.peer));
-    }
+      newDataAction = 'canJoin';
+    } else { newDataAction = 'occupied'; }
   } else if (data.action === 'closeLobby') {
-    WorldManager.getInstance().closeLobby(data.tableID);
-    console.log(WorldManager.getInstance().gameLobbies);
+    worldManager.closeLobby(data.tableID);
   } else if (data.action === 'leaveGame') {
-    if (WorldManager.getInstance()
-      .getLobbyHost(data.tableID) === PlayerManager.getInstance().getSelfId()
-    || WorldManager.getInstance()
-      .getLobbyJoiner(data.tableID) === PlayerManager.getInstance().getSelfId()) {
+    if (worldManager.getLobbyHost(data.tableID) === PlayerManager.getInstance().getSelfId()
+    || worldManager.getLobbyJoiner(data.tableID) === PlayerManager.getInstance().getSelfId()) {
       GameManager.getInstance().getBoardGameManager().endGame();
     } else {
+      newDataHost = data.host;
+      newDataJoiner = WorldManager.getInstance().getLobbyPartner(data.tableID, data.host);
+      newDataTableID = data.tableID;
+      newDataGameName = data.gameName;
+      newDataAction = 'leaveGame';
       const newData = {
-        host: data.host,
-        joiner: WorldManager.getInstance().getLobbyPartner(data.tableID, data.host),
-        tableID: data.tableID,
-        gameName: data.gameName,
-        action: 'leaveGame',
+        host: newDataHost,
+        joiner: newDataJoiner,
+        tableID: newDataTableID,
+        action: newDataAction,
+        gameName: newDataGameName,
       };
-      NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('gameLobby-echo', newData, conn.peer));
+      NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('gameLobby-echo', newData), conn.peer);
+      worldManager.closeLobby(data.tableID);
+      return;
     }
-    WorldManager.getInstance().closeLobby(data.tableID);
+    worldManager.closeLobby(data.tableID);
   } else if (data.action === 'leave-spectate') {
-    WorldManager.getInstance().removeSpectator(data.tableID, data.host);
-    console.log(WorldManager.getInstance().gameLobbies);
+    worldManager.removeSpectator(data.tableID, data.host);
   } else if (data.action === 'spectate') {
+    console.log(data);
     WorldManager.getInstance().addSpectator(data.tableID, data.host);
-    const historyList = WorldManager.getInstance()
-      .getHistory(GameManager.getInstance().getBoardGameManager().tableID);
-    const newData = {
-      host: WorldManager.getInstance().getLobbyHost(data.tableID),
-      joiner: WorldManager.getInstance().getLobbyJoiner(data.tableID),
-      action: { action: 'spectate-start', from: data.host, history: historyList }, // TO CHANGE
-    };
-
-    NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('gameLobby-echo', newData, conn.peer));
-  } else if (data.action.history !== undefined) {
-    console.log('hHERER');
-
-    WorldManager.getInstance().addHistory(data.host, data);
-    console.log(GameManager.getInstance().getBoardGameManager());
-    if (GameManager.getInstance().getBoardGameManager().tableID !== undefined) {
-      const spectators = WorldManager.getInstance()
-        .getSpectators(GameManager.getInstance().getBoardGameManager().tableID);
-      console.log(spectators);
-      console.log(PlayerManager.getInstance().getSelfId());
-      console.log(PlayerManager.getInstance().getSelfId() in spectators);
-      // console.log(spectators);
+    const cb = worldManager.gameLobbies[data.tableID].currentBoard;
+    console.log(cb);
+    console.log(worldManager.gameLobbies);
+    newDataHost = WorldManager.getInstance().getLobbyHost(data.tableID);
+    newDataJoiner = WorldManager.getInstance().getLobbyJoiner(data.tableID);
+    newDataGameName = WorldManager.getInstance().gameLobbies[data.tableID].gameName;
+    newDataAction = { action: 'spectate-start', from: data.host, currentBoard: cb };
+  } else if (data.action.newBoard !== undefined) {
+    worldManager.updateCurrentBoard(data.host, data.action.newBoard);
+    console.log(worldManager);
+    if (boardGameManager.gameState === 'spectating') {
+      const spectators = worldManager.getSpectators(boardGameManager.tableID);
       if (spectators !== undefined) {
-        if (spectators.includes(PlayerManager.getInstance().getSelfId())) { // IS DIS RACE CONDITION
-          console.log(data);
-          console.log('ooolllalala im here???0');
-          GameManager.getInstance()
-            .getBoardGameManager().gameList[0].processMove(data); // HARD CODED 0
+        if (spectators.includes(PlayerManager.getInstance().getSelfId())) {
+          boardGameManager.getGame(WorldManager.getGameNamePlayer(data.host))
+            .updateSpectateBoard(worldManager.getCurrentBoard(data.host)); // HARD CODED 0
         }
       }
-      const newData = {
-        action: { action: 'spectate-update', s: spectators, move: data },
-      };
-      NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('gameLobby-echo', newData, conn.peer));
     }
+    newDataAction = { action: 'spectate-update', s: worldManager.getSpectatorsPlayer(data.host), newBoard: worldManager.getCurrentBoard(data.host) };
+    newDataGameName = worldManager.getGameNamePlayer(data.host);
+  }
+  const newData = {
+    host: newDataHost,
+    joiner: newDataJoiner,
+    tableID: newDataTableID,
+    action: newDataAction,
+    gameName: newDataGameName,
+  };
+  console.log(newData);
+  if (newData.action !== undefined) {
+    NetworkManager.getInstance().getConnection().send(buildGamePacket('gameLobby-echo', newData));
+    console.log(newData);
   }
 }
 
