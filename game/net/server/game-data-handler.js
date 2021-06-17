@@ -91,7 +91,7 @@ function handleGameLobby(data, conn) {
     newDataGameName = data.gameName;
     newDataAction = WorldManager.getInstance().lobbyExist(data.tableID) ? 'registerLobbyEcho-fail' : 'registerLobbyEcho-success';
     if (!WorldManager.getInstance().lobbyExist(data.tableID)) {
-      worldManager.registerLobby(newDataTableID, newDataHost, newDataGameName);
+      worldManager.createLobby(newDataTableID, newDataHost, newDataGameName);
     }
   } else if (data.action === 'joinGame') {
     console.log('join game');
@@ -151,26 +151,26 @@ function handleGameLobby(data, conn) {
   } else if (data.action === 'spectate') {
     console.log(data);
     WorldManager.getInstance().addSpectator(data.tableID, data.host);
-    const cb = worldManager.gameLobbies[data.tableID].currentBoard;
-    console.log(cb);
+    const currentState = worldManager.getCurrentState(data.tableID);
+    console.log(currentState);
     console.log(worldManager.gameLobbies);
     newDataHost = WorldManager.getInstance().getLobbyHost(data.tableID);
     newDataJoiner = WorldManager.getInstance().getLobbyJoiner(data.tableID);
-    newDataGameName = WorldManager.getInstance().gameLobbies[data.tableID].gameName;
-    newDataAction = { action: 'spectate-start', from: data.host, currentBoard: cb };
+    newDataGameName = WorldManager.getInstance().getGameName(data.tableID);
+    newDataAction = { action: 'spectate-start', from: data.host, currentState };
   } else if (data.action.newBoard !== undefined) {
-    worldManager.updateCurrentBoard(data.host, data.action.newBoard);
+    worldManager.updateCurrentState(data.host, data.action.newBoard);
     console.log(worldManager);
     if (boardGameManager.gameState === 'spectating') {
       const spectators = worldManager.getSpectators(boardGameManager.tableID);
       if (spectators !== undefined) {
         if (spectators.includes(PlayerManager.getInstance().getSelfId())) {
-          boardGameManager.getGame(WorldManager.getInstance().getGameNamePlayer(data.host))
-            .updateSpectateBoard(worldManager.getCurrentBoard(data.host), data.host);
+          boardGameManager.getGame(worldManager.getGameNamePlayer(data.host))
+            .updateSpectateBoard(worldManager.getCurrentState(data.host), data.host);
         }
       }
     }
-    newDataAction = { action: 'spectate-update', s: worldManager.getSpectatorsPlayer(data.host), newBoard: worldManager.getCurrentBoard(data.host) };
+    newDataAction = { action: 'spectate-update', s: worldManager.getSpectatorsPlayer(data.host), newBoard: worldManager.getCurrentState(data.host) };
     newDataGameName = worldManager.getGameNamePlayer(data.host);
     newDataHost = data.host;
   }

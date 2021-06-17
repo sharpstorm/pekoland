@@ -96,7 +96,7 @@ function handleGameLobby(data, conn) {
     );
     // TO CHANGE THIS
     GameManager.getInstance().getBoardGameManager().getGame(data.gameName)
-      .updateSpectateBoard(data.action.currentBoard); // hard coded
+      .updateSpectateBoard(data.action.currentState); // hard coded
   } else if (data.action.action === 'spectate-update' && data.action.s.includes(PlayerManager.getInstance().getSelfId())) {
     GameManager.getInstance().getBoardGameManager().getGame(data.gameName)
       .updateSpectateBoard(data.action.newBoard, data.host);

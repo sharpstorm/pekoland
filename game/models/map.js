@@ -10,7 +10,6 @@ export default class Map {
     this.heightGrids = heightGrids;
 
     this.initCollisionMap();
-    document.addEventListener('click', this.getColor);
   }
 
   initCollisionMap() {
@@ -21,34 +20,30 @@ export default class Map {
     ctx.drawImage(this.CollisionMap, 0, 0, this.CollisionMap.width, this.CollisionMap.height);
 
     this.collisionMatrix = [];
+    this.furnitureMatrix = [];
+
     const unit = this.getUnitLength();
     for (let x = 0; x < this.mapWidth; x += unit) {
-      const col = [];
+      const collisionCol = [];
+      const furnitureCol = [];
+
       for (let y = 0; y < this.mapHeight; y += unit) {
         const pixel = ctx.getImageData(x + (unit / 2), y + (unit / 2), 1, 1).data;
         if (pixel[3] === 255 && pixel[0] === 0 && pixel[1] === 0 && pixel[2] === 0) {
-          col.push(1);
+          collisionCol.push(1);
         } else {
-          col.push(0);
+          collisionCol.push(0);
+        }
+
+        if (pixel[3] === 255 && pixel[0] === 255 && pixel[1] === 0 && pixel[2] === 0) {
+          furnitureCol.push('BoardGame');
+        } else {
+          furnitureCol.push(undefined);
         }
       }
-      this.collisionMatrix.push(col);
+      this.collisionMatrix.push(collisionCol);
+      this.furnitureMatrix.push(furnitureCol);
     }
-  }
-
-  getFuniture(x, y) {
-    const colorCanvas = document.createElement('canvas');
-    colorCanvas.width = this.mapWidth;
-    colorCanvas.height = this.mapHeight;
-    const ctx = colorCanvas.getContext('2d');
-    if (this.CollisionMap !== undefined) {
-      ctx.drawImage(this.CollisionMap, 0, 0, this.mapWidth, this.mapHeight);
-      const pixel = (ctx.getImageData(x / 2, y / 2, 1, 1).data);
-      if (pixel[3] === 255 && pixel[0] === 255 && pixel[1] === 0 && pixel[2] === 0) {
-        return 'BoardGame';
-      }
-    }
-    return undefined;
   }
 
   draw(ctx, camContext) {
@@ -81,5 +76,12 @@ export default class Map {
     const x = Math.floor(playerX / GameConstants.UNIT);
     const y = Math.floor(playerY / GameConstants.UNIT);
     return this.collisionMatrix[x][y] === 1;
+  }
+
+  getFurniture(worldX, worldY) {
+    const x = Math.floor(worldX / GameConstants.UNIT);
+    const y = Math.floor(worldY / GameConstants.UNIT);
+
+    return this.furnitureMatrix[x][y];
   }
 }
