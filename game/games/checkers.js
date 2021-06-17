@@ -25,12 +25,18 @@ export default class CheckersGame {
           const move = checkersInstance.checkersBoard.move();
           if (move !== undefined) {
             const data = {
+              gameName: this.gameName,
               from: PlayerManager.getInstance().getSelfId(),
               player1: checkersInstance.checkersBoard.player1,
               player2: checkersInstance.checkersBoard.player2,
               action: move,
             };
-            NetworkManager.getInstance().send(buildClientGamePacket('checkers', data));
+            if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.CLIENT) {
+              NetworkManager.getInstance().send(buildClientGamePacket('game-update', data));
+            } else if (NetworkManager.getInstance().getOperationMode()
+              === NetworkManager.Mode.SERVER) {
+              NetworkManager.getInstance().send(buildServerGamePacket('game-update-echo', data));
+            }
 
             if (NetworkManager.getInstance().getOperationMode() === 2) {
               const newData = {
@@ -123,17 +129,34 @@ export default class CheckersGame {
     this.gameOn = false;
   }
 
-  startGame(p1, p2) {
-    this.gameOn = true;
-    this.checkersBoard = new CheckerBoard(p1, p2);
-    const data = {
+  startGame(p1, p2, lobbyId) {
+    this.lobbyId = lobbyId;
+
+    if (PlayerManager.getInstance().getSelfId() === p1
+      || PlayerManager.getInstance().getSelfId() === p2) {
+      this.gameOn = true;
+      if (PlayerManager.getInstance().getSelfId() === p1) {
+        this.checkersBoard = new CheckerBoard(p1, p2);
+      } else {
+        this.checkersBoard = new CheckerBoard(p2, p1);
+        console.log(this.checkersBoard.player2);
+      }
+    }
+
+    console.log('start-game');
+    /* const data = {
+      gameName: this.gameName,
       from: PlayerManager.getInstance().getSelfId(),
       player1: p1,
       player2: p2,
       action: 'startGame',
     };
     // TO CHECK. MAYBE MOVE IT UP
-    NetworkManager.getInstance().send(buildClientGamePacket('checkers', data));
+    if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.CLIENT) {
+      NetworkManager.getInstance().send(buildClientGamePacket('game-update', data));
+    } else if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.SERVER) {
+      NetworkManager.getInstance().send(buildServerGamePacket('game-update-echo', data));
+    } */
   }
 
   spectateGame(p1, p2) {
@@ -141,21 +164,12 @@ export default class CheckersGame {
     this.checkersBoard = new CheckerBoard(p1, p2);
   }
 
-  checkersMove(data) {
+  handleNetworkEvent(data) {
     console.log(data);
-    if (data.action === 'startGame') {
-      if (PlayerManager.getInstance().getSelfId() === data.player1
-      || PlayerManager.getInstance().getSelfId() === data.player2) {
-        this.gameOn = true;
-        if (PlayerManager.getInstance().getSelfId() === data.player1) {
-          this.checkersBoard = new CheckerBoard(data.player1, data.player2);
-        } else {
-          this.checkersBoard = new CheckerBoard(data.player2, data.player1);
-        }
-      }
-    } else if (this.gameOn) {
+    if (this.gameOn) {
       if (data.player1 === PlayerManager.getInstance().getSelfId()
       || data.player2 === PlayerManager.getInstance().getSelfId()) {
+        console.log(data.from, this.checkersBoard.player2);
         if (data.from === this.checkersBoard.player2) {
           this.checkersBoard.gridArray[63 - data.action.from]
             .movePieceTo(this.checkersBoard.gridArray[63 - data.action.to]);

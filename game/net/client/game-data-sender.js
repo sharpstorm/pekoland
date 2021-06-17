@@ -32,9 +32,10 @@ function buildChatUpdate(opCode, data) {
   };
 }
 
-function buildCheckersUpdate(opCode, data) {
+function buildGameUpdate(opCode, data) {
   return {
     opCode,
+    gameName: data.gameName,
     from: data.from,
     player1: data.player1,
     player2: data.player2,
@@ -58,7 +59,7 @@ const handlers = {
   'spawn-request': buildSpawnRequest,
   'move': buildMoveUpdate,
   'chat': buildChatUpdate,
-  'checkers': buildCheckersUpdate,
+  'game-update': buildGameUpdate,
   'join-voice': buildEmptyPacket,
   'disconnect-voice': buildEmptyPacket,
   'game-lobby': buildGameLobbyUpdate,

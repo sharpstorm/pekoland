@@ -62,9 +62,12 @@ function handleChatEcho(data, conn) {
   player.chat.updateMessage(data.message);
 }
 
-function handleCheckersEcho(data, conn) {
-  console.log(data);
-  GameManager.getInstance().getBoardGameManager().getGame('Checkers').checkersMove(data);
+function handleGameUpdateEcho(data, conn) {
+  if (!data.gameName) {
+    return;
+  }
+
+  GameManager.getInstance().getBoardGameManager().getGame(data.gameName).handleNetworkEvent(data);
 }
 
 function handleVoiceChannelData(data, conn) {
@@ -106,7 +109,7 @@ function handleGameLobby(data, conn) {
   } else if ((data.action === 'startGame' && data.host === PlayerManager.getInstance().getSelfId())
   || (data.action === 'startGame' && data.joiner === PlayerManager.getInstance().getSelfId())) {
     GameManager.getInstance().getBoardGameManager()
-      .startGame(data.gameName, data.host, data.joiner);
+      .startGame(data.gameName, data.host, data.joiner, data.tableID);
   } else if ((data.action === 'leaveGame' && data.host === PlayerManager.getInstance().getSelfId())
   || (data.action === 'leaveGame' && data.joiner === PlayerManager.getInstance().getSelfId())) {
     GameManager.getInstance().getBoardGameManager().endGame();
@@ -121,7 +124,7 @@ const handlers = {
   'despawn-player': handleDespawnPlayer,
   'move-echo': handleMoveEcho,
   'chat-echo': handleChatEcho,
-  'checkers': handleCheckersEcho,
+  'game-update-echo': handleGameUpdateEcho,
   'voice-channel-data': handleVoiceChannelData,
   'game-lobby-echo': handleGameLobby,
 };

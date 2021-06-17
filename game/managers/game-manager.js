@@ -283,8 +283,7 @@ class BoardGameManager {
       };
       NetworkManager.getInstance().send(buildClientGamePacket('game-lobby', data));
     } else if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.SERVER) {
-      WorldManager.getInstance().joinLobby(this.tableID, PlayerManager
-        .getInstance().getSelfId());
+      WorldManager.getInstance().joinLobby(this.tableID, PlayerManager.getInstance().getSelfId());
       console.log(WorldManager.getInstance().gameLobbies);
       data = {
         host: WorldManager.getInstance().getLobbyHost(this.tableID),
@@ -298,13 +297,14 @@ class BoardGameManager {
       this.gameState = 'playing';
       this.displayPage(-1);
       this.showGameOverlay();
+      this.startGame(data.gameName, data.host, data.joiner, data.tableID);
     }
   }
 
-  startGame(gameName, p1, p2) {
+  startGame(gameName, p1, p2, lobbyId) {
     const game = this.gameList.find((x) => x.gameName === gameName);
     if (game !== undefined) {
-      game.startGame(p1, p2);
+      game.startGame(p1, p2, lobbyId);
       this.currentGame = game.gameName;
       this.displayPage(-1);
 

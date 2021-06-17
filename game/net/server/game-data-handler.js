@@ -55,10 +55,13 @@ function handleChat(data, conn) {
   NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('chat-echo', data), conn.peer);
 }
 
-function handleCheckersGame(data, conn) {
-  console.log(data);
-  GameManager.getInstance().getBoardGameManager().getGame('Checkers').checkersMove(data);
-  NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('checkers', data, conn.peer));
+function handleGameUpdate(data, conn) {
+  if (!data.gameName) {
+    return;
+  }
+
+  GameManager.getInstance().getBoardGameManager().getGame(data.gameName).handleNetworkEvent(data);
+  NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('game-update-echo', data), conn.peer);
 }
 
 function handleJoinVoice(data, conn) {
@@ -104,7 +107,7 @@ function handleGameLobby(data, conn) {
       newDataAction = 'startGame';
       if (worldManager.getLobbyHost(data.tableID) === PlayerManager.getInstance().getSelfId()
         || worldManager.getLobbyJoiner(data.tableID) === PlayerManager.getInstance().getSelfId()) {
-        boardGameManager.startGame(newDataGameName, newDataHost, newDataJoiner);
+        boardGameManager.startGame(newDataGameName, newDataHost, newDataJoiner, data.tableID);
       }
     } else {
       newDataHost = data.host;
@@ -192,7 +195,7 @@ const handlers = {
   'spawn-request': handleSpawnRequest,
   'move': handleMove,
   'chat': handleChat,
-  'checkers': handleCheckersGame,
+  'game-update': handleGameUpdate,
   'join-voice': handleJoinVoice,
   'disconnect-voice': handleDisconnectVoice,
   'game-lobby': handleGameLobby,
