@@ -164,7 +164,7 @@ Promise.all([netSetupPromise, assetSetupPromise])
             gameName: card.innerHTML,
             action: 'registerLobbyRequest',
           };
-          NetworkManager.getInstance().send(buildClientGamePacket('gameLobby', data));
+          NetworkManager.getInstance().send(buildClientGamePacket('game-lobby', data));
         } else if (networkManager.getOperationMode() === 1) {
           worldManager.registerLobby(boardGameManager.tableID,
             playerManager.getSelfId(), card.innerHTML);
@@ -183,16 +183,15 @@ Promise.all([netSetupPromise, assetSetupPromise])
         );
         worldManager.addSpectator(boardGameManager.tableID, playerManager.getSelfId());
         boardGameManager.displayPage(-1);
-        const currentBoard = worldManager.getCurrentBoard(boardGameManager.tableID);
         boardGameManager.getGame(worldManager.gameLobbies[boardGameManager.tableID].gameName)
-          .updateSpectateBoard(currentBoard);
+          .updateSpectateBoard(worldManager.gameLobbies[boardGameManager.tableID].currentBoard);
       } else if (NetworkManager.getInstance().getOperationMode() === 2) {
         const data = {
           host: playerManager.getSelfId(),
           tableID: boardGameManager.tableID,
           action: 'spectate',
         };
-        NetworkManager.getInstance().send(buildClientGamePacket('gameLobby', data));
+        NetworkManager.getInstance().send(buildClientGamePacket('game-lobby', data));
         boardGameManager.displayPage(-1);
       }
     });

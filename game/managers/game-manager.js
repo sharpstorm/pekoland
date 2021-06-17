@@ -215,7 +215,7 @@ class BoardGameManager {
       switch (NetworkManager.getInstance().getOperationMode()) {
         case 2:
           data = { host: PlayerManager.getInstance().getSelfId(), tableID: this.tableID, action: 'checkLobby' };
-          NetworkManager.getInstance().send(buildClientGamePacket('gameLobby', data));
+          NetworkManager.getInstance().send(buildClientGamePacket('game-lobby', data));
           this.gameState = 'waitingCheck';
           break;
         case 1:
@@ -263,7 +263,7 @@ class BoardGameManager {
           tableID: this.tableID,
           action: 'closeLobby',
         };
-        NetworkManager.getInstance().send(buildClientGamePacket('gameLobby', data));
+        NetworkManager.getInstance().send(buildClientGamePacket('game-lobby', data));
       } else if (NetworkManager.getInstance().getOperationMode() === 1) {
         WorldManager.getInstance().closeLobby(this.tableID);
       }
@@ -281,7 +281,7 @@ class BoardGameManager {
           tableID: this.tableID,
           action: 'joinGame',
         };
-        NetworkManager.getInstance().send(buildClientGamePacket('gameLobby', data));
+        NetworkManager.getInstance().send(buildClientGamePacket('game-lobby', data));
         break;
       case 1:
         WorldManager.getInstance().joinLobby(this.tableID, PlayerManager
@@ -294,7 +294,7 @@ class BoardGameManager {
           gameName: WorldManager.getInstance().getGameName(this.tableID),
           action: 'startGame',
         };
-        NetworkManager.getInstance().send(buildServerGamePacket('gameLobby-echo', data));
+        NetworkManager.getInstance().send(buildServerGamePacket('game-lobby-echo', data));
         this.currentGame = data.gameName;
         this.gameState = 'playing';
         this.displayPage(-1);
@@ -365,14 +365,14 @@ class BoardGameManager {
             tableID: this.tableID,
             action: 'leave-spectate',
           };
-          NetworkManager.getInstance().send(buildClientGamePacket('gameLobby', data));
+          NetworkManager.getInstance().send(buildClientGamePacket('game-lobby', data));
         } else {
           const data = {
             host: PlayerManager.getInstance().getSelfId(),
             tableID: this.tableID,
             action: 'leaveGame',
           };
-          NetworkManager.getInstance().send(buildClientGamePacket('gameLobby', data));
+          NetworkManager.getInstance().send(buildClientGamePacket('game-lobby', data));
           this.gameList.forEach((game) => {
             if (game.gameName === this.currentGame) {
               game.endGame();
@@ -406,7 +406,7 @@ class BoardGameManager {
                 action: 'leaveGame',
               };
               WorldManager.getInstance().closeLobby(this.tableID);
-              NetworkManager.getInstance().send(buildServerGamePacket('gameLobby-echo', data));
+              NetworkManager.getInstance().send(buildServerGamePacket('game-lobby-echo', data));
             }
           });
         }

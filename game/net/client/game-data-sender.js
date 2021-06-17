@@ -61,7 +61,7 @@ const handlers = {
   'checkers': buildCheckersUpdate,
   'join-voice': buildEmptyPacket,
   'disconnect-voice': buildEmptyPacket,
-  'gameLobby': buildGameLobbyUpdate,
+  'game-lobby': buildGameLobbyUpdate,
 };
 
 export default function buildGameDataPacket(opCode, data) {

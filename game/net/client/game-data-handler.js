@@ -88,8 +88,6 @@ function handleGameLobby(data, conn) {
   } else if ((data.action === 'occupied' && GameManager.getInstance().getBoardGameManager().gameState === 'waitingCheck')) {
     GameManager.getInstance().getBoardGameManager().displayPage(2);
   } else if (data.action.action === 'spectate-start' && PlayerManager.getInstance().getSelfId() === data.action.from) {
-    console.log('im here');
-    console.log(data);
     GameManager.getInstance().getBoardGameManager().gameState = 'spectating';
     GameManager.getInstance().getBoardGameManager().spectateGame(
       'Checkers', // hardcoded
@@ -122,7 +120,7 @@ const handlers = {
   'chat-echo': handleChatEcho,
   'checkers': handleCheckersEcho,
   'voice-channel-data': handleVoiceChannelData,
-  'gameLobby-echo': handleGameLobby,
+  'game-lobby-echo': handleGameLobby,
 };
 
 // Conn will always be the server

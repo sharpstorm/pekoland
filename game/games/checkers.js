@@ -41,7 +41,7 @@ export default class CheckersGame {
                 action: { action: 'spectate-update', newBoard: instance.gridToArray() },
               };
               console.log(instance.gridToArray());
-              NetworkManager.getInstance().send(buildClientGamePacket('gameLobby', newData));
+              NetworkManager.getInstance().send(buildClientGamePacket('game-lobby', newData));
             } else if (NetworkManager.getInstance().getOperationMode() === 1) {
               WorldManager.getInstance().updateCurrentBoard(data.host, instance.gridToArray());
               const spectators = WorldManager.getInstance()
@@ -53,7 +53,7 @@ export default class CheckersGame {
               };
               WorldManager.getInstance().updateCurrentBoard(PlayerManager
                 .getInstance().getSelfId(), instance.gridToArray());
-              NetworkManager.getInstance().send(buildServerGamePacket('gameLobby-echo', newData));
+              NetworkManager.getInstance().send(buildServerGamePacket('game-lobby-echo', newData));
             }
           }
           checkersInstance.checkersBoard.resetBoard();

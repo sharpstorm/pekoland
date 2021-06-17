@@ -99,7 +99,7 @@ const handlers = {
   'chat-echo': buildChatEcho,
   'checkers': buildCheckers,
   'voice-channel-data': buildVoiceChannelData,
-  'gameLobby-echo': buildGameLobbyUpdate,
+  'game-lobby-echo': buildGameLobbyUpdate,
 };
 
 export default function buildGamePacket(opCode, data) {

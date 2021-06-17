@@ -141,7 +141,7 @@ function handleGameLobby(data, conn) {
         action: newDataAction,
         gameName: newDataGameName,
       };
-      NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('gameLobby-echo', newData), conn.peer);
+      NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('game-lobby-echo', newData), conn.peer);
       worldManager.closeLobby(data.tableID);
       return;
     }
@@ -165,7 +165,7 @@ function handleGameLobby(data, conn) {
       const spectators = worldManager.getSpectators(boardGameManager.tableID);
       if (spectators !== undefined) {
         if (spectators.includes(PlayerManager.getInstance().getSelfId())) {
-          boardGameManager.getGame(WorldManager.getGameNamePlayer(data.host))
+          boardGameManager.getGame(WorldManager.getInstance().getGameNamePlayer(data.host))
             .updateSpectateBoard(worldManager.getCurrentBoard(data.host)); // HARD CODED 0
         }
       }
@@ -182,7 +182,7 @@ function handleGameLobby(data, conn) {
   };
   console.log(newData);
   if (newData.action !== undefined) {
-    NetworkManager.getInstance().getConnection().send(buildGamePacket('gameLobby-echo', newData));
+    NetworkManager.getInstance().getConnection().send(buildGamePacket('game-lobby-echo', newData));
     console.log(newData);
   }
 }
@@ -195,7 +195,7 @@ const handlers = {
   'checkers': handleCheckersGame,
   'join-voice': handleJoinVoice,
   'disconnect-voice': handleDisconnectVoice,
-  'gameLobby': handleGameLobby,
+  'game-lobby': handleGameLobby,
 };
 
 // Conn can be used to uniquely identify the peer
