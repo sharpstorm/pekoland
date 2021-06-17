@@ -104,7 +104,7 @@ Promise.all([netSetupPromise, assetSetupPromise])
     const chatManager = GameManager.getInstance().getTextChannelManager();
     const boardGameManager = GameManager.getInstance().getBoardGameManager();
 
-    gameRenderer.register(CheckersGame.getInstance());
+    gameRenderer.register(new CheckersGame());
 
     const chatbox = new Chatbox();
     chatbox.addSubmitListener((msg) => {

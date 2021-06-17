@@ -7,19 +7,17 @@ import buildClientGamePacket from '../net/client/game-data-sender.js';
 import buildServerGamePacket from '../net/server/game-data-sender.js';
 import WorldManager from '../managers/world-manager.js'; // TO FIX
 
-let instance;
-
 export default class CheckersGame {
   constructor() {
     this.checkersBoard = undefined;
     this.gameName = 'Checkers';
     this.gameOn = false;
-    document.addEventListener('click', this.checkersMouseClick);
+    document.addEventListener('click', this.checkersMouseClick.bind(this));
   }
 
   checkersMouseClick(e) {
-    if (CheckersGame.getInstance().checkersBoard !== undefined) {
-      const checkersInstance = CheckersGame.getInstance();
+    if (this.checkersBoard !== undefined) {
+      const checkersInstance = this;
       if (checkersInstance.checkersBoard.player1 === PlayerManager.getInstance().getSelfId()
       || checkersInstance.checkersBoard.player2 === PlayerManager.getInstance().getSelfId()) {
         const clickedGrid = checkersInstance.checkersBoard.getGridIndex(e.pageX, e.pageY);
@@ -38,21 +36,20 @@ export default class CheckersGame {
             if (NetworkManager.getInstance().getOperationMode() === 2) {
               const newData = {
                 host: PlayerManager.getInstance().getSelfId(),
-                action: { action: 'spectate-update', newBoard: instance.gridToArray() },
+                action: { action: 'spectate-update', newBoard: this.gridToArray() },
               };
-              console.log(instance.gridToArray());
               NetworkManager.getInstance().send(buildClientGamePacket('game-lobby', newData));
             } else if (NetworkManager.getInstance().getOperationMode() === 1) {
-              WorldManager.getInstance().updateCurrentState(data.host, instance.gridToArray());
+              WorldManager.getInstance().updateCurrentState(data.host, this.gridToArray());
               const spectators = WorldManager.getInstance()
                 .getSpectatorsPlayer(checkersInstance.checkersBoard.player1);
               const newData = {
                 host: PlayerManager.getInstance().getSelfId(),
                 gameName: 'Checkers',
-                action: { action: 'spectate-update', s: spectators, newBoard: instance.gridToArray() },
+                action: { action: 'spectate-update', s: spectators, newBoard: this.gridToArray() },
               };
               WorldManager.getInstance().updateCurrentState(PlayerManager
-                .getInstance().getSelfId(), instance.gridToArray());
+                .getInstance().getSelfId(), this.gridToArray());
               NetworkManager.getInstance().send(buildServerGamePacket('game-lobby-echo', newData));
             }
           }
@@ -214,12 +211,5 @@ export default class CheckersGame {
       this.checkersBoard.reDraw(camContext);
       this.checkersBoard.drawBoard(ctx);
     }
-  }
-
-  static getInstance() {
-    if (instance === undefined) {
-      instance = new CheckersGame();
-    }
-    return instance;
   }
 }
