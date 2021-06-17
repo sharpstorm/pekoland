@@ -126,11 +126,13 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  flex: 1 1 0;
 }
 
 #game-menu-games > div {
   padding: 16px;
   border-bottom: 1px solid #CCC;
+  min-height: 100px;
 }
 
 #game-menu-join > div:hover, #game-menu-spectate > div:hover, #game-menu-games > div:hover {
