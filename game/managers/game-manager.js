@@ -199,10 +199,6 @@ class BoardGameManager {
     this.gameList.push(game);
   }
 
-  render(ctx, camContext) {
-    this.gameList.forEach((game) => game.draw(ctx, camContext));
-  }
-
   // eslint-disable-next-line class-methods-use-this
   checkPlayerProximity(x, y) {
     if (Math.abs(x - PlayerManager.getInstance().getSelf().x) <= 100
@@ -212,7 +208,7 @@ class BoardGameManager {
     return false;
   }
 
-  propagateEvent(eventId, event, camContext) {
+  handleEvent(eventId, event, camContext) {
     if (eventId === 'click') {
       const worldX = camContext.x + event.clientX;
       const worldY = camContext.y + event.clientY;

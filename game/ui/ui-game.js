@@ -26,10 +26,10 @@ class GameMenu extends UIElement {
       this.titleWindow,
       this.gamesWindow,
       createElement('div', { id: 'game-menu-join' },
-        createElement('div', { eventListener: { click: () => this.emitEvent('joinYes') } }, 'Yes'),
+        createElement('div', { eventListener: { click: () => this.emitEvent('joinYes') }, style: { borderRight: '1px solid #CCC' } }, 'Yes'),
         createElement('div', { eventListener: { click: () => this.emitEvent('joinNo') } }, 'No')),
       createElement('div', { id: 'game-menu-spectate' },
-        createElement('div', { eventListener: { click: () => this.emitEvent('spectateYes') } }, 'Yes'),
+        createElement('div', { eventListener: { click: () => this.emitEvent('spectateYes') }, style: { borderRight: '1px solid #CCC' } }, 'Yes'),
         createElement('div', { eventListener: { click: () => this.emitEvent('spectateNo') } }, 'No')),
       createElement('div', { id: 'game-menu-waiting' }),
       createElement('div', { id: 'game-menu-title-closebtn', eventListener: { click: () => this.close() } }));

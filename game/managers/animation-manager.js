@@ -1,7 +1,6 @@
 import PlayerManager from './player-manager.js';
 import MapManager from './map-manager.js';
 import GameConstants from '../game-constants.js';
-import GameManager from './game-manager.js';
 
 class CameraContext {
   constructor(viewportWidth, viewportHeight) {
@@ -95,18 +94,20 @@ class GameLayer {
   }
 
   register(game) {
-    GameManager.getInstance().getBoardGameManager().register(game);
     this.drawables.push(game);
   }
 
   render(ctx, cam) {
-    GameManager.getInstance().getBoardGameManager().render(ctx, cam);
+    this.drawables.forEach((x) => x.draw(ctx, cam));
   }
 
   // eslint-disable-next-line class-methods-use-this
-  propagateEvent(eventID, event, camContext, uiLayer) {
-    GameManager.getInstance().getBoardGameManager()
-      .propagateEvent(eventID, event, camContext, uiLayer);
+  propagateEvent(eventID, event, camContext) {
+    this.drawables.forEach((x) => {
+      if (x.handleEvent) {
+        x.handleEvent(eventID, event, camContext);
+      }
+    });
   }
 }
 
@@ -120,6 +121,7 @@ class Renderer {
     this.ctx = this.canvas.getContext('2d', { alpha: false });
     this.uiLayer = new UILayer();
     this.gameLayer = new GameLayer();
+    this.eventListeners = [];
 
     this.dimens = {
       width: this.canvas.width,
@@ -150,7 +152,7 @@ class Renderer {
 
   // eslint-disable-next-line class-methods-use-this
   propagateEvent(eventID, event) {
-    this.gameLayer.propagateEvent(eventID, event, this.cameraContext, this.uiLayer);
+    this.gameLayer.propagateEvent(eventID, event, this.cameraContext);
   }
 
   render(timestamp) {

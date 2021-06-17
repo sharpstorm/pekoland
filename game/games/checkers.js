@@ -12,10 +12,9 @@ export default class CheckersGame {
     this.checkersBoard = undefined;
     this.gameName = 'Checkers';
     this.gameOn = false;
-    document.addEventListener('click', this.checkersMouseClick.bind(this));
   }
 
-  checkersMouseClick(e) {
+  handleEvent(evtId, e) {
     if (this.checkersBoard !== undefined) {
       const checkersInstance = this;
       if (checkersInstance.checkersBoard.player1 === PlayerManager.getInstance().getSelfId()
