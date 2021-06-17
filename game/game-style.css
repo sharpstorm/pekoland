@@ -143,8 +143,8 @@
 }
 
 #game-menu-title-closebtn {
-  z-index:99;
-  position:absolute;
+  z-index: 99;
+  position: absolute;
   right: 0;
   height: 50%;
   width: 5%;
@@ -165,7 +165,6 @@
 .game-menu-cards:hover {
   background-color: rgba(255, 255, 255, 0.2);
 }
-
 
 #game-overlay-window {
   position: absolute;
@@ -192,7 +191,6 @@
   border: 1px white solid;
   bottom: 0;
 }
-
 
 #game-overlay-window-leave:hover {
   background-color: rgba(0, 0, 0, 0.7);
