@@ -7,6 +7,7 @@ class GameMenu extends UIElement {
     this.cardList = [];
     this.gameNameList = [];
     this.initObject(gameList);
+
     this.eventListeners = {};
   }
 
@@ -34,7 +35,7 @@ class GameMenu extends UIElement {
       createElement('div', { id: 'game-menu-title-closebtn', eventListener: { click: () => this.close() } }));
 
     this.node.appendChild(this.gameMenu);
-    this.close();
+    this.node.style.display = 'none';
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -53,6 +54,10 @@ class GameMenu extends UIElement {
     if (evtId in this.eventListeners) {
       this.eventListeners[evtId](data);
     }
+  }
+
+  on(evtId, handler) {
+    this.eventListeners[evtId] = handler;
   }
 
   displayWindow(page) {
