@@ -35,7 +35,7 @@ export default function loadAssets() {
       });
 
     // Map
-    const load3 = loadAsset(['Images/template1_collision.png', 'Images/template1_collision.png'])
+    const load3 = loadAsset(['Images/template1.png', 'Images/template1_collision.png'])
       .then(([map, colli]) => {
         const map1 = new Map(map, colli, 3300, 1200, 66, 24);
         MapManager.getInstance().registerMap('testMap', map1);
