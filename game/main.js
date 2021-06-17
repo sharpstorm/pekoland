@@ -153,28 +153,31 @@ Promise.all([netSetupPromise, assetSetupPromise])
     });
 
     const gameMenu = new GameMenu(boardGameManager.gameList);
-    gameMenu.joinWindow.childNodes[0].addEventListener('click', () => { boardGameManager.joinGame(); });
-    gameMenu.joinWindow.childNodes[1].addEventListener('click', () => { boardGameManager.displayPage(-1); boardGameManager.gameState = undefined; });
-    gameMenu.gamesWindow.childNodes.forEach((card) => {
-      card.addEventListener('click', () => {
-        if (networkManager.getOperationMode() === 2) {
-          const data = {
-            host: playerManager.getSelfId(),
-            tableID: boardGameManager.tableID,
-            gameName: card.innerHTML,
-            action: 'registerLobbyRequest',
-          };
-          NetworkManager.getInstance().send(buildClientGamePacket('game-lobby', data));
-        } else if (networkManager.getOperationMode() === 1) {
-          worldManager.createLobby(boardGameManager.tableID,
-            playerManager.getSelfId(), card.innerHTML);
-          boardGameManager.gameState = 'hosting';
-          boardGameManager.displayPage(3);
-        }
-      });
+    gameMenu.on('joinYes', () => boardGameManager.joinGame());
+    gameMenu.on('joinNo', () => {
+      boardGameManager.displayPage(-1);
+      boardGameManager.gameState = undefined;
     });
-    gameMenu.spectateWindow.childNodes[0].addEventListener('click', () => {
-      if (NetworkManager.getInstance().getOperationMode() === 1) {
+
+    gameMenu.on('gamePressed', (gameName) => {
+      if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {
+        const data = {
+          host: playerManager.getSelfId(),
+          tableID: boardGameManager.tableID,
+          gameName,
+          action: 'registerLobbyRequest',
+        };
+        NetworkManager.getInstance().send(buildClientGamePacket('game-lobby', data));
+      } else if (networkManager.getOperationMode() === NetworkManager.Mode.SERVER) {
+        worldManager.createLobby(boardGameManager.tableID,
+          playerManager.getSelfId(), gameName);
+        boardGameManager.gameState = 'hosting';
+        boardGameManager.displayPage(3);
+      }
+    });
+
+    gameMenu.on('spectateYes', () => {
+      if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.SERVER) {
         boardGameManager.gameState = 'spectating';
         boardGameManager.spectateGame(
           worldManager.getGameName(boardGameManager.tableID),
@@ -187,7 +190,7 @@ Promise.all([netSetupPromise, assetSetupPromise])
         const currentState = worldManager.getCurrentState(boardGameManager.tableID);
         boardGameManager.getGame(worldManager.gameLobbies[boardGameManager.tableID].gameName)
           .updateSpectateBoard(currentState);
-      } else if (NetworkManager.getInstance().getOperationMode() === 2) {
+      } else if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.CLIENT) {
         const data = {
           host: playerManager.getSelfId(),
           tableID: boardGameManager.tableID,
@@ -197,15 +200,15 @@ Promise.all([netSetupPromise, assetSetupPromise])
         boardGameManager.displayPage(-1);
       }
     });
-    gameMenu.spectateWindow.childNodes[1].addEventListener('click', () => {
+
+    gameMenu.on('spectateNo', () => {
       boardGameManager.displayPage(-1);
       boardGameManager.gameState = undefined;
     });
 
-    gameMenu.closeBtn.addEventListener('click', () => {
+    gameMenu.on('close', () => {
       boardGameManager.closeGameMenu();
       boardGameManager.gameState = undefined;
-      gameMenu.close();
     });
 
     const gameOverlay = new GameOverlay();

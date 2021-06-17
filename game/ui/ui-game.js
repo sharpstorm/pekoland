@@ -3,36 +3,37 @@ import UIElement, { UIAnchor } from './ui-element.js';
 
 class GameMenu extends UIElement {
   constructor(gameList) {
-    super('30%', '30%', '40%', '40%', new UIAnchor(false, false, false, false)); // Center
+    super('30%', '30%', '40%', '40%', new UIAnchor(true, true, true, true)); // Center
     this.cardList = [];
     this.gameNameList = [];
     this.initObject(gameList);
+    this.eventListeners = {};
   }
 
   initObject(gameList) {
-    this.node.id = 'gameMenu';
-    this.gameMenu = createElement('div', { id: 'game-menu' });
     this.titleWindow = createElement('div', { id: 'game-menu-title' });
     this.gamesWindow = createElement('div', { id: 'game-menu-games' });
-    this.joinWindow = createElement('div', { id: 'game-menu-join' });
-    this.waitingWindow = createElement('div', { id: 'game-menu-waiting' });
-    this.spectateWindow = createElement('div', { id: 'game-menu-spectate' });
-    this.closeBtn = createElement('div', { id: 'game-menu-title-closebtn' });
-    this.node.appendChild(this.gameMenu);
-    this.gameMenu.appendChild(this.titleWindow);
-    this.gameMenu.appendChild(this.gamesWindow);
-    this.gameMenu.appendChild(this.joinWindow);
-    this.gameMenu.appendChild(this.spectateWindow);
-    this.gameMenu.appendChild(this.waitingWindow);
-    this.gameMenu.appendChild(this.closeBtn);
+
     gameList.forEach((game) => {
       this.gameNameList.push(game.gameName);
-      this.gamesWindow.appendChild(this.createCard(game.gameName));
+      this.gamesWindow.appendChild(
+        createElement('div', { eventListener: { click: () => this.emitEvent('gamePressed', game.gameName) } }, game.gameName),
+      );
     });
-    this.joinWindow.appendChild(this.createCard('Yes')); // JoinWindow - Child Node[0]
-    this.joinWindow.appendChild(this.createCard('No')); // JoinWindow - Child Node[1]
-    this.spectateWindow.appendChild(this.createCard('Yes')); // spectateWidnow - Child Node[0]
-    this.spectateWindow.appendChild(this.createCard('No')); // spectateWidnow - Child Node[1]
+
+    this.gameMenu = createElement('div', { id: 'game-menu' },
+      this.titleWindow,
+      this.gamesWindow,
+      createElement('div', { id: 'game-menu-join' },
+        createElement('div', { eventListener: { click: () => this.emitEvent('joinYes') } }, 'Yes'),
+        createElement('div', { eventListener: { click: () => this.emitEvent('joinNo') } }, 'No')),
+      createElement('div', { id: 'game-menu-spectate' },
+        createElement('div', { eventListener: { click: () => this.emitEvent('spectateYes') } }, 'Yes'),
+        createElement('div', { eventListener: { click: () => this.emitEvent('spectateNo') } }, 'No')),
+      createElement('div', { id: 'game-menu-waiting' }),
+      createElement('div', { id: 'game-menu-title-closebtn', eventListener: { click: () => this.close() } }));
+
+    this.node.appendChild(this.gameMenu);
     this.close();
   }
 
@@ -44,45 +45,37 @@ class GameMenu extends UIElement {
   }
 
   close() {
-    this.gameMenu.style.display = 'none';
+    this.node.style.display = 'none';
+    this.emitEvent('close');
+  }
+
+  emitEvent(evtId, data) {
+    if (evtId in this.eventListeners) {
+      this.eventListeners[evtId](data);
+    }
   }
 
   displayWindow(page) {
     switch (page) {
       case 0: // Games Window
-        this.titleWindow.innerHTML = '<Pre> Games';
-        this.gameMenu.style.display = 'block';
-        this.joinWindow.style.display = 'none';
-        this.gamesWindow.style.display = 'block';
-        this.spectateWindow.style.display = 'none';
-        this.waitingWindow.style.display = 'none';
+        this.titleWindow.textContent = 'Games';
+        this.gameMenu.className = 'games';
         break;
       case 1: // Join Window
-        this.titleWindow.innerHTML = '<Pre> Join Game?';
-        this.gameMenu.style.display = 'block';
-        this.joinWindow.style.display = 'block';
-        this.gamesWindow.style.display = 'none';
-        this.spectateWindow.style.display = 'none';
-        this.waitingWindow.style.display = 'none';
+        this.titleWindow.textContent = 'Join Game?';
+        this.gameMenu.className = 'join';
         break;
       case 2: // Spectate Window
-        this.titleWindow.innerHTML = '<Pre> Spectate Game?';
-        this.gameMenu.style.display = 'block';
-        this.joinWindow.style.display = 'none';
-        this.gamesWindow.style.display = 'none';
-        this.spectateWindow.style.display = 'block';
-        this.waitingWindow.style.display = 'none';
+        this.titleWindow.textContent = 'Spectate Game?';
+        this.gameMenu.className = 'spectate';
         break;
       case 3: // Waiting Window
-        this.titleWindow.innerHTML = '<Pre> Waiting for someone to join';
-        this.gameMenu.style.display = 'block';
-        this.joinWindow.style.display = 'none';
-        this.gamesWindow.style.display = 'none';
-        this.spectateWindow.style.display = 'none';
-        this.waitingWindow.style.display = 'block';
+        this.titleWindow.textContent = 'Waiting for someone to join';
+        this.gameMenu.className = 'waiting';
         break;
       default:
     }
+    this.node.style.display = '';
   }
 }
 
