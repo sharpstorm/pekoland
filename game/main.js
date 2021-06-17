@@ -201,6 +201,12 @@ Promise.all([netSetupPromise, assetSetupPromise])
       boardGameManager.gameState = undefined;
     });
 
+    gameMenu.closeBtn.addEventListener('click', () => {
+      boardGameManager.closeGameMenu();
+      boardGameManager.gameState = undefined;
+      gameMenu.close();
+    });
+
     const gameOverlay = new GameOverlay();
     gameOverlay.leaveBtn.addEventListener('click', () => { boardGameManager.leaveGame(); });
 

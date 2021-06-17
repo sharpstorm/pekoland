@@ -1,6 +1,5 @@
 import { createElement } from './ui-utils.js';
 import UIElement, { UIAnchor } from './ui-element.js';
-import GameManager from '../managers/game-manager.js';
 
 class GameMenu extends UIElement {
   constructor(gameList) {
@@ -34,11 +33,6 @@ class GameMenu extends UIElement {
     this.joinWindow.appendChild(this.createCard('No')); // JoinWindow - Child Node[1]
     this.spectateWindow.appendChild(this.createCard('Yes')); // spectateWidnow - Child Node[0]
     this.spectateWindow.appendChild(this.createCard('No')); // spectateWidnow - Child Node[1]
-    this.closeBtn.addEventListener('click', () => {
-      GameManager.getInstance().getBoardGameManager().closeGameMenu();
-      GameManager.getInstance().getBoardGameManager().gameState = undefined;
-      this.close();
-    });
     this.close();
   }
 
