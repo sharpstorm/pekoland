@@ -10,7 +10,6 @@ export default class Map {
     this.heightGrids = heightGrids;
 
     this.initCollisionMap();
-    document.addEventListener('click', this.getColor);
   }
 
   initCollisionMap() {
