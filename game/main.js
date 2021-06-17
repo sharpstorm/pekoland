@@ -185,7 +185,7 @@ Promise.all([netSetupPromise, assetSetupPromise])
         boardGameManager.displayPage(-1);
         const currentBoard = worldManager.getCurrentBoard(boardGameManager.tableID);
         boardGameManager.getGame(worldManager.gameLobbies[boardGameManager.tableID].gameName)
-          .updateSpectateBoard(currentBoard); // hard coded
+          .updateSpectateBoard(currentBoard);
       } else if (NetworkManager.getInstance().getOperationMode() === 2) {
         const data = {
           host: playerManager.getSelfId(),
