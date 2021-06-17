@@ -13,12 +13,12 @@ class GameMenu extends UIElement {
   initObject(gameList) {
     this.node.id = 'gameMenu';
     this.gameMenu = createElement('div', { id: 'game-menu' });
-    this.titleWindow = createElement('div', { id: 'game-menu--title' });
-    this.gamesWindow = createElement('div', { id: 'game-menu--games' });
-    this.joinWindow = createElement('div', { id: 'game-menu--join' });
-    this.waitingWindow = createElement('div', { id: 'game-menu--waiting' });
-    this.spectateWindow = createElement('div', { id: 'game-menu--spectate' });
-    this.closeBtn = createElement('div', { id: 'game-menu--title--closebtn' });
+    this.titleWindow = createElement('div', { id: 'game-menu-title' });
+    this.gamesWindow = createElement('div', { id: 'game-menu-games' });
+    this.joinWindow = createElement('div', { id: 'game-menu-join' });
+    this.waitingWindow = createElement('div', { id: 'game-menu-waiting' });
+    this.spectateWindow = createElement('div', { id: 'game-menu-spectate' });
+    this.closeBtn = createElement('div', { id: 'game-menu-title-closebtn' });
     this.node.appendChild(this.gameMenu);
     this.gameMenu.appendChild(this.titleWindow);
     this.gameMenu.appendChild(this.gamesWindow);

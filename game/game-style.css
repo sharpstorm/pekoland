@@ -85,7 +85,7 @@
   height: 100%;
 }
 
-#game-menu--title {
+#game-menu-title {
   border: 1px solid white;
   position: absolute;
   display: table-row;
@@ -96,7 +96,7 @@
   background-color: rgba(0, 0, 0, 0.9);
 }
 
-#game-menu--games {
+#game-menu-games {
   border: 1px solid white;
   position: absolute;
   display: grid;
@@ -107,7 +107,7 @@
   background-color: rgba(0, 0, 0, 0.9);
 }
 
-#game-menu--join {
+#game-menu-join {
   border: 1px solid white;
   position: absolute;
   display: grid;
@@ -118,7 +118,7 @@
   background-color: rgba(0, 0, 0, 0.9);
 }
 
-#game-menu--spectate {
+#game-menu-spectate {
   border: 1px solid white;
   position: absolute;
   display: grid;
@@ -129,7 +129,7 @@
   background-color: rgba(0, 0, 0, 0.9);
 }
 
-#game-menu--waiting {
+#game-menu-waiting {
   border: 1px solid white;
   position: absolute;
   width: 100%;
@@ -142,7 +142,7 @@
   background-position: center;
 }
 
-#game-menu--title--closebtn {
+#game-menu-title-closebtn {
   z-index:99;
   position:absolute;
   right: 0;
