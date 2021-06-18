@@ -320,15 +320,15 @@ class BoardGameManager {
       const worldManager = WorldManager.getInstance();
       this.spectateGame(
         worldManager.getGameName(this.tableID),
-        worldManager.getLobbyHost(this.tableID),
-        worldManager.getLobbyJoiner(this.tableID),
+        worldManager.getHost(this.tableID),
+        worldManager.getJoiner(this.tableID),
       );
       worldManager.addSpectator(this.tableID, PlayerManager.getInstance().getSelfId());
       this.displayPage(-1);
 
       const currentState = worldManager.getLobbyGameState(this.tableID);
       this.getGame(worldManager.getGameName(this.tableID))
-        .updateSpectateBoard(currentState);
+        .updateState(currentState);
     } else if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.CLIENT) {
       const data = {
         userId: PlayerManager.getInstance().getSelfId(),
@@ -344,7 +344,9 @@ class BoardGameManager {
     const game = this.gameList.find((x) => x.gameName === gameName);
     if (game !== undefined) {
       game.spectateGame(p1, p2, lobbyId);
-      game.updateState(gameState);
+      if (gameState !== undefined) {
+        game.updateState(gameState);
+      }
       this.currentGame = gameName;
       this.closeGameMenu();
 
