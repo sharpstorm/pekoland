@@ -5,6 +5,7 @@ import PlayerManager from '../managers/player-manager.js';
 import buildClientGamePacket from '../net/client/game-data-sender.js';
 import buildServerGamePacket from '../net/server/game-data-sender.js';
 import GridBox from './grid-box.js';
+import WorldManager from '../managers/world-manager.js';
 
 export default class CheckersGame {
   constructor() {
@@ -55,7 +56,14 @@ export default class CheckersGame {
     if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.CLIENT) {
       NetworkManager.getInstance().send(buildClientGamePacket('game-update', data));
     } else if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.SERVER) {
-      NetworkManager.getInstance().send(buildServerGamePacket('game-update-echo', data));
+      WorldManager.getInstance().updateLobbyGameState(this.lobbyId, data.state);
+      WorldManager.getInstance().lobbyForAll(this.lobbyId, (userId) => {
+        if (userId === PlayerManager.getInstance().getSelfId()) {
+          return;
+        }
+        NetworkManager.getInstance().getConnection()
+          .sendTo(buildServerGamePacket('game-update-echo', data), WorldManager.getInstance().getPeerId(userId));
+      });
     }
   }
 

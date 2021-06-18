@@ -108,7 +108,7 @@ export default class WorldManager {
   getPlayerId(peerId) {
     return this.roomController.getPlayerId(peerId);
   }
-  
+
   getPeerId(uid) {
     return this.roomController.getPeerId(uid);
   }
@@ -241,6 +241,17 @@ export default class WorldManager {
 
   lobbyExist(key) {
     return key in this.gameLobbies;
+  }
+
+  lobbyForAll(lobbyId, action) {
+    if (lobbyId in this.gameLobbies) {
+      const { spectators } = this.gameLobbies[lobbyId];
+      if (spectators !== undefined) {
+        spectators.forEach((userId) => action(userId));
+      }
+      action(this.getJoiner(lobbyId));
+      action(this.getHost(lobbyId));
+    }
   }
 
   static getInstance() {

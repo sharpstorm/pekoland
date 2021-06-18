@@ -42,7 +42,7 @@ function handleChat(data, conn) {
   NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('chat-echo', data), conn.peer);
 }
 
-function handleGameUpdate(data, conn) {
+function handleGameUpdate(data) {
   console.log(data);
   if (!data.gameName || !data.lobbyId) {
     return;
@@ -50,14 +50,14 @@ function handleGameUpdate(data, conn) {
 
   if (WorldManager.getInstance().lobbyExist(data.lobbyId)) {
     WorldManager.getInstance().updateLobbyGameState(data.lobbyId, data.state);
-    const { spectators } = WorldManager.getInstance().getLobbyFromPlayer(data.from);
-    if (spectators !== undefined) {
-      spectators.forEach((userId) => {
-        NetworkManager.getInstance().getConnection()
-          .sendTo(buildGamePacket('game-update-echo', data), WorldManager.getInstance().getPeerId(userId));
-      });
-    }
-    NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('game-update-echo', data), conn.peer);
+
+    WorldManager.getInstance().lobbyForAll(data.lobbyId, (userId) => {
+      if (userId === PlayerManager.getInstance().getSelfId()) {
+        return;
+      }
+      NetworkManager.getInstance().getConnection()
+        .sendTo(buildGamePacket('game-update-echo', data), WorldManager.getInstance().getPeerId(userId));
+    });
     GameManager.getInstance().getBoardGameManager().getGame(data.gameName).handleNetworkEvent(data);
   }
 }
