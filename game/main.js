@@ -168,12 +168,11 @@ Promise.all([netSetupPromise, assetSetupPromise])
     gameMenu.on('gamePressed', (gameName) => {
       if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {
         const data = {
-          host: playerManager.getSelfId(),
-          tableID: boardGameManager.tableID,
+          userId: playerManager.getSelfId(),
+          tableId: boardGameManager.tableID,
           gameName,
-          action: 'registerLobbyRequest',
         };
-        NetworkManager.getInstance().send(buildClientGamePacket('game-lobby', data));
+        NetworkManager.getInstance().send(buildClientGamePacket('register-lobby', data));
       } else if (networkManager.getOperationMode() === NetworkManager.Mode.SERVER) {
         worldManager.createLobby(boardGameManager.tableID,
           playerManager.getSelfId(), gameName);
@@ -193,16 +192,16 @@ Promise.all([netSetupPromise, assetSetupPromise])
         worldManager.addSpectator(boardGameManager.tableID, playerManager.getSelfId());
         boardGameManager.displayPage(-1);
 
-        const currentState = worldManager.getCurrentState(boardGameManager.tableID);
+        const currentState = worldManager.getLobbyGameState(boardGameManager.tableID);
         boardGameManager.getGame(worldManager.gameLobbies[boardGameManager.tableID].gameName)
           .updateSpectateBoard(currentState);
       } else if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.CLIENT) {
         const data = {
-          host: playerManager.getSelfId(),
+          userId: playerManager.getSelfId(),
           tableID: boardGameManager.tableID,
-          action: 'spectate',
+          mode: 'spectator',
         };
-        NetworkManager.getInstance().send(buildClientGamePacket('game-lobby', data));
+        NetworkManager.getInstance().send(buildClientGamePacket('start-game', data));
         boardGameManager.displayPage(-1);
       }
     });

@@ -79,14 +79,22 @@ function buildVoiceChannelData(opCode, data) {
   };
 }
 
-function buildGameLobbyUpdate(opCode, data) {
+function buildLobbyReply(opCode, data) {
   return {
     opCode,
-    action: data.action,
-    tableID: data.tableID,
+    msg: data,
+  };
+}
+
+function buildStartGame(opCode, data) {
+  return {
+    opCode,
+    mode: data.mode,
+    player1: data.player1,
+    player2: data.player2,
+    tableId: data.tableId,
     gameName: data.gameName,
-    host: data.host,
-    joiner: data.joiner,
+    gameState: data.gameState,
   };
 }
 
@@ -100,7 +108,9 @@ const handlers = {
   'chat-echo': buildChatEcho,
   'game-update-echo': buildGameUpdate,
   'voice-channel-data': buildVoiceChannelData,
-  'game-lobby-echo': buildGameLobbyUpdate,
+  'lobby-reply': buildLobbyReply,
+  'start-game': buildStartGame,
+  'end-game': buildLobbyReply,
 };
 
 export default function buildGamePacket(opCode, data) {

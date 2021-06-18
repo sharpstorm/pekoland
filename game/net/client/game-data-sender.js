@@ -43,14 +43,20 @@ function buildGameUpdate(opCode, data) {
   };
 }
 
-function buildGameLobbyUpdate(opCode, data) {
+function buildLobbyRequest(opCode, data) {
   return {
     opCode,
-    action: data.action,
-    tableID: data.tableID,
+    tableId: data.tableId,
+  };
+}
+
+function buildLobbyUpdate(opCode, data) {
+  return {
+    opCode,
+    userId: data.userId,
+    tableId: data.tableId,
     gameName: data.gameName,
-    host: data.host,
-    joiner: data.joiner,
+    mode: data.mode,
   };
 }
 
@@ -62,7 +68,10 @@ const handlers = {
   'game-update': buildGameUpdate,
   'join-voice': buildEmptyPacket,
   'disconnect-voice': buildEmptyPacket,
-  'game-lobby': buildGameLobbyUpdate,
+  'check-lobby-state-request': buildLobbyRequest,
+  'register-lobby': buildLobbyUpdate,
+  'join-lobby': buildLobbyUpdate,
+  'leave-lobby': buildLobbyUpdate,
 };
 
 export default function buildGameDataPacket(opCode, data) {

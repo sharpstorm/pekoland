@@ -77,116 +77,101 @@ function handleDisconnectVoice(data, conn) {
   conn.send(packet);
 }
 
-// eslint-disable-next-line no-unused-vars
-function handleGameLobby(data, conn) {
-  let newDataHost;
-  let newDataJoiner;
-  let newDataTableID;
-  let newDataGameName;
-  let newDataAction;
-  const worldManager = WorldManager.getInstance();
-  const boardGameManager = GameManager.getInstance().getBoardGameManager();
-
-  if (data.action === 'registerLobbyRequest') {
-    newDataHost = data.host;
-    newDataTableID = data.tableID;
-    newDataGameName = data.gameName;
-    newDataAction = WorldManager.getInstance().lobbyExist(data.tableID) ? 'registerLobbyEcho-fail' : 'registerLobbyEcho-success';
-    if (!WorldManager.getInstance().lobbyExist(data.tableID)) {
-      worldManager.createLobby(newDataTableID, newDataHost, newDataGameName);
-    }
-  } else if (data.action === 'joinGame') {
-    console.log('join game');
-    if (worldManager.lobbyExist(data.tableID)
-    && worldManager.getLobbyJoiner(data.tableID) === undefined) {
-      worldManager.joinLobby(data.tableID, data.joiner);
-      newDataHost = WorldManager.getInstance().getLobbyHost(data.tableID);
-      newDataJoiner = data.joiner;
-      newDataTableID = data.tableID;
-      newDataGameName = WorldManager.getInstance().getGameName(data.tableID);
-      newDataAction = 'startGame';
-      if (worldManager.getLobbyHost(data.tableID) === PlayerManager.getInstance().getSelfId()
-        || worldManager.getLobbyJoiner(data.tableID) === PlayerManager.getInstance().getSelfId()) {
-        boardGameManager.startGame(newDataGameName, newDataHost, newDataJoiner, data.tableID);
-      }
-    } else {
-      newDataHost = data.host;
-      newDataTableID = data.tableID;
-      newDataGameName = data.gameName;
-      newDataAction = 'joinGame-fail'; // TODO: UNHANDLED ON CLIENT SIDE
-    }
-  } else if (data.action === 'checkLobby') {
-    newDataHost = data.host;
-    newDataTableID = data.tableID;
-    newDataGameName = data.gameName;
-    if (!worldManager.lobbyExist(data.tableID)) {
-      newDataAction = 'open';
-    } else if (WorldManager.getInstance().getLobbyJoiner(data.tableID) === undefined) {
-      newDataAction = 'canJoin';
-    } else { newDataAction = 'occupied'; }
-  } else if (data.action === 'closeLobby') {
-    worldManager.closeLobby(data.tableID);
-  } else if (data.action === 'leaveGame') {
-    if (worldManager.getLobbyHost(data.tableID) === PlayerManager.getInstance().getSelfId()
-    || worldManager.getLobbyJoiner(data.tableID) === PlayerManager.getInstance().getSelfId()) {
-      GameManager.getInstance().getBoardGameManager().endGame();
-    } else {
-      newDataHost = data.host;
-      newDataJoiner = WorldManager.getInstance().getLobbyPartner(data.tableID, data.host);
-      newDataTableID = data.tableID;
-      newDataGameName = data.gameName;
-      newDataAction = 'leaveGame';
-      const newData = {
-        host: newDataHost,
-        joiner: newDataJoiner,
-        tableID: newDataTableID,
-        action: newDataAction,
-        gameName: newDataGameName,
-      };
-      NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('game-lobby-echo', newData), conn.peer);
-      worldManager.closeLobby(data.tableID);
-      return;
-    }
-    worldManager.closeLobby(data.tableID);
-  } else if (data.action === 'leave-spectate') {
-    worldManager.removeSpectator(data.tableID, data.host);
-  } else if (data.action === 'spectate') {
-    console.log(data);
-    WorldManager.getInstance().addSpectator(data.tableID, data.host);
-    const currentState = worldManager.getCurrentState(data.tableID);
-    console.log(currentState);
-    console.log(worldManager.gameLobbies);
-    newDataHost = WorldManager.getInstance().getLobbyHost(data.tableID);
-    newDataJoiner = WorldManager.getInstance().getLobbyJoiner(data.tableID);
-    newDataGameName = WorldManager.getInstance().getGameName(data.tableID);
-    newDataAction = { action: 'spectate-start', from: data.host, currentState };
-  } else if (data.action.newBoard !== undefined) {
-    worldManager.updateCurrentState(data.host, data.action.newBoard);
-    console.log(worldManager);
-    if (boardGameManager.gameState === 'spectating') {
-      const spectators = worldManager.getSpectators(boardGameManager.tableID);
-      if (spectators !== undefined) {
-        if (spectators.includes(PlayerManager.getInstance().getSelfId())) {
-          boardGameManager.getGame(worldManager.getGameNamePlayer(data.host))
-            .updateSpectateBoard(worldManager.getCurrentState(data.host), data.host);
-        }
-      }
-    }
-    newDataAction = { action: 'spectate-update', s: worldManager.getSpectatorsPlayer(data.host), newBoard: worldManager.getCurrentState(data.host) };
-    newDataGameName = worldManager.getGameNamePlayer(data.host);
-    newDataHost = data.host;
+function handleCheckLobbyRequest(data, conn) {
+  if (!WorldManager.getInstance().lobbyExist(data.tableId)) {
+    conn.send(buildGamePacket('lobby-reply', 'lobby-state-new'));
+  } else if (WorldManager.getInstance().getLobbyState(data.tableId) === 0) {
+    conn.send(buildGamePacket('lobby-reply', 'lobby-state-open'));
+  } else if (WorldManager.getInstance().getLobbyState(data.tableId) === 1) {
+    conn.send(buildGamePacket('lobby-reply', 'lobby-state-occupied'));
   }
-  const newData = {
-    host: newDataHost,
-    joiner: newDataJoiner,
-    tableID: newDataTableID,
-    action: newDataAction,
-    gameName: newDataGameName,
-  };
-  console.log(newData);
-  if (newData.action !== undefined) {
-    NetworkManager.getInstance().getConnection().send(buildGamePacket('game-lobby-echo', newData));
+}
+function handleRegisterLobby(data, conn) {
+  if (WorldManager.getInstance().lobbyExist(data.tableId)) {
+    conn.send(buildGamePacket('lobby-reply', 'lobby-register-fail'));
+  } else {
+    conn.send(buildGamePacket('lobby-reply', 'lobby-register-success'));
+    WorldManager.getInstance().createLobby(data.tableId, data.userId, data.gameName);
+  }
+}
+
+function handleJoinLobby(data, conn) {
+  console.log(data);
+  console.log(WorldManager.getInstance().gameLobbies);
+  if (!WorldManager.getInstance().lobbyExist
+    || WorldManager.getInstance().getJoiner(data.tableId) !== undefined) {
+    conn.send(buildGamePacket('lobby-reply', 'lobby-join-fail'));
+  } else if (data.mode === 'player') {
+    WorldManager.getInstance().joinLobby(data.tableId, data.userId);
+    const newData = {
+      mode: data.mode,
+      tableId: data.tableId,
+      player1: WorldManager.getInstance().getHost(data.tableId),
+      player2: WorldManager.getInstance().getJoiner(data.tableId),
+      gameName: WorldManager.getInstance().getGameName(data.tableId),
+    };
+    conn.send(buildGamePacket('start-game', newData));
+    NetworkManager.getInstance().getConnection()
+      .sendTo(buildGamePacket('start-game', newData), WorldManager.getInstance().getPeerId(WorldManager.getInstance().getJoiner(data.tableId)));
+    NetworkManager.getInstance().getConnection()
+      .sendTo(buildGamePacket('start-game', newData), WorldManager.getInstance().getPeerId(WorldManager.getInstance().getHost(data.tableId)));
     console.log(newData);
+    if (newData.player1 === PlayerManager.getInstance().getSelfId()) {
+      GameManager.getInstance().getBoardGameManager().gameState = 'playing';
+      GameManager.getInstance().getBoardGameManager()
+        .startGame(newData.gameName, newData.player1, newData.player2, newData.tableId);
+    }
+    console.log(WorldManager.getInstance().gameLobbies);
+  } else if (data.mode === 'spectator') {
+    WorldManager.getInstance().addSpectator(data.tableId, data.userId);
+    conn.send(buildGamePacket('start-game', {
+      mode: data.mode,
+      tableId: data.tableId,
+      player1: WorldManager.getInstance().getHost(data.tableId),
+      player2: WorldManager.getInstance().getJoiner(data.tableId),
+      gameName: WorldManager.getInstance().getGameName(data.tableId),
+      gameState: WorldManager.getInstance().getLobbyGameState(data.tableId),
+    }));
+  }
+}
+
+// eslint-disable-next-line no-unused-vars
+function handleLeaveLobby(data, conn) {
+  console.log(WorldManager.getInstance().gameLobbies);
+  if (data.mode === 'player') {
+    NetworkManager.getInstance().getConnection()
+      .sendTo(buildGamePacket('end-game', PlayerManager.getInstance().getSelfId()), WorldManager.getInstance().getPeerId(WorldManager.getInstance().getOpponent(data.userId)));
+    const spectators = WorldManager.getInstance().getSpectators(data.tableId);
+    if (spectators !== undefined) {
+      spectators.forEach((userId) => {
+        NetworkManager.getInstance().getConnection()
+          .sendTo(buildGamePacket('end-game', PlayerManager.getInstance().getSelfId()), WorldManager.getInstance().getPeerId(userId));
+      });
+    }
+    if (PlayerManager.getInstance().getSelfId() === WorldManager.getInstance()
+      .getOpponent(data.userId)) {
+      GameManager.getInstance().getBoardGameManager().endGame();
+      alert(`${data.userId} has left the game`);
+    }
+    WorldManager.getInstance().closeLobby(data.tableId);
+  } else if (data.mode === 'spectator') {
+    WorldManager.getInstance().removeSpectator(data.tableId, data.userId);
+  } else if (data.mode === 'hosting') {
+    WorldManager.getInstance().closeLobby(data.tableId);
+  }
+}
+
+// eslint-disable-next-line no-unused-vars
+function handleLobbyGameUpdate(data, conn) {
+  if (WorldManager.getInstance().lobbyExist(data.tableId)) {
+    WorldManager.getInstance().updateLobbyGameState(data.tableId, data.newGameState);
+    const spectators = WorldManager.getInstance().getLobbyFromPlayer(data.from);
+    if (spectators !== undefined) {
+      spectators.forEach((userId) => {
+        NetworkManager.getInstance().getConnection()
+          .sendTo(buildGamePacket('game-update-echo', data.move), WorldManager.getInstance().getPeerId(userId));
+      });
+    }
   }
 }
 
@@ -198,7 +183,11 @@ const handlers = {
   'game-update': handleGameUpdate,
   'join-voice': handleJoinVoice,
   'disconnect-voice': handleDisconnectVoice,
-  'game-lobby': handleGameLobby,
+  'check-lobby-state-request': handleCheckLobbyRequest,
+  'register-lobby': handleRegisterLobby,
+  'join-lobby': handleJoinLobby,
+  'leave-lobby': handleLeaveLobby,
+  'game-lobby-update': handleLobbyGameUpdate,
 };
 
 // Conn can be used to uniquely identify the peer

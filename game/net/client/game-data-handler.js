@@ -75,45 +75,36 @@ function handleVoiceChannelData(data, conn) {
   GameManager.getInstance().getVoiceChannelManager().updateChannelUsers(voiceUsers);
 }
 
-function handleGameLobby(data, conn) {
-  console.log(data);
-  if (data.action === 'registerLobbyEcho-success' && data.host === PlayerManager.getInstance().getSelfId()) {
-    GameManager.getInstance().getBoardGameManager().displayPage(3);
-    GameManager.getInstance().getBoardGameManager().currentGame = data.gameName;
-    GameManager.getInstance().getBoardGameManager().gameState = 'hosting';
-  } else if (data.action === 'open' && data.host === PlayerManager.getInstance().getSelfId()) {
+function handleLobbyReply(data, conn) {
+  if (data.msg === 'lobby-state-new') {
     GameManager.getInstance().getBoardGameManager().displayPage(0);
-  } else if (data.action === 'canJoin' && GameManager.getInstance().getBoardGameManager().gameState === 'waitingCheck') {
-    if (data.tableID === GameManager.getInstance().getBoardGameManager().tableID) {
-      GameManager.getInstance().getBoardGameManager().displayPage(1);
-    }
-  } else if ((data.action === 'occupied' && GameManager.getInstance().getBoardGameManager().gameState === 'waitingCheck')) {
+  } else if (data.msg === 'lobby-state-open') {
+    GameManager.getInstance().getBoardGameManager().displayPage(1);
+  } else if (data.msg === 'lobby-state-occupied') {
     GameManager.getInstance().getBoardGameManager().displayPage(2);
-  } else if (data.action.action === 'spectate-start' && PlayerManager.getInstance().getSelfId() === data.action.from) {
-    GameManager.getInstance().getBoardGameManager().gameState = 'spectating';
-    GameManager.getInstance().getBoardGameManager().spectateGame(
-      'Checkers', // hardcoded
-      data.host,
-      data.joiner,
-    );
-    // TO CHANGE THIS
-    GameManager.getInstance().getBoardGameManager().getGame(data.gameName)
-      .updateSpectateBoard(data.action.currentState); // hard coded
-  } else if (data.action.action === 'spectate-update') {
-    if (data.action.s !== null) {
-      if (data.action.s.includes(PlayerManager.getInstance().getSelfId())) {
-        GameManager.getInstance().getBoardGameManager().getGame(data.gameName)
-          .updateSpectateBoard(data.action.newBoard, data.host);
-      }
-    }
-  } else if ((data.action === 'startGame' && data.host === PlayerManager.getInstance().getSelfId())
-  || (data.action === 'startGame' && data.joiner === PlayerManager.getInstance().getSelfId())) {
-    GameManager.getInstance().getBoardGameManager()
-      .startGame(data.gameName, data.host, data.joiner, data.tableID);
-  } else if ((data.action === 'leaveGame' && data.host === PlayerManager.getInstance().getSelfId())
-  || (data.action === 'leaveGame' && data.joiner === PlayerManager.getInstance().getSelfId())) {
-    GameManager.getInstance().getBoardGameManager().endGame();
+  } else if (data.msg === 'lobby-register-fail') {
+    alert(data.msg);
+  } else if (data.msg === 'lobby-register-success') {
+    GameManager.getInstance().getBoardGameManager().displayPage(3);
+  } else if (data.msg === 'lobby-join-fail') {
+    alert(data.msg);
   }
+}
+
+function handleStartGame(data, conn) {
+  console.log(data);
+  if (data.mode === 'player') {
+    GameManager.getInstance().getBoardGameManager()
+      .startGame(data.gameName, data.player1, data.player2, data.tableId);
+  } else if (data.mode === 'spectator') {
+    GameManager.getInstance().getBoardGameManager()
+      .spectateGame(data.gameName, data.player1, data.player2);
+  }
+}
+
+function handleEndGame(data, conn) {
+  GameManager.getInstance().getBoardGameManager().endGame();
+  alert(`${data.msg} has left the game`);
 }
 
 const handlers = {
@@ -126,7 +117,9 @@ const handlers = {
   'chat-echo': handleChatEcho,
   'game-update-echo': handleGameUpdateEcho,
   'voice-channel-data': handleVoiceChannelData,
-  'game-lobby-echo': handleGameLobby,
+  'lobby-reply': handleLobbyReply,
+  'start-game': handleStartGame,
+  'end-game': handleEndGame,
 };
 
 // Conn will always be the server
