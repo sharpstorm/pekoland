@@ -181,31 +181,7 @@ Promise.all([netSetupPromise, assetSetupPromise])
       }
     });
 
-    gameMenu.on('spectateYes', () => {
-      if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.SERVER) {
-        boardGameManager.gameState = 'spectating';
-        boardGameManager.spectateGame(
-          worldManager.getGameName(boardGameManager.tableID),
-          worldManager.getLobbyHost(boardGameManager.tableID),
-          worldManager.getLobbyJoiner(boardGameManager.tableID),
-        );
-        worldManager.addSpectator(boardGameManager.tableID, playerManager.getSelfId());
-        boardGameManager.displayPage(-1);
-
-        const currentState = worldManager.getLobbyGameState(boardGameManager.tableID);
-        boardGameManager.getGame(worldManager.gameLobbies[boardGameManager.tableID].gameName)
-          .updateSpectateBoard(currentState);
-      } else if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.CLIENT) {
-        const data = {
-          userId: playerManager.getSelfId(),
-          tableId: boardGameManager.tableID,
-          mode: 'spectator',
-        };
-        NetworkManager.getInstance().send(buildClientGamePacket('join-lobby', data));
-        boardGameManager.displayPage(-1);
-      }
-    });
-
+    gameMenu.on('spectateYes', () => boardGameManager.joinGameSpectate());
     gameMenu.on('spectateNo', () => {
       boardGameManager.displayPage(-1);
       boardGameManager.gameState = undefined;

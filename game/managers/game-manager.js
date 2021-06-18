@@ -314,6 +314,32 @@ class BoardGameManager {
     }
   }
 
+  joinGameSpectate() {
+    if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.SERVER) {
+      this.gameState = 'spectating';
+      const worldManager = WorldManager.getInstance();
+      this.spectateGame(
+        worldManager.getGameName(this.tableID),
+        worldManager.getLobbyHost(this.tableID),
+        worldManager.getLobbyJoiner(this.tableID),
+      );
+      worldManager.addSpectator(this.tableID, PlayerManager.getInstance().getSelfId());
+      this.displayPage(-1);
+
+      const currentState = worldManager.getLobbyGameState(this.tableID);
+      this.getGame(worldManager.getGameName(this.tableID))
+        .updateSpectateBoard(currentState);
+    } else if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.CLIENT) {
+      const data = {
+        userId: PlayerManager.getInstance().getSelfId(),
+        tableId: this.tableID,
+        mode: 'spectator',
+      };
+      NetworkManager.getInstance().send(buildClientGamePacket('join-lobby', data));
+      this.displayPage(-1);
+    }
+  }
+
   spectateGame(gameName, p1, p2, lobbyId, gameState) {
     const game = this.gameList.find((x) => x.gameName === gameName);
     if (game !== undefined) {
