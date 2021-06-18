@@ -101,6 +101,12 @@ class BroadcastConnection {
     });
   }
 
+  sendTo(data, peerId) {
+    if (peerId in this.connections) {
+      this.connections[peerId].send(data);
+    }
+  }
+
   setDataHandler(handler) {
     this.dataHandler = handler;
     Object.values(this.connections).forEach(((conn) => {

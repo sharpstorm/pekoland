@@ -32,13 +32,33 @@ function buildChatUpdate(opCode, data) {
   };
 }
 
-function buildCheckersUpdate(opCode, data) {
+function buildGameUpdate(opCode, data) {
   return {
     opCode,
+    gameName: data.gameName,
+    lobbyId: data.lobbyId,
+    state: data.state,
     from: data.from,
     player1: data.player1,
     player2: data.player2,
     action: data.action,
+  };
+}
+
+function buildLobbyRequest(opCode, data) {
+  return {
+    opCode,
+    tableId: data.tableId,
+  };
+}
+
+function buildLobbyUpdate(opCode, data) {
+  return {
+    opCode,
+    userId: data.userId,
+    tableId: data.tableId,
+    gameName: data.gameName,
+    mode: data.mode,
   };
 }
 
@@ -47,9 +67,13 @@ const handlers = {
   'spawn-request': buildSpawnRequest,
   'move': buildMoveUpdate,
   'chat': buildChatUpdate,
-  'checkers': buildCheckersUpdate,
+  'game-update': buildGameUpdate,
   'join-voice': buildEmptyPacket,
   'disconnect-voice': buildEmptyPacket,
+  'check-lobby-state-request': buildLobbyRequest,
+  'register-lobby': buildLobbyUpdate,
+  'join-lobby': buildLobbyUpdate,
+  'leave-lobby': buildLobbyUpdate,
 };
 
 export default function buildGameDataPacket(opCode, data) {

@@ -20,18 +20,30 @@ export default class Map {
     ctx.drawImage(this.CollisionMap, 0, 0, this.CollisionMap.width, this.CollisionMap.height);
 
     this.collisionMatrix = [];
+    this.furnitureMatrix = [];
+
     const unit = this.getUnitLength();
     for (let x = 0; x < this.mapWidth; x += unit) {
-      const col = [];
+      const collisionCol = [];
+      const furnitureCol = [];
+
       for (let y = 0; y < this.mapHeight; y += unit) {
         const pixel = ctx.getImageData(x + (unit / 2), y + (unit / 2), 1, 1).data;
-        if (pixel[3] === 255 && pixel[0] === 0 && pixel[1] === 0 && pixel[2] === 0) {
-          col.push(1);
+        if ((pixel[3] === 255 && pixel[0] === 0 && pixel[1] === 0 && pixel[2] === 0)
+          || (pixel[3] === 255 && pixel[0] === 255 && pixel[1] === 0 && pixel[2] === 0)) {
+          collisionCol.push(1);
         } else {
-          col.push(0);
+          collisionCol.push(0);
+        }
+
+        if (pixel[3] === 255 && pixel[0] === 255 && pixel[1] === 0 && pixel[2] === 0) {
+          furnitureCol.push('BoardGame');
+        } else {
+          furnitureCol.push(undefined);
         }
       }
-      this.collisionMatrix.push(col);
+      this.collisionMatrix.push(collisionCol);
+      this.furnitureMatrix.push(furnitureCol);
     }
   }
 
@@ -65,5 +77,12 @@ export default class Map {
     const x = Math.floor(playerX / GameConstants.UNIT);
     const y = Math.floor(playerY / GameConstants.UNIT);
     return this.collisionMatrix[x][y] === 1;
+  }
+
+  getFurniture(worldX, worldY) {
+    const x = Math.floor(worldX / GameConstants.UNIT);
+    const y = Math.floor(worldY / GameConstants.UNIT);
+
+    return this.furnitureMatrix[x][y];
   }
 }

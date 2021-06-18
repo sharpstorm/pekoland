@@ -22,20 +22,20 @@ import {
 
 import Chatbox from './ui/ui-chatbox.js';
 import Button, { LongButton } from './ui/ui-button.js';
+import GameMenu, { GameOverlay } from './ui/ui-game.js';
 import { UIAnchor } from './ui/ui-element.js';
-import { startGame } from './games/checkers.js';
+
+import CheckersGame from './games/checkers.js';
+import AdmissionPrompt from './ui/ui-admission-prompt.js';
 
 const networkManager = NetworkManager.getInstance();
-const inputSystem = new InputSystem(document.getElementById('ui'), document);
+const inputSystem = new InputSystem(document.getElementById('ui-overlay'), document);
 
 networkManager.on('connected', () => {
   console.log('Connected to remote');
 });
 networkManager.on('clientConnected', () => {
   console.log('Remote has connected');
-});
-networkManager.on('modeChanged', (mode) => {
-  console.log(`Currently in ${mode === NetworkManager.Mode.SERVER ? 'server' : 'client'} mode`);
 });
 networkManager.on('connectionFailed', () => {
   alert('Could not connect to partner! Please Try Again!');
@@ -83,12 +83,70 @@ addJoystickEventHandler((evt) => {
   }
 });
 
+function setupServerHooks() {
+  const worldManager = WorldManager.getInstance();
+  const roomController = worldManager.getRoomController();
+  const uiRenderer = Renderer.getUILayer();
+
+  const admissionPrompt = new AdmissionPrompt();
+  uiRenderer.addElement(admissionPrompt);
+
+  roomController.on('playerRequestJoin', (playerInfo) => {
+    // eslint-disable-next-line no-restricted-globals
+    admissionPrompt.prompt(`${playerInfo.name} is requesting to join. Admit?`,
+      () => { roomController.admitIntoWorld(playerInfo.peerId); },
+      () => { roomController.rejectAdmit(playerInfo.peerId); });
+  });
+
+  roomController.on('playerAdmit', (playerInfo) => {
+    const playerId = roomController.getPlayerId(playerInfo.peerId);
+    if (playerId === undefined) {
+      return;
+    }
+
+    const player = new Player(playerId, playerInfo.name, SpriteManager.getInstance().getSprite('rabbit-avatar'));
+    // Update connection
+    NetworkManager.getInstance().getConnection().sendTo(buildServerGamePacket('spawn-reply', {
+      self: player,
+      others: PlayerManager.getInstance().getPlayers(),
+    }), playerInfo.peerId);
+
+    // Broadcast to everyone else
+    NetworkManager.getInstance().getConnection().sendAllExcept(buildServerGamePacket('spawn-player', player), playerInfo.peerId);
+
+    // Register User to Server Player Manager
+    PlayerManager.getInstance().addPlayer(player);
+  });
+
+  roomController.on('playerReject', (playerInfo) => {
+    NetworkManager.getInstance().getConnection().sendTo(buildServerGamePacket('spawn-reject', 'Host Rejected Your Admission'), playerInfo.peerId);
+  });
+}
+
+networkManager.on('modeChanged', (mode) => {
+  console.log(`Currently in ${mode === NetworkManager.Mode.SERVER ? 'server' : 'client'} mode`);
+});
+
 const netSetupPromise = timeout(networkManager.setup(), 5000);
 const assetSetupPromise = loadAssets();
+const spawnPromise = new Promise((resolve) => {
+  PlayerManager.getInstance().on('spawnSelf', () => {
+    PlayerManager.getInstance().on('spawnSelf', undefined);
+    resolve();
+  });
+});
 Promise.all([netSetupPromise, assetSetupPromise])
   .then(() => {
+    document.getElementById('loading-panel').classList.add('joining');
+    return spawnPromise;
+  })
+  .then(() => {
     console.log('setup successful');
-    document.getElementById('connecting-msg').style.display = 'none';
+    if (networkManager.getOperationMode() === NetworkManager.Mode.SERVER) {
+      setupServerHooks();
+    }
+
+    document.getElementById('loading-panel').style.display = 'none';
     document.getElementById('game-container').style.display = 'block';
 
     inputSystem.addListener('keydown', joystickWorker);
@@ -96,17 +154,20 @@ Promise.all([netSetupPromise, assetSetupPromise])
 
     const voiceChannelManager = GameManager.getInstance().getVoiceChannelManager();
     const uiRenderer = Renderer.getUILayer();
+    const gameRenderer = Renderer.getGameLayer();
     const playerManager = PlayerManager.getInstance();
+    const worldManager = WorldManager.getInstance();
     const chatManager = GameManager.getInstance().getTextChannelManager();
+    const boardGameManager = GameManager.getInstance().getBoardGameManager();
+
+    inputSystem.addListener('click', (evt) => boardGameManager.handleEvent('click', evt, Renderer.getCameraContext()));
+
+    const checkersGame = new CheckersGame();
+    boardGameManager.register(checkersGame);
+    gameRenderer.register(checkersGame);
 
     const chatbox = new Chatbox();
     chatbox.addSubmitListener((msg) => {
-      if (msg.startsWith('start-game-checker ')) {
-        const parts = msg.split(' ');
-        startGame(parts[1], parts[2]);
-        return;
-      }
-
       chatManager.addToHistory(playerManager.getSelf().name, msg);
       playerManager.getSelf().chat.updateMessage(msg);
 
@@ -150,6 +211,49 @@ Promise.all([netSetupPromise, assetSetupPromise])
         micBtn.setContent(SpriteManager.getInstance().getSprite('icon-mic-muted'));
       }
     });
+
+    const gameMenu = new GameMenu(boardGameManager.gameList);
+    GameManager.getInstance().getBoardGameManager().registerGameMenuUI(gameMenu);
+
+    gameMenu.on('joinYes', () => boardGameManager.joinGame());
+    gameMenu.on('joinNo', () => {
+      boardGameManager.displayPage(-1);
+      boardGameManager.gameState = undefined;
+    });
+
+    gameMenu.on('gamePressed', (gameName) => {
+      if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {
+        const data = {
+          userId: playerManager.getSelfId(),
+          tableId: boardGameManager.tableId,
+          gameName,
+        };
+        NetworkManager.getInstance().send(buildClientGamePacket('register-lobby', data));
+      } else if (networkManager.getOperationMode() === NetworkManager.Mode.SERVER) {
+        worldManager.createLobby(boardGameManager.tableId,
+          playerManager.getSelfId(), gameName);
+        boardGameManager.gameState = 'hosting';
+        boardGameManager.displayPage(3);
+      }
+    });
+
+    gameMenu.on('spectateYes', () => boardGameManager.joinGameSpectate());
+    gameMenu.on('spectateNo', () => {
+      boardGameManager.displayPage(-1);
+      boardGameManager.gameState = undefined;
+    });
+
+    gameMenu.on('close', () => {
+      boardGameManager.closeGameMenu();
+      boardGameManager.gameState = undefined;
+    });
+
+    const gameOverlay = new GameOverlay();
+    GameManager.getInstance().getBoardGameManager().registerGameOverlayUI(gameOverlay);
+    gameOverlay.registerLeaveListener(() => { boardGameManager.leaveGame(); });
+
+    uiRenderer.addElement(gameMenu);
+    uiRenderer.addElement(gameOverlay);
     uiRenderer.addElement(menuBtn);
     uiRenderer.addElement(connectBtn);
     uiRenderer.addElement(micBtn);

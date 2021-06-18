@@ -4,6 +4,7 @@ export default class PlayerManager {
   constructor() {
     this.players = {};
     this.self = undefined;
+    this.eventHandlers = {};
   }
 
   addPlayer(player) {
@@ -12,6 +13,7 @@ export default class PlayerManager {
 
   setSelf(userId) {
     this.self = userId;
+    this.emitEvent(PlayerManager.Events.SPAWN_SELF, this.self);
   }
 
   getSelf() {
@@ -40,6 +42,18 @@ export default class PlayerManager {
     }
   }
 
+  on(evtId, handler) {
+    if (Object.values(PlayerManager.Events).includes(evtId)) {
+      this.eventHandlers[evtId] = handler;
+    }
+  }
+
+  emitEvent(evtId, data) {
+    if (evtId in this.eventHandlers) {
+      this.eventHandlers[evtId](data);
+    }
+  }
+
   static getInstance() {
     if (instance === undefined) {
       instance = new PlayerManager();
@@ -47,3 +61,7 @@ export default class PlayerManager {
     return instance;
   }
 }
+
+PlayerManager.Events = {
+  SPAWN_SELF: 'spawnSelf',
+};

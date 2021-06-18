@@ -61,10 +61,12 @@ function buildChatEcho(opCode, data) {
   };
 }
 
-
-function buildCheckers(opCode, data) {
+function buildGameUpdate(opCode, data) {
   return {
     opCode,
+    gameName: data.gameName,
+    lobbyId: data.lobbyId,
+    state: data.state,
     from: data.from,
     player1: data.player1,
     player2: data.player2,
@@ -79,6 +81,25 @@ function buildVoiceChannelData(opCode, data) {
   };
 }
 
+function buildLobbyReply(opCode, data) {
+  return {
+    opCode,
+    msg: data,
+  };
+}
+
+function buildStartGame(opCode, data) {
+  return {
+    opCode,
+    mode: data.mode,
+    player1: data.player1,
+    player2: data.player2,
+    tableId: data.tableId,
+    gameName: data.gameName,
+    gameState: data.gameState,
+  };
+}
+
 const handlers = {
   'handshake': buildEmptyPacket,
   'spawn-reply': buildSpawnReply,
@@ -87,8 +108,11 @@ const handlers = {
   'despawn-player': buildDespawnPlayer,
   'move-echo': buildMoveEcho,
   'chat-echo': buildChatEcho,
-  'checkers': buildCheckers,
+  'game-update-echo': buildGameUpdate,
   'voice-channel-data': buildVoiceChannelData,
+  'lobby-reply': buildLobbyReply,
+  'start-game': buildStartGame,
+  'end-game': buildLobbyReply,
 };
 
 export default function buildGamePacket(opCode, data) {

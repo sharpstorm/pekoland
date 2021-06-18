@@ -6,9 +6,9 @@ import SpriteManager from '../../managers/sprite-manager.js';
 import Player from '../../models/player.js';
 import NetworkManager from '../network-manager.js';
 import buildClientGamePacket from './game-data-sender.js';
-import { checkersMove } from '../../games/checkers.js';
 import Renderer from '../../managers/animation-manager.js';
 import GameManager from '../../managers/game-manager.js';
+import { GameOverlay } from '../../ui/ui-game.js';
 
 const chatManager = GameManager.getInstance().getTextChannelManager();
 
@@ -62,14 +62,49 @@ function handleChatEcho(data, conn) {
   player.chat.updateMessage(data.message);
 }
 
-function handleCheckersEcho(data, conn) {
-  console.log(data);
-  checkersMove(data);
+function handleGameUpdateEcho(data, conn) {
+  if (!data.gameName) {
+    return;
+  }
+
+  GameManager.getInstance().getBoardGameManager().getGame(data.gameName).handleNetworkEvent(data);
 }
 
 function handleVoiceChannelData(data, conn) {
   const voiceUsers = data.users;
   GameManager.getInstance().getVoiceChannelManager().updateChannelUsers(voiceUsers);
+}
+
+function handleLobbyReply(data, conn) {
+  if (data.msg === 'lobby-state-new') {
+    GameManager.getInstance().getBoardGameManager().displayPage(0);
+  } else if (data.msg === 'lobby-state-open') {
+    GameManager.getInstance().getBoardGameManager().displayPage(1);
+  } else if (data.msg === 'lobby-state-occupied') {
+    GameManager.getInstance().getBoardGameManager().displayPage(2);
+  } else if (data.msg === 'lobby-register-fail') {
+    alert('Failed to create lobby');
+  } else if (data.msg === 'lobby-register-success') {
+    GameManager.getInstance().getBoardGameManager().displayPage(3);
+  } else if (data.msg === 'lobby-join-fail') {
+    alert('Failed to join lobby');
+  }
+}
+
+function handleStartGame(data, conn) {
+  console.log(data);
+  if (data.mode === 'player') {
+    GameManager.getInstance().getBoardGameManager()
+      .startGame(data.gameName, data.player1, data.player2, data.tableId);
+  } else if (data.mode === 'spectator') {
+    GameManager.getInstance().getBoardGameManager()
+      .spectateGame(data.gameName, data.player1, data.player2, data.tableId, data.gameState);
+  }
+}
+
+function handleEndGame(data, conn) {
+  GameManager.getInstance().getBoardGameManager().endGame();
+  alert(`${data.msg} has left the game`);
 }
 
 const handlers = {
@@ -80,8 +115,11 @@ const handlers = {
   'despawn-player': handleDespawnPlayer,
   'move-echo': handleMoveEcho,
   'chat-echo': handleChatEcho,
-  'checkers': handleCheckersEcho,
+  'game-update-echo': handleGameUpdateEcho,
   'voice-channel-data': handleVoiceChannelData,
+  'lobby-reply': handleLobbyReply,
+  'start-game': handleStartGame,
+  'end-game': handleEndGame,
 };
 
 // Conn will always be the server
