@@ -107,8 +107,6 @@ function handleRegisterLobby(data, conn) {
 }
 
 function handleJoinLobby(data, conn) {
-  console.log(data);
-  console.log(WorldManager.getInstance().gameLobbies);
   if (!WorldManager.getInstance().lobbyExist(data.tableId)) {
     conn.send(buildGamePacket('lobby-reply', 'lobby-join-fail'));
   } else if (data.mode === 'player') {
@@ -116,6 +114,7 @@ function handleJoinLobby(data, conn) {
       conn.send(buildGamePacket('lobby-reply', 'lobby-join-fail'));
       return;
     }
+
     WorldManager.getInstance().joinLobby(data.tableId, data.userId);
     const newData = {
       mode: data.mode,
@@ -149,8 +148,7 @@ function handleJoinLobby(data, conn) {
   }
 }
 
-// eslint-disable-next-line no-unused-vars
-function handleLeaveLobby(data, conn) {
+function handleLeaveLobby(data) {
   console.log(WorldManager.getInstance().gameLobbies);
   if (data.mode === 'player') {
     NetworkManager.getInstance().getConnection()

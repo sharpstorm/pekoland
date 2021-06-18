@@ -83,11 +83,11 @@ function handleLobbyReply(data, conn) {
   } else if (data.msg === 'lobby-state-occupied') {
     GameManager.getInstance().getBoardGameManager().displayPage(2);
   } else if (data.msg === 'lobby-register-fail') {
-    alert(data.msg);
+    alert('Failed to create lobby');
   } else if (data.msg === 'lobby-register-success') {
     GameManager.getInstance().getBoardGameManager().displayPage(3);
   } else if (data.msg === 'lobby-join-fail') {
-    alert(data.msg);
+    alert('Failed to join lobby');
   }
 }
 
