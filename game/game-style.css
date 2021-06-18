@@ -142,7 +142,7 @@
 #game-menu-waiting {
   flex: 1 1 0;
   display: none;
-  background-image: url(../Images/waiting.gif);
+  background-image: url(Images/waiting.gif);
   background-repeat: no-repeat;
   background-size: contain;
   background-position: center;
@@ -157,7 +157,7 @@
   height: 24px;
   margin: 6px;
   display: block;
-  background-image: url(../Images/x.png);
+  background-image: url(Images/x.png);
   background-size: contain;
   background-repeat: no-repeat;
 }
