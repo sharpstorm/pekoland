@@ -1,211 +1,193 @@
-import PlayerManager from '../managers/player-manager.js';
 import CheckerPiece from './checker-piece.js';
 import GridBox from './grid-box.js';
 
-export default class Board {
-  constructor(player1, player2) {
+const BOARD_SIZE = 900;
+
+export default class CheckerBoard {
+  constructor(player1, player2, flipped) {
     this.player1 = player1;
     this.player2 = player2;
+    this.flipped = flipped;
+
     this.gridArray = [];
-    this.set = false;
     this.selectedGrid = undefined;
-    this.selectedPiece = undefined;
     this.currentTurn = this.player1;
-    this.opponent = undefined;
-    this.me = undefined;
+
     this.setUp();
   }
 
-  drawBoard(ctx) {
-    ctx.beginPath();
-    this.gridArray.forEach((grid) => grid.drawAt(ctx));
+  setUp() {
+    const unit = BOARD_SIZE / 8;
+    for (let y = 0; y < 8; y += 1) {
+      for (let x = 0; x < 8; x += 1) {
+        if ((y % 2) === (x % 2)) {
+          if (y < 3) {
+            this.gridArray.push(new GridBox(GridBox.State.UNSELECTED, new CheckerPiece(1), unit));
+          } else if (y > 4) {
+            this.gridArray.push(new GridBox(GridBox.State.UNSELECTED, new CheckerPiece(2), unit));
+          } else {
+            this.gridArray.push((new GridBox(GridBox.State.UNSELECTED, undefined, unit)));
+          }
+        } else {
+          this.gridArray.push((new GridBox(GridBox.State.UNSELECTED, undefined, unit)));
+        }
+      }
+    }
+    // console.log(this.gridArray);
+    this.gridArray.forEach((grid, idx) => grid.setIndex(idx));
   }
 
-  gridArrayInit() {
-    let i;
-    for (i = 0; i < 64; i += 1) {
-      this.gridArray.push(new GridBox(0, 0, 'white', undefined, false));
+  drawBoard(ctx, camContext) {
+    const unit = BOARD_SIZE / 8;
+
+    if (!this.flipped) {
+      // Reference coordinate is bottom left
+      const baseX = (camContext.viewportWidth / 2 - (BOARD_SIZE / 2));
+      const baseY = (camContext.viewportHeight / 2 + (BOARD_SIZE / 2));
+      for (let i = 0; i < 8; i += 1) {
+        for (let j = 0; j < 8; j += 1) {
+          const x = baseX + (j * unit);
+          const y = baseY - ((i + 1) * unit); // +1 because canvas reference is top left
+
+          this.getGridAtCoord(j, i).drawAt(ctx, x, y);
+        }
+      }
+    } else {
+      // Reference coordinate is top right
+      const baseX = (camContext.viewportWidth / 2 + (BOARD_SIZE / 2));
+      const baseY = (camContext.viewportHeight / 2 - (BOARD_SIZE / 2));
+      for (let i = 0; i < 8; i += 1) {
+        for (let j = 0; j < 8; j += 1) {
+          const x = baseX - ((j + 1) * unit);
+          const y = baseY + (i * unit); // +1 because canvas reference is top left
+
+          this.getGridAtCoord(j, i).drawAt(ctx, x, y);
+        }
+      }
     }
   }
 
-  move() {
-    let f;
-    let t;
-    let dead;
-    let king = false;
-    if (this.selectedGrid.color === 'green') {
-      this.selectedPiece.movePieceTo(this.selectedGrid);
-      const indexDiff = this.selectedGrid.index - this.selectedPiece.index;
-      if (this.currentTurn === this.me
-        || (this.currentTurn === this.me && this.selectedGrid.checkerPiece.isKing)) {
-        if (indexDiff === 14) {
-          this.gridArray[this.selectedPiece.index + 7].removePiece();
-          dead = this.selectedPiece.index + 7;
-        } else if (indexDiff === 18) {
-          this.gridArray[this.selectedPiece.index + 9].removePiece();
-          dead = this.selectedPiece.index + 9;
-        }
-        if (this.isAtEnd() === 1 && !this.selectedGrid.checkerPiece.isKing) {
-          this.selectedGrid.checkerPiece.isKing = true;
-          king = true;
-        }
+  isPlaying(playerId) {
+    return this.player1 === playerId || this.player2 === playerId;
+  }
+
+  isTurn(playerId) {
+    return this.currentTurn === playerId;
+  }
+
+  getPlayerNum(playerId) {
+    if (this.player1 === playerId) {
+      return 1;
+    // eslint-disable-next-line no-else-return
+    } else if (this.player2 === playerId) {
+      return 2;
+    }
+    return 0;
+  }
+
+  getOpponent(playerId) {
+    if (this.player1 === playerId) {
+      return this.player2;
+    }
+    if (this.player2 === playerId) {
+      return this.player1;
+    }
+    return undefined;
+  }
+
+  selectGrid(selectedGrid) {
+    this.selectedGrid = selectedGrid;
+  }
+
+  move(newGrid) {
+    if (newGrid.getState() === GridBox.State.SELECTABLE) {
+      this.selectedGrid.movePieceTo(newGrid);
+      const oldCoord = this.selectedGrid.getCoordinates();
+      const newCoord = newGrid.getCoordinates();
+
+      let king;
+      let remove;
+
+      if (Math.abs(oldCoord.y - newCoord.y) > 1) {
+        // Piece will be eaten
+        const eatY = (newCoord.y - oldCoord.y > 0) ? (oldCoord.y + 1) : (oldCoord.y - 1);
+        const eatX = (newCoord.x - oldCoord.x > 0) ? (oldCoord.x + 1) : (oldCoord.x - 1);
+        const deadIdx = (eatY * 8) + eatX;
+        this.gridArray[deadIdx].removePiece();
+        remove = deadIdx;
       }
-      if ((this.currentTurn === this.me && this.selectedGrid.checkerPiece.isKing)
-      || this.currentTurn === this.me) {
-        if (indexDiff === -14) {
-          this.gridArray[this.selectedPiece.index - 7].removePiece();
-          dead = this.selectedPiece.index - 7;
-        } else if (indexDiff === -18) {
-          this.gridArray[this.selectedPiece.index - 9].removePiece();
-          dead = this.selectedPiece.index - 9;
-        }
-        if (this.isAtEnd() === 1 && !this.selectedGrid.checkerPiece.isKing) {
-          this.selectedGrid.checkerPiece.isKing = true;
-          king = true;
-        }
+
+      // Kinging
+      if ((newCoord.y === 7 && newGrid.getPiece().getPlayer() === 1)
+        || (newCoord.y === 0 && newGrid.getPiece().getPlayer() === 2)) {
+        newGrid.getPiece().setKing(true);
+        king = true;
       }
-      f = this.selectedPiece.index;
-      t = this.selectedGrid.index;
-      // console.log(`from: ${f}`);
-      // console.log(`to: ${t}`);
-      this.resetBoard();
+
+      const from = this.selectedGrid.index;
+      this.unsetBoard();
       this.nextTurn();
       return {
-        from: f,
-        to: t,
-        remove: dead,
+        from,
+        to: newGrid.index,
+        remove,
         k: king,
       };
     }
     return undefined;
   }
 
-  isAtEnd() {
-    if (this.currentTurn === this.player2) {
-      if (this.selectedGrid.index - 8 < 0 || this.selectedGrid.index + 8 > 63) {
-        return 1;
-      }
-    } else if (this.currentTurn === this.player1) {
-      if (this.selectedGrid.index - 8 < 0 || this.selectedGrid.index + 8 > 63) {
-        return 1;
-      }
+  getGridAtScreenCoord(x, y, viewportWidth, viewportHeight) {
+    const baseX = (viewportWidth / 2 - (BOARD_SIZE / 2));
+    const baseY = (viewportHeight / 2 + (BOARD_SIZE / 2));
+
+    if (x < baseX || x > baseX + BOARD_SIZE || y < baseY - BOARD_SIZE || y > baseY) {
+      return undefined;
     }
-    return 0;
+
+    const unit = BOARD_SIZE / 8;
+    if (!this.flipped) {
+      const xIdx = Math.floor((x - baseX) / unit);
+      const yIdx = Math.floor((baseY - y) / unit);
+
+      return this.getGridAtCoord(xIdx, yIdx);
+    }
+
+    const xIdx = 7 - Math.floor((x - baseX) / unit);
+    const yIdx = 7 - Math.floor((baseY - y) / unit);
+
+    return this.getGridAtCoord(xIdx, yIdx);
   }
 
-  reDraw(camContext) {
-    // console.log(this.gridArray.length);
-    let i;
-    let ii;
-    let iii = 63;
-    const unit = 900 / 8;
-    const width = (camContext.viewportWidth / 2 - 450);
-    const height = (camContext.viewportHeight / 2 - 450);
-    for (ii = 0; ii < 8; ii += 1) {
-      for (i = 0; i < 8; i += 1) {
-        if (iii > 0) {
-          this.gridArray[iii].setXY(width + i * unit, height + unit * ii);
-          iii -= 1;
-        }
-      }
-    }
-    this.gridArray[0].setXY(width + 7 * unit, height + unit * 7);
+  getGridAtCoord(x, y) {
+    return this.gridArray[(y * 8) + x];
   }
 
-  setUp() {
-    let i;
-    let ii;
-    const unit = 900 / 8;
-    const width = 0;
-    const height = 0;
-    for (ii = 0; ii < 8; ii += 1) {
-      for (i = 0; i < 8; i += 1) {
-        if (this.gridArray.length < 64) {
-          if (ii % 2 !== 0 && i % 2 === 0 && ii !== 3 && ii !== 4) {
-            this.gridArray.push(new GridBox(width + i * unit, height + unit * ii, 'black', new CheckerPiece(1, width + i * unit, height + ii * unit), true));
-          } else if (ii % 2 === 0 && i % 2 !== 0 && ii !== 3 && ii !== 4) {
-            this.gridArray.push((new GridBox(width + unit * i, height + unit * ii, 'black', new CheckerPiece(1, width + i * unit, height + ii * unit), true)));
-          } else {
-            this.gridArray.push((new GridBox(width + unit * i, height + unit * ii, 'black', undefined, false)));
-          }
-          if (this.gridArray.length === 64) {
-            this.gridArray = this.gridArray.reverse();
-          }
-        }
-      }
-    }
-    // console.log(this.gridArray);
-    this.setPlayers();
-    this.gridArray.forEach((grid, idx) => grid.setIndex(idx));
+  getGridAtIndex(idx) {
+    return this.gridArray[idx];
   }
 
-  // HARDCODED
   nextTurn() {
-    if (this.currentTurn === this.player1) {
-      this.currentTurn = this.player2;
-    } else {
-      this.currentTurn = this.player1;
-    }
+    this.currentTurn = (this.currentTurn === this.player1) ? this.player2 : this.player1;
   }
 
-  setPlayers() {
-    if (!this.set) {
-      if (this.selectedGrid === undefined) {
-        let i;
-        for (i = 0; i < 32; i += 1) {
-          if (this.gridArray[i] !== undefined) {
-            if (this.gridArray[i].hasPiece) {
-              this.gridArray[i].checkerPiece.player = PlayerManager.getInstance().getSelfId();
-              this.me = PlayerManager.getInstance().getSelfId();
-              this.gridArray[i].checkerPiece.color = 'red';
-            }
-          }
-        }
-        for (i = 32; i < 64; i += 1) {
-          if (this.gridArray[i] !== undefined) {
-            if (this.gridArray[i].hasPiece) {
-              if (PlayerManager.getInstance().getSelfId() === this.player1) {
-                this.gridArray[i].checkerPiece.player = this.player2;
-                this.opponent = this.player2;
-              } else {
-                this.gridArray[i].checkerPiece.player = this.player1;
-                this.opponent = this.player1;
-              }
-              this.gridArray[i].checkerPiece.color = 'blue';
-            }
-          }
-        }
-        this.set = true;
-      }
-    }
+  unsetBoard() {
+    this.gridArray.forEach((grid) => grid.setState(GridBox.State.UNSELECTED));
+    this.selectedGrid = undefined;
   }
 
-  getGridIndex(x, y) {
-    let g;
-    this.gridArray.forEach((grid) => {
-      if (x > grid.x && x < grid.x + 900 / 8 && y > grid.y && y < grid.y + 900 / 8) {
-        g = grid;
-      }
-    });
-    return g;
-  }
-
-  resetBoard() {
-    this.gridArray.forEach((grid) => grid.setColor('black'));
-  }
-
-  isEnemy(index) {
-    return this.gridArray[index].checkerPiece.player !== this.currentTurn;
+  isEnemy(index, selfPlayerNum) {
+    return this.gridArray[index].checkerPiece.getPlayer() !== selfPlayerNum;
   }
 
   checkWin() {
     let p1 = false;
     let p2 = false;
     this.gridArray.forEach((grid) => {
-      if (grid.hasPiece) {
-        if (grid.checkerPiece.player === this.player1) {
+      if (grid.hasPiece()) {
+        if (grid.checkerPiece.getPlayer() === 1) {
           p1 = true;
-        } else if (grid.checkerPiece.player === this.player2) {
+        } else if (grid.checkerPiece.getPlayer() === 2) {
           p2 = true;
         }
       }
@@ -217,124 +199,80 @@ export default class Board {
     }
   }
 
-  /*
-  noPossibleMoves() {
-    let p1 = 0;
-    let p2 = 0;
-
-    this.gridArray.forEach((grid) => {
-      if (grid.hasPiece) {
-        if (grid.checkerPiece.player === this.player1) {
-          if (grid.getDiagonals('bottom').left === undefined &&
-          grid.getDiagonals('bottom').right === undefined) {
-            p1 += 0;
-          } else if (grid.getDiagonals('bottom').left === undefined) {
-            p1 += this.gridArray[grid.getDiagonals('bottom').right].hasPiece ? 0 : 1;
-          } else if (grid.getDiagonals('bottom').right === undefined) {
-            p1 += this.gridArray[grid.getDiagonals('bottom').left].hasPiece ? 0 : 1;
-          } else if (!this.gridArray[grid.getDiagonals('bottom').left].hasPiece |
-          | !this.gridArray[grid.getDiagonals('bottom').right].hasPiece) {
-            p1 += 1;
-          }
-        }
-      }
-    });
-
-    this.gridArray.forEach((grid) => {
-      if (grid.hasPiece) {
-        if (grid.checkerPiece.player === this.player2) {
-          if (grid.getDiagonals('top').left === undefined && grid.
-          getDiagonals('top').right === undefined) {
-            p2 += 0;
-          } else if (grid.getDiagonals('top').left === undefined) {
-            p2 += this.gridArray[grid.getDiagonals('top').right].hasPiece ? 0 : 1;
-          } else if (grid.getDiagonals('top').right === undefined) {
-            p2 += this.gridArray[grid.getDiagonals('top').left].hasPiece ? 0 : 1;
-          } else if (!this.gridArray[grid.getDiagonals('top').left].hasPiece
-          || !this.gridArray[grid.getDiagonals('top').right].hasPiece) {
-            p2 += 1;
-          }
-        }
-      }
-    });
-  }
-  */
-
-  highlightMoves() {
-    if (this.selectedGrid.hasPiece) {
-      if (this.selectedGrid.checkerPiece.color === 'red') {
-        if (this.selectedGrid.checkerPiece.player === this.currentTurn) {
-          if (this.currentTurn === this.me
-            || (this.currentTurn === this.opponent && this.selectedGrid.checkerPiece.isKing)) {
-            if (this.selectedGrid.getDiagonals('bottom').left !== undefined) {
-              if (this.gridArray[this.selectedGrid.getDiagonals('bottom').left].hasPiece) {
-                if (this.isEnemy(this.selectedGrid.getDiagonals('bottom').left)) {
-                  if (this.gridArray[this.selectedGrid.getDiagonals('bottom').left].getDiagonals('bottom').left !== undefined) {
-                    if (!this.gridArray[this.gridArray[this.selectedGrid.getDiagonals('bottom').left].getDiagonals('bottom').left].hasPiece) {
-                      this.gridArray[this.gridArray[this.selectedGrid.getDiagonals('bottom').left].getDiagonals('bottom').left].color = 'green';
-                    }
-                  }
-                }
-              } else {
-                this.gridArray[this.selectedGrid.getDiagonals('bottom').left].setColor('green');
-              }
-            }
-            if (this.selectedGrid.getDiagonals('bottom').right !== undefined) {
-              if (this.gridArray[this.selectedGrid.getDiagonals('bottom').right].hasPiece) {
-                if (this.isEnemy(this.selectedGrid.getDiagonals('bottom').right)) {
-                  if (this.gridArray[this.selectedGrid.getDiagonals('bottom').right].getDiagonals('bottom').right !== undefined) {
-                    if (!this.gridArray[this.gridArray[this.selectedGrid.getDiagonals('bottom').right].getDiagonals('bottom').right].hasPiece) {
-                      this.gridArray[this.gridArray[this.selectedGrid.getDiagonals('bottom').right].getDiagonals('bottom').right].color = 'green';
-                    }
-                  }
-                }
-              } else {
-                this.gridArray[this.selectedGrid.getDiagonals('bottom').right].setColor('green');
-              }
-            }
-          }
-          if ((this.currentTurn === this.me && this.selectedGrid.checkerPiece.isKing)
-          || this.currentTurn === this.opponent) {
-            if (this.selectedGrid.getDiagonals('top').left !== undefined) {
-              if (this.gridArray[this.selectedGrid.getDiagonals('top').left].hasPiece) {
-                if (this.isEnemy(this.selectedGrid.getDiagonals('top').left)) {
-                  if (this.gridArray[this.selectedGrid.getDiagonals('top').left].getDiagonals('top').left !== undefined) {
-                    if (!this.gridArray[this.gridArray[this.selectedGrid.getDiagonals('top').left].getDiagonals('top').left].hasPiece) {
-                      this.gridArray[this.gridArray[this.selectedGrid.getDiagonals('top').left].getDiagonals('top').left].color = 'green';
-                    }
-                  }
-                }
-              } else {
-                this.gridArray[this.selectedGrid.getDiagonals('top').left].setColor('green');
-              }
-            }
-            if (this.selectedGrid.getDiagonals('top').right !== undefined) {
-              if (this.gridArray[this.selectedGrid.getDiagonals('top').right].hasPiece) {
-                if (this.isEnemy(this.selectedGrid.getDiagonals('top').right)) {
-                  if (this.gridArray[this.selectedGrid.getDiagonals('top').right].getDiagonals('top').right !== undefined) {
-                    if (!this.gridArray[this.gridArray[this.selectedGrid.getDiagonals('top').right].getDiagonals('top').right].hasPiece) {
-                      this.gridArray[this.gridArray[this.selectedGrid.getDiagonals('top').right].getDiagonals('top').right].color = 'green';
-                    }
-                  }
-                }
-              } else {
-                this.gridArray[this.selectedGrid.getDiagonals('top').right].setColor('green');
-              }
-            }
-          }
-          /*
-          // TODO: detect when no possible moves
-          let gg = false;
-          this.gridArray.forEach((grid) => {
-            if (grid.color === 'green') {
-              gg = true;
-            }
-          });
-          if (!gg) {
-            alert('lose');
-          } */
+  getMoveInDirection(x, y, directionX, directionY, playerNum) {
+    let ret;
+    const newGrid = this.getGridAtCoord(x + directionX, y + directionY);
+    if (!newGrid.hasPiece()) { // Open square
+      ret = newGrid;
+    } else if (newGrid.getPiece().getPlayer() !== playerNum) {
+      const futureX = x + directionX * 2;
+      const futureY = y + directionY * 2;
+      if (futureX >= 0 && futureX <= 7 && futureY >= 0 && futureY <= 7) { // Not Out of Bounds
+        const futureGrid = this.getGridAtCoord(futureX, futureY);
+        if (!futureGrid.hasPiece()) {
+          ret = futureGrid;
         }
       }
     }
+    return ret;
+  }
+
+  highlightMoves(grid, playerNum) {
+    if (!grid.hasPiece() || grid.getPiece().getPlayer() !== playerNum) {
+      return 0; // Not My Piece
+    }
+
+    const coord = grid.getCoordinates();
+    let moves = 0;
+    const deltaY = (playerNum === 1) ? 1 : -1;
+
+    // Do forward checks
+    const futureY = coord.y + deltaY;
+    if (futureY >= 0 && futureY <= 7) {
+      // Can do forward move
+      if (coord.x > 0) {
+        // Can Move x-
+        const box = this.getMoveInDirection(coord.x, coord.y, -1, deltaY, playerNum);
+        if (box !== undefined) {
+          box.setState(GridBox.State.SELECTABLE);
+          moves += 1;
+        }
+      }
+
+      if (coord.x < 7) {
+        // Can Move x+
+        const box = this.getMoveInDirection(coord.x, coord.y, 1, deltaY, playerNum);
+        if (box !== undefined) {
+          box.setState(GridBox.State.SELECTABLE);
+          moves += 1;
+        }
+      }
+    }
+
+    // Do backward check
+    if (grid.getPiece().isKing()) {
+      const backwardY = coord.y - deltaY;
+      if (backwardY >= 0 && backwardY <= 7) {
+        // Can do backwards move
+        if (coord.x > 0) {
+          // Can Move x-
+          const box = this.getMoveInDirection(coord.x, coord.y, -1, -deltaY, playerNum);
+          if (box !== undefined) {
+            box.setState(GridBox.State.SELECTABLE);
+            moves += 1;
+          }
+        }
+
+        if (coord.x < 7) {
+          // Can Move x+
+          const box = this.getMoveInDirection(coord.x, coord.y, 1, -deltaY, playerNum);
+          if (box !== undefined) {
+            box.setState(GridBox.State.SELECTABLE);
+            moves += 1;
+          }
+        }
+      }
+    }
+    return moves;
   }
 }

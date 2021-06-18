@@ -1,11 +1,10 @@
 /* eslint-disable class-methods-use-this */
 import CheckerBoard from './checker-board.js';
-import CheckerPiece from './checker-piece.js';
 import NetworkManager from '../net/network-manager.js';
 import PlayerManager from '../managers/player-manager.js';
 import buildClientGamePacket from '../net/client/game-data-sender.js';
 import buildServerGamePacket from '../net/server/game-data-sender.js';
-import WorldManager from '../managers/world-manager.js'; // TO FIX
+import GridBox from './grid-box.js';
 
 export default class CheckersGame {
   constructor() {
@@ -14,215 +13,98 @@ export default class CheckersGame {
     this.gameOn = false;
   }
 
-  handleEvent(evtId, e) {
-    if (this.checkersBoard !== undefined) {
-      const checkersInstance = this;
-      if (checkersInstance.checkersBoard.player1 === PlayerManager.getInstance().getSelfId()
-      || checkersInstance.checkersBoard.player2 === PlayerManager.getInstance().getSelfId()) {
-        const clickedGrid = checkersInstance.checkersBoard.getGridIndex(e.pageX, e.pageY);
+  handleEvent(evtId, e, camContext) {
+    if (evtId === 'click' && this.checkersBoard !== undefined) {
+      const checkerBoard = this.checkersBoard;
+      const selfId = PlayerManager.getInstance().getSelfId();
+      if (checkerBoard.isPlaying(selfId) && checkerBoard.isTurn(selfId)) {
+        const clickedGrid = checkerBoard.getGridAtScreenCoord(e.clientX, e.clientY,
+          camContext.viewportWidth, camContext.viewportHeight);
+
         if (clickedGrid !== undefined) {
-          checkersInstance.checkersBoard.selectedGrid = clickedGrid;
-          const move = checkersInstance.checkersBoard.move();
-          if (move !== undefined) {
+          if (clickedGrid.getState() === GridBox.State.SELECTABLE) {
+            const move = checkerBoard.move(clickedGrid);
             const data = {
-              gameName: this.gameName,
               from: PlayerManager.getInstance().getSelfId(),
-              player1: checkersInstance.checkersBoard.player1,
-              player2: checkersInstance.checkersBoard.player2,
+              player1: checkerBoard.player1,
+              player2: checkerBoard.player2,
               action: move,
             };
-            if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.CLIENT) {
-              NetworkManager.getInstance().send(buildClientGamePacket('game-update', data));
-            } else if (NetworkManager.getInstance().getOperationMode()
-              === NetworkManager.Mode.SERVER) {
-              NetworkManager.getInstance().send(buildServerGamePacket('game-update-echo', data));
-            }
 
-            if (NetworkManager.getInstance().getOperationMode() === 2) {
-              const newData = {
-                host: PlayerManager.getInstance().getSelfId(),
-                action: { action: 'spectate-update', newBoard: this.gridToArray() },
-              };
-              NetworkManager.getInstance().send(buildClientGamePacket('game-lobby', newData));
-            } else if (NetworkManager.getInstance().getOperationMode() === 1) {
-              WorldManager.getInstance().updateCurrentState(data.host, this.gridToArray());
-              const spectators = WorldManager.getInstance()
-                .getSpectatorsPlayer(checkersInstance.checkersBoard.player1);
-              const newData = {
-                host: PlayerManager.getInstance().getSelfId(),
-                gameName: 'Checkers',
-                action: { action: 'spectate-update', s: spectators, newBoard: this.gridToArray() },
-              };
-              WorldManager.getInstance().updateCurrentState(PlayerManager
-                .getInstance().getSelfId(), this.gridToArray());
-              NetworkManager.getInstance().send(buildServerGamePacket('game-lobby-echo', newData));
+            this.sendNetworkUpdate(data);
+            checkerBoard.checkWin();
+          } else {
+            checkerBoard.unsetBoard();
+            if (clickedGrid.hasPiece()) {
+              if (checkerBoard.highlightMoves(clickedGrid, checkerBoard.getPlayerNum(selfId)) > 0) {
+                checkerBoard.selectGrid(clickedGrid);
+              }
             }
           }
-          checkersInstance.checkersBoard.resetBoard();
-          if (checkersInstance.checkersBoard.selectedGrid.hasPiece) {
-            checkersInstance.checkersBoard.selectedPiece = checkersInstance
-              .checkersBoard.selectedGrid;
-          }
-          checkersInstance.checkersBoard.highlightMoves();
-          checkersInstance.checkersBoard.checkWin();
         }
       }
     }
   }
 
-  flipArray(newBoard) {
-    let i;
-    const tempBoard = newBoard;
-    for (i = 0; i < tempBoard.length; i += 1) {
-      if (tempBoard[i] !== 0) {
-        tempBoard[i] = tempBoard[i] === 1 ? 2 : 1;
-      }
-    }
-    return tempBoard.reverse();
-  }
+  sendNetworkUpdate(data) {
+    const dataToSend = data;
+    dataToSend.gameName = this.gameName;
+    dataToSend.lobbyId = this.lobbyId;
 
-  updateSpectateBoard(newBoard, from) {
-    console.log(from);
-    if (newBoard !== undefined) {
-      let i;
-      const tempBoard = newBoard;
-      const cb = this.checkersBoard;
-      if (from === cb.player2) {
-        this.flipArray(tempBoard);
-      }
-      console.log('changed');
-      for (i = 0; i < 64; i += 1) {
-        if (tempBoard[i] === 0) {
-          if (cb.gridArray[i].hasPiece) {
-            cb.gridArray[i].removePiece();
-          }
-        } else if (tempBoard[i] === 1) {
-          const newPiece = new CheckerPiece(cb.player2, 0, 0);
-          newPiece.color = 'red';
-          cb.gridArray[i].assignPiece(newPiece);
-        } else if (tempBoard[i] === 2) {
-          const newPiece = new CheckerPiece(cb.player1, 0, 0);
-          newPiece.color = 'blue';
-          cb.gridArray[i].assignPiece(newPiece);
-        }
-      }
-    }
-  }
-
-  gridToArray() {
-    const gArray = [];
-    this.checkersBoard.gridArray.forEach((grid) => {
-      if (grid.hasPiece) {
-        if (grid.checkerPiece.player === this.checkersBoard.player1) {
-          gArray.push(1);
-        } else if (grid.checkerPiece.player === this.checkersBoard.player2) {
-          gArray.push(2);
-        }
-      } else {
-        gArray.push(0);
-      }
-    });
-    return gArray;
-  }
-
-  endGame() {
-    this.gameOn = false;
-  }
-
-  startGame(p1, p2, lobbyId) {
-    this.lobbyId = lobbyId;
-
-    if (PlayerManager.getInstance().getSelfId() === p1
-      || PlayerManager.getInstance().getSelfId() === p2) {
-      this.gameOn = true;
-      if (PlayerManager.getInstance().getSelfId() === p1) {
-        this.checkersBoard = new CheckerBoard(p1, p2);
-      } else {
-        this.checkersBoard = new CheckerBoard(p2, p1);
-        console.log(this.checkersBoard.player2);
-      }
-    }
-
-    console.log('start-game');
-    /* const data = {
-      gameName: this.gameName,
-      from: PlayerManager.getInstance().getSelfId(),
-      player1: p1,
-      player2: p2,
-      action: 'startGame',
-    };
-    // TO CHECK. MAYBE MOVE IT UP
     if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.CLIENT) {
       NetworkManager.getInstance().send(buildClientGamePacket('game-update', data));
     } else if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.SERVER) {
       NetworkManager.getInstance().send(buildServerGamePacket('game-update-echo', data));
-    } */
+    }
   }
 
-  spectateGame(p1, p2) {
+  startGame(p1, p2, lobbyId) {
+    const selfId = PlayerManager.getInstance().getSelfId();
+
+    if (selfId === p1 || selfId === p2) {
+      this.gameOn = true;
+      this.lobbyId = lobbyId;
+      if (selfId === p1) {
+        this.checkersBoard = new CheckerBoard(p1, p2, false);
+      } else {
+        this.checkersBoard = new CheckerBoard(p1, p2, true);
+      }
+    }
+  }
+
+  endGame() {
+    this.gameOn = false;
+    this.lobbyId = undefined;
+  }
+
+  spectateGame(p1, p2, lobbyId) {
+    this.lobbyId = lobbyId;
     this.gameOn = true;
-    this.checkersBoard = new CheckerBoard(p1, p2);
+    this.checkersBoard = new CheckerBoard(p1, p2, false);
   }
 
   handleNetworkEvent(data) {
     console.log(data);
-    if (this.gameOn) {
-      if (data.player1 === PlayerManager.getInstance().getSelfId()
-      || data.player2 === PlayerManager.getInstance().getSelfId()) {
-        console.log(data.from, this.checkersBoard.player2);
-        if (data.from === this.checkersBoard.player2) {
-          this.checkersBoard.gridArray[63 - data.action.from]
-            .movePieceTo(this.checkersBoard.gridArray[63 - data.action.to]);
-          this.checkersBoard.currentTurn = PlayerManager.getInstance().getSelfId();
-          if (data.action.remove !== undefined) {
-            this.checkersBoard.gridArray[63 - data.action.remove].removePiece();
-          }
-          if (data.action.k) {
-            this.checkersBoard.gridArray[63 - data.action.to].checkerPiece.isKing = true;
-          }
+    const checkerBoard = this.checkersBoard;
+    if (this.gameOn && checkerBoard !== undefined && this.lobbyId === data.lobbyId) {
+      if (checkerBoard.isTurn(data.from)) {
+        checkerBoard.getGridAtIndex(data.action.from)
+          .movePieceTo(this.checkersBoard.getGridAtIndex(data.action.to));
+        this.checkersBoard.nextTurn();
+        if (data.action.remove) {
+          this.checkersBoard.getGridAtIndex(data.action.remove).removePiece();
+        }
+        if (data.action.k) {
+          this.checkersBoard.getGridAtIndex(data.action.to).getPiece().setKing(true);
         }
       }
-    }
-    console.log(this);
-  }
-
-  processMove(data) {
-    if (this.checkersBoard.gridArray[0] !== undefined) {
-      console.log(data);
-      console.log(this.checkersBoard);
-      if (data.host === this.checkersBoard.player2) {
-        console.log(data.action.history.from);
-        console.log(this.checkersBoard);
-        console.log(this.checkersBoard.gridArray[44]);
-        console.log(this.checkersBoard.gridArray[63 - data.action.history.from]);
-        console.log(this.checkersBoard.gridArray);
-        console.log(this.checkersBoard.gridArray[0]);
-        this.checkersBoard.gridArray[63 - data.action.history.from]
-          .movePieceTo(this.checkersBoard.gridArray[63 - data.action.history.to]);
-        if (data.action.history.remove !== undefined && data.action.history.remove !== null) {
-          this.checkersBoard.gridArray[63 - data.action.history.remove].removePiece();
-        }
-        if (data.action.history.k) {
-          this.checkersBoard.gridArray[63 - data.action.history.to].checkerPiece.isKing = true;
-        }
-      } else if (data.host === this.checkersBoard.player1) {
-        this.checkersBoard.gridArray[data.action.history.from]
-          .movePieceTo(this.checkersBoard.gridArray[data.action.history.to]);
-        console.log(data);
-        if (data.action.history.remove !== undefined && data.action.history.remove !== null) {
-          this.checkersBoard.gridArray[data.action.history.remove].removePiece();
-        }
-        if (data.action.history.k) {
-          this.checkersBoard.gridArray[data.action.history.to].checkerPiece.isKing = true;
-        }
-      }
+      checkerBoard.checkWin();
     }
   }
 
   draw(ctx, camContext) {
     if (this.gameOn) {
-      this.checkersBoard.reDraw(camContext);
-      this.checkersBoard.drawBoard(ctx);
+      this.checkersBoard.drawBoard(ctx, camContext);
     }
   }
 }

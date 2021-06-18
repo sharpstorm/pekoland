@@ -65,6 +65,7 @@ function buildGameUpdate(opCode, data) {
   return {
     opCode,
     gameName: data.gameName,
+    lobbyId: data.lobbyId,
     from: data.from,
     player1: data.player1,
     player2: data.player2,
