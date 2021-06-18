@@ -22,12 +22,14 @@ import {
 
 import Chatbox from './ui/ui-chatbox.js';
 import Button, { LongButton } from './ui/ui-button.js';
+import GameMenu, { GameOverlay } from './ui/ui-game.js';
 import { UIAnchor } from './ui/ui-element.js';
-import { startGame } from './games/checkers.js';
+
+import CheckersGame from './games/checkers.js';
 import AdmissionPrompt from './ui/ui-admission-prompt.js';
 
 const networkManager = NetworkManager.getInstance();
-const inputSystem = new InputSystem(document.getElementById('ui'), document);
+const inputSystem = new InputSystem(document.getElementById('ui-overlay'), document);
 
 networkManager.on('connected', () => {
   console.log('Connected to remote');
@@ -151,17 +153,20 @@ Promise.all([netSetupPromise, assetSetupPromise])
 
     const voiceChannelManager = GameManager.getInstance().getVoiceChannelManager();
     const uiRenderer = Renderer.getUILayer();
+    const gameRenderer = Renderer.getGameLayer();
     const playerManager = PlayerManager.getInstance();
+    const worldManager = WorldManager.getInstance();
     const chatManager = GameManager.getInstance().getTextChannelManager();
+    const boardGameManager = GameManager.getInstance().getBoardGameManager();
+
+    inputSystem.addListener('click', (evt) => boardGameManager.handleEvent('click', evt, Renderer.getCameraContext()));
+
+    const checkersGame = new CheckersGame();
+    boardGameManager.register(checkersGame);
+    gameRenderer.register(checkersGame);
 
     const chatbox = new Chatbox();
     chatbox.addSubmitListener((msg) => {
-      if (msg.startsWith('start-game-checker ')) {
-        const parts = msg.split(' ');
-        startGame(parts[1], parts[2]);
-        return;
-      }
-
       chatManager.addToHistory(playerManager.getSelf().name, msg);
       playerManager.getSelf().chat.updateMessage(msg);
 
@@ -205,6 +210,49 @@ Promise.all([netSetupPromise, assetSetupPromise])
         micBtn.setContent(SpriteManager.getInstance().getSprite('icon-mic-muted'));
       }
     });
+
+    const gameMenu = new GameMenu(boardGameManager.gameList);
+    GameManager.getInstance().getBoardGameManager().registerGameMenuUI(gameMenu);
+
+    gameMenu.on('joinYes', () => boardGameManager.joinGame());
+    gameMenu.on('joinNo', () => {
+      boardGameManager.displayPage(-1);
+      boardGameManager.gameState = undefined;
+    });
+
+    gameMenu.on('gamePressed', (gameName) => {
+      if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {
+        const data = {
+          userId: playerManager.getSelfId(),
+          tableId: boardGameManager.tableId,
+          gameName,
+        };
+        NetworkManager.getInstance().send(buildClientGamePacket('register-lobby', data));
+      } else if (networkManager.getOperationMode() === NetworkManager.Mode.SERVER) {
+        worldManager.createLobby(boardGameManager.tableId,
+          playerManager.getSelfId(), gameName);
+        boardGameManager.gameState = 'hosting';
+        boardGameManager.displayPage(3);
+      }
+    });
+
+    gameMenu.on('spectateYes', () => boardGameManager.joinGameSpectate());
+    gameMenu.on('spectateNo', () => {
+      boardGameManager.displayPage(-1);
+      boardGameManager.gameState = undefined;
+    });
+
+    gameMenu.on('close', () => {
+      boardGameManager.closeGameMenu();
+      boardGameManager.gameState = undefined;
+    });
+
+    const gameOverlay = new GameOverlay();
+    GameManager.getInstance().getBoardGameManager().registerGameOverlayUI(gameOverlay);
+    gameOverlay.registerLeaveListener(() => { boardGameManager.leaveGame(); });
+
+    uiRenderer.addElement(gameMenu);
+    uiRenderer.addElement(gameOverlay);
     uiRenderer.addElement(menuBtn);
     uiRenderer.addElement(connectBtn);
     uiRenderer.addElement(micBtn);

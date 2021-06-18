@@ -1,7 +1,6 @@
 import PlayerManager from './player-manager.js';
 import MapManager from './map-manager.js';
 import GameConstants from '../game-constants.js';
-import { drawChecker } from '../games/checkers.js';
 
 class CameraContext {
   constructor(viewportWidth, viewportHeight) {
@@ -89,6 +88,29 @@ class UILayer {
   }
 }
 
+class GameLayer {
+  constructor() {
+    this.drawables = [];
+  }
+
+  register(game) {
+    this.drawables.push(game);
+  }
+
+  render(ctx, cam) {
+    this.drawables.forEach((x) => x.draw(ctx, cam));
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  propagateEvent(eventID, event, camContext) {
+    this.drawables.forEach((x) => {
+      if (x.handleEvent) {
+        x.handleEvent(eventID, event, camContext);
+      }
+    });
+  }
+}
+
 let instance;
 class Renderer {
   constructor() {
@@ -98,6 +120,8 @@ class Renderer {
     this.canvas = document.getElementById('game');
     this.ctx = this.canvas.getContext('2d', { alpha: false });
     this.uiLayer = new UILayer();
+    this.gameLayer = new GameLayer();
+    this.eventListeners = [];
 
     this.dimens = {
       width: this.canvas.width,
@@ -126,6 +150,11 @@ class Renderer {
     }));
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  propagateEvent(eventID, event) {
+    this.gameLayer.propagateEvent(eventID, event, this.cameraContext);
+  }
+
   render(timestamp) {
     let majorUpdate = false;
     const delta = timestamp - this.lastUpdate;
@@ -150,8 +179,8 @@ class Renderer {
       player.animate(delta, majorUpdate);
     });
 
-    // Checkers
-    drawChecker(this.ctx, camContext);
+    // Game Renderer
+    this.gameLayer.render(this.ctx, camContext);
 
     // Update Camera
     camContext.animate(delta);
@@ -181,6 +210,10 @@ class Renderer {
 
   getUILayer() {
     return this.uiLayer;
+  }
+
+  getGameLayer() {
+    return this.gameLayer;
   }
 
   static getInstance() {

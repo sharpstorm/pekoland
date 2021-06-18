@@ -78,6 +78,112 @@
   text-align: center;
 }
 
+#game-menu {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  border: 2px solid #CCC;
+  background-color: rgba(0, 0, 0, 0.9);
+}
+
+#game-menu-title {
+  border-bottom: 2px solid #CCC;
+  flex: 0 0 20%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+#game-menu.games > #game-menu-games { display: flex; }
+#game-menu.join > #game-menu-join { display: flex; }
+#game-menu.spectate > #game-menu-spectate { display: flex; }
+#game-menu.waiting > #game-menu-waiting { display: block; }
+
+#game-menu-games {
+  display: none;
+  flex: 1 1 0;
+  flex-direction: column;
+  width: 100%;
+  bottom: 0;
+  overflow-y: scroll;
+}
+
+#game-menu-games::-webkit-scrollbar { width: 10px; }
+#game-menu-games::-webkit-scrollbar-track { background: #333; }
+#game-menu-games::-webkit-scrollbar-thumb { background: #CCC; }
+
+#game-menu-join, #game-menu-spectate {
+  flex: 1 1 0;
+  display: none;
+  width: 100%;
+}
+
+#game-menu-join > div, #game-menu-spectate > div, #game-menu-games > div {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1 1 0;
+}
+
+#game-menu-games > div {
+  padding: 16px;
+  border-bottom: 1px solid #CCC;
+  min-height: 100px;
+}
+
+#game-menu-join > div:hover, #game-menu-spectate > div:hover, #game-menu-games > div:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+#game-menu-waiting {
+  flex: 1 1 0;
+  display: none;
+  background-image: url(../Images/waiting.gif);
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+}
+
+#game-menu-title-closebtn {
+  z-index: 20;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 24px;
+  height: 24px;
+  margin: 6px;
+  display: block;
+  background-image: url(../Images/x.png);
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+#game-overlay-window {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  justify-content: center;
+}
+
+#game-overlay-window-leave {
+  text-align: center;
+  height: 40%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.9);;
+}
+
+#game-overlay-window-leave:hover {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
 #admit-prompt {
   transition: transform 1s ease-in-out;
   will-change: transform;
