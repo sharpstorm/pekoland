@@ -125,9 +125,6 @@ function setupServerHooks() {
 
 networkManager.on('modeChanged', (mode) => {
   console.log(`Currently in ${mode === NetworkManager.Mode.SERVER ? 'server' : 'client'} mode`);
-  if (networkManager.getOperationMode() === NetworkManager.Mode.SERVER) {
-    setupServerHooks();
-  }
 });
 
 const netSetupPromise = timeout(networkManager.setup(), 5000);
@@ -145,6 +142,10 @@ Promise.all([netSetupPromise, assetSetupPromise])
   })
   .then(() => {
     console.log('setup successful');
+    if (networkManager.getOperationMode() === NetworkManager.Mode.SERVER) {
+      setupServerHooks();
+    }
+
     document.getElementById('loading-panel').style.display = 'none';
     document.getElementById('game-container').style.display = 'block';
 
