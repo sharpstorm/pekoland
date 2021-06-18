@@ -56,12 +56,23 @@ function handleChat(data, conn) {
 }
 
 function handleGameUpdate(data, conn) {
-  if (!data.gameName) {
+  console.log(data);
+  if (!data.gameName || !data.lobbyId) {
     return;
   }
 
-  GameManager.getInstance().getBoardGameManager().getGame(data.gameName).handleNetworkEvent(data);
-  NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('game-update-echo', data), conn.peer);
+  if (WorldManager.getInstance().lobbyExist(data.lobbyId)) {
+    WorldManager.getInstance().updateLobbyGameState(data.lobbyId, data.state);
+    const { spectators } = WorldManager.getInstance().getLobbyFromPlayer(data.from);
+    if (spectators !== undefined) {
+      spectators.forEach((userId) => {
+        NetworkManager.getInstance().getConnection()
+          .sendTo(buildGamePacket('game-update-echo', data), WorldManager.getInstance().getPeerId(userId));
+      });
+    }
+    NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('game-update-echo', data), conn.peer);
+    GameManager.getInstance().getBoardGameManager().getGame(data.gameName).handleNetworkEvent(data);
+  }
 }
 
 function handleJoinVoice(data, conn) {
@@ -98,10 +109,13 @@ function handleRegisterLobby(data, conn) {
 function handleJoinLobby(data, conn) {
   console.log(data);
   console.log(WorldManager.getInstance().gameLobbies);
-  if (!WorldManager.getInstance().lobbyExist
-    || WorldManager.getInstance().getJoiner(data.tableId) !== undefined) {
+  if (!WorldManager.getInstance().lobbyExist(data.tableId)) {
     conn.send(buildGamePacket('lobby-reply', 'lobby-join-fail'));
   } else if (data.mode === 'player') {
+    if (WorldManager.getInstance().getJoiner(data.tableId) !== undefined) {
+      conn.send(buildGamePacket('lobby-reply', 'lobby-join-fail'));
+      return;
+    }
     WorldManager.getInstance().joinLobby(data.tableId, data.userId);
     const newData = {
       mode: data.mode,
@@ -161,20 +175,6 @@ function handleLeaveLobby(data, conn) {
   }
 }
 
-// eslint-disable-next-line no-unused-vars
-function handleLobbyGameUpdate(data, conn) {
-  if (WorldManager.getInstance().lobbyExist(data.tableId)) {
-    WorldManager.getInstance().updateLobbyGameState(data.tableId, data.newGameState);
-    const spectators = WorldManager.getInstance().getLobbyFromPlayer(data.from);
-    if (spectators !== undefined) {
-      spectators.forEach((userId) => {
-        NetworkManager.getInstance().getConnection()
-          .sendTo(buildGamePacket('game-update-echo', data.move), WorldManager.getInstance().getPeerId(userId));
-      });
-    }
-  }
-}
-
 const handlers = {
   'handshake': handleHandshake,
   'spawn-request': handleSpawnRequest,
@@ -187,7 +187,6 @@ const handlers = {
   'register-lobby': handleRegisterLobby,
   'join-lobby': handleJoinLobby,
   'leave-lobby': handleLeaveLobby,
-  'game-lobby-update': handleLobbyGameUpdate,
 };
 
 // Conn can be used to uniquely identify the peer

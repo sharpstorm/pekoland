@@ -98,7 +98,7 @@ function handleStartGame(data, conn) {
       .startGame(data.gameName, data.player1, data.player2, data.tableId);
   } else if (data.mode === 'spectator') {
     GameManager.getInstance().getBoardGameManager()
-      .spectateGame(data.gameName, data.player1, data.player2);
+      .spectateGame(data.gameName, data.player1, data.player2, data.tableId, data.gameState);
   }
 }
 

@@ -50,6 +50,7 @@ export default class CheckersGame {
     const dataToSend = data;
     dataToSend.gameName = this.gameName;
     dataToSend.lobbyId = this.lobbyId;
+    dataToSend.state = this.getState();
 
     if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.CLIENT) {
       NetworkManager.getInstance().send(buildClientGamePacket('game-update', data));
@@ -81,6 +82,19 @@ export default class CheckersGame {
     this.lobbyId = lobbyId;
     this.gameOn = true;
     this.checkersBoard = new CheckerBoard(p1, p2, false);
+  }
+
+  updateState(state) {
+    if (this.checkersBoard !== undefined) {
+      this.checkersBoard.inflateState(state);
+    }
+  }
+
+  getState() {
+    if (this.checkersBoard !== undefined) {
+      return this.checkersBoard.getState();
+    }
+    return undefined;
   }
 
   handleNetworkEvent(data) {

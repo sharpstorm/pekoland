@@ -275,4 +275,31 @@ export default class CheckerBoard {
     }
     return moves;
   }
+
+  getState() {
+    return this.gridArray.map((grid) => {
+      const ret = { state: grid.getState() };
+      if (grid.hasPiece()) {
+        ret.p = {
+          k: grid.getPiece().isKing(),
+          p: grid.getPiece().getPlayer(),
+        };
+      }
+      return ret;
+    });
+  }
+
+  inflateState(data) {
+    data.forEach((x, idx) => {
+      const grid = this.gridArray[idx];
+      grid.setState(x.state);
+      if (x.p) {
+        const piece = new CheckerPiece(x.p.p);
+        piece.setKing(x.p.k);
+        grid.assignPiece(piece);
+      } else {
+        grid.removePiece();
+      }
+    });
+  }
 }

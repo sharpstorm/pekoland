@@ -198,10 +198,10 @@ Promise.all([netSetupPromise, assetSetupPromise])
       } else if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.CLIENT) {
         const data = {
           userId: playerManager.getSelfId(),
-          tableID: boardGameManager.tableID,
+          tableId: boardGameManager.tableID,
           mode: 'spectator',
         };
-        NetworkManager.getInstance().send(buildClientGamePacket('start-game', data));
+        NetworkManager.getInstance().send(buildClientGamePacket('join-lobby', data));
         boardGameManager.displayPage(-1);
       }
     });

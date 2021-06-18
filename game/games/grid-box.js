@@ -52,8 +52,6 @@ export default class GridBox {
 
   assignPiece(checkerPiece) {
     this.checkerPiece = checkerPiece;
-    this.checkerPiece.x = this.x;
-    this.checkerPiece.y = this.y;
   }
 
   removePiece() {

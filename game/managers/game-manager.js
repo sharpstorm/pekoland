@@ -7,7 +7,6 @@ import { timeout } from '../utils.js';
 
 // import Player from '../models/player.js';
 import PlayerManager from './player-manager.js';
-import Player from '../models/player.js';
 // import PlayerManager from './player-manager.js';
 
 let instance;
@@ -315,10 +314,11 @@ class BoardGameManager {
     }
   }
 
-  spectateGame(gameName, p1, p2) {
+  spectateGame(gameName, p1, p2, lobbyId, gameState) {
     const game = this.gameList.find((x) => x.gameName === gameName);
     if (game !== undefined) {
-      game.spectateGame(p1, p2);
+      game.spectateGame(p1, p2, lobbyId);
+      game.updateState(gameState);
       this.currentGame = gameName;
       this.closeGameMenu();
 
