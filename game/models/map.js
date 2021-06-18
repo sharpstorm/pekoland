@@ -29,7 +29,8 @@ export default class Map {
 
       for (let y = 0; y < this.mapHeight; y += unit) {
         const pixel = ctx.getImageData(x + (unit / 2), y + (unit / 2), 1, 1).data;
-        if (pixel[3] === 255 && pixel[0] === 0 && pixel[1] === 0 && pixel[2] === 0) {
+        if ((pixel[3] === 255 && pixel[0] === 0 && pixel[1] === 0 && pixel[2] === 0)
+          || (pixel[3] === 255 && pixel[0] === 255 && pixel[1] === 0 && pixel[2] === 0)) {
           collisionCol.push(1);
         } else {
           collisionCol.push(0);
