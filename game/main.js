@@ -169,12 +169,12 @@ Promise.all([netSetupPromise, assetSetupPromise])
       if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {
         const data = {
           userId: playerManager.getSelfId(),
-          tableId: boardGameManager.tableID,
+          tableId: boardGameManager.tableId,
           gameName,
         };
         NetworkManager.getInstance().send(buildClientGamePacket('register-lobby', data));
       } else if (networkManager.getOperationMode() === NetworkManager.Mode.SERVER) {
-        worldManager.createLobby(boardGameManager.tableID,
+        worldManager.createLobby(boardGameManager.tableId,
           playerManager.getSelfId(), gameName);
         boardGameManager.gameState = 'hosting';
         boardGameManager.displayPage(3);
