@@ -183,3 +183,13 @@
 #game-overlay-window-leave:hover {
   background-color: rgba(0, 0, 0, 0.7);
 }
+
+#admit-prompt {
+  transition: transform 1s ease-in-out;
+  will-change: transform;
+  transform: translateX(100%);
+}
+
+#admit-prompt.show {
+  transform: translateX(0);
+}
