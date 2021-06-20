@@ -26,6 +26,7 @@ import GameMenu, { GameOverlay } from './ui/ui-game.js';
 import { UIAnchor } from './ui/ui-element.js';
 
 import CheckersGame from './games/checkers.js';
+import BattleshipGame from './games/battleship/battleship.js';
 import AdmissionPrompt from './ui/ui-admission-prompt.js';
 
 const networkManager = NetworkManager.getInstance();
@@ -165,6 +166,10 @@ Promise.all([netSetupPromise, assetSetupPromise])
     const checkersGame = new CheckersGame();
     boardGameManager.register(checkersGame);
     gameRenderer.register(checkersGame);
+
+    const battleshipGame = new BattleshipGame();
+    boardGameManager.register(battleshipGame);
+    gameRenderer.register(battleshipGame);
 
     const chatbox = new Chatbox();
     chatbox.addSubmitListener((msg) => {
