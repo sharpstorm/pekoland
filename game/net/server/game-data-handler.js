@@ -42,7 +42,7 @@ function handleChat(data, conn) {
   NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('chat-echo', data), conn.peer);
 }
 
-function handleGameUpdate(data) {
+function handleGameUpdate(data, conn) {
   console.log(data);
   if (!data.gameName || !data.lobbyId) {
     return;
@@ -51,8 +51,10 @@ function handleGameUpdate(data) {
   if (WorldManager.getInstance().lobbyExist(data.lobbyId)) {
     WorldManager.getInstance().updateLobbyGameState(data.lobbyId, data.state);
 
+    const partnerUserId = WorldManager.getInstance().getPlayerId(conn.peer);
     WorldManager.getInstance().lobbyForAll(data.lobbyId, (userId) => {
-      if (userId === PlayerManager.getInstance().getSelfId()) {
+      if (userId === PlayerManager.getInstance().getSelfId()
+        || userId === partnerUserId) {
         return;
       }
       NetworkManager.getInstance().getConnection()
