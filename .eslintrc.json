@@ -21,13 +21,19 @@
         "react/prop-types": 0,
         "react/destructuring-assignment": 0,
         "react/no-did-update-set-state": 0,
-        "global-require": 0
+        "global-require": 0,
     },
     "overrides": [
         {
             "files": ["game/*.js", "game/*/*.js", "game/*/*/*.js"],
             "rules": {
                 "import/extensions": 0
+            }
+        },
+        {
+            "files": ["game/test/*.js"],
+            "rules": {
+                "import/no-extraneous-dependencies": 0
             }
         }
     ]
