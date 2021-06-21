@@ -80,6 +80,13 @@ export default class Map {
   }
 
   getFurniture(worldX, worldY) {
+    const scale = this.getUnitLength() / GameConstants.UNIT;
+    const scaledX = worldX * scale;
+    const scaledY = worldY * scale;
+
+    if (scaledX < 0 || scaledY < 0 || scaledX > this.mapWidth || scaledY > this.mapHeight) {
+      return undefined;
+    }
     const x = Math.floor(worldX / GameConstants.UNIT);
     const y = Math.floor(worldY / GameConstants.UNIT);
 

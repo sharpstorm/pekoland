@@ -91,6 +91,24 @@ export default function loadAssets() {
         spriteManager.registerSprite('panel', panel);
       });
 
-    Promise.all([load1, load2, load3, load4]).then(resolve);
+    const load5 = loadAsset('Images/battleship.png')
+      .then((x) => {
+        const spriteManager = SpriteManager.getInstance();
+        spriteManager.registerSprite('battleship-board', new Sprite(x, 0, 0, 512, 512));
+
+        spriteManager.registerSprite('battleship-bb-90', new Sprite(x, 514, 0, 46, 184));
+        spriteManager.registerSprite('battleship-dd-90', new Sprite(x, 562, 0, 46, 138));
+        spriteManager.registerSprite('battleship-cl-90', new Sprite(x, 562, 140, 46, 138));
+        spriteManager.registerSprite('battleship-cv-90', new Sprite(x, 610, 0, 46, 230));
+        spriteManager.registerSprite('battleship-ao-90', new Sprite(x, 658, 0, 46, 92));
+
+        spriteManager.registerSprite('battleship-bb', new Sprite(x, 514, 466, 184, 46));
+        spriteManager.registerSprite('battleship-cv', new Sprite(x, 514, 418, 230, 46));
+        spriteManager.registerSprite('battleship-cl', new Sprite(x, 514, 370, 138, 46));
+        spriteManager.registerSprite('battleship-dd', new Sprite(x, 514, 322, 138, 46));
+        spriteManager.registerSprite('battleship-ao', new Sprite(x, 654, 322, 92, 46));
+      });
+
+    Promise.all([load1, load2, load3, load4, load5]).then(resolve);
   });
 }

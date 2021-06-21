@@ -19,7 +19,7 @@ export default class InputSystem {
       || evtId === InputSystem.Events.DRAG
       || evtId === InputSystem.Events.DRAG_START
       || evtId === InputSystem.Events.DRAG_END) {
-      this.canvas.addEventListener(evtId, this.handleClick.bind(this));
+      this.canvas.addEventListener(evtId, (evt) => this.handleEvent(evtId, evt));
     } else {
       this.doc.addEventListener(evtId, (evt) => this.handleEvent(evtId, evt));
     }
@@ -44,10 +44,6 @@ export default class InputSystem {
     }
 
     this.handlers[evt] = this.handlers[evt].filter((x) => x !== handler);
-  }
-
-  handleClick(evt) {
-    this.handlers[InputSystem.Events.CLICK].forEach((x) => x(evt));
   }
 
   handleEvent(evtId, evt) {
