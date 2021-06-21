@@ -80,9 +80,11 @@ export default class Map {
   }
 
   getFurniture(worldX, worldY) {
-    const x = Math.floor(worldX / GameConstants.UNIT);
-    const y = Math.floor(worldY / GameConstants.UNIT);
-
-    return this.furnitureMatrix[x][y];
+    if (worldX > 0 && worldY > 0) {
+      const x = Math.floor(worldX / GameConstants.UNIT);
+      const y = Math.floor(worldY / GameConstants.UNIT);
+      return this.furnitureMatrix[x][y];
+    }
+    return undefined;
   }
 }

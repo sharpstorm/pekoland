@@ -26,6 +26,7 @@ import GameMenu, { GameOverlay } from './ui/ui-game.js';
 import { UIAnchor } from './ui/ui-element.js';
 
 import CheckersGame from './games/checkers.js';
+import DrawSomething from './games/draw-something.js';
 import AdmissionPrompt from './ui/ui-admission-prompt.js';
 
 const networkManager = NetworkManager.getInstance();
@@ -151,6 +152,10 @@ Promise.all([netSetupPromise, assetSetupPromise])
 
     inputSystem.addListener('keydown', joystickWorker);
     inputSystem.addListener('click', (evt) => Renderer.propagateEvent('click', evt));
+    inputSystem.addListener('keydown', (evt) => Renderer.propagateEvent('keydown', evt));
+    inputSystem.addListener('mousedown', (evt) => Renderer.propagateEvent('mousedown', evt));
+    inputSystem.addListener('mouseup', (evt) => Renderer.propagateEvent('mouseup', evt));
+    inputSystem.addListener('mousemove', (evt) => Renderer.propagateEvent('mousedown', evt));
 
     const voiceChannelManager = GameManager.getInstance().getVoiceChannelManager();
     const uiRenderer = Renderer.getUILayer();
@@ -161,10 +166,17 @@ Promise.all([netSetupPromise, assetSetupPromise])
     const boardGameManager = GameManager.getInstance().getBoardGameManager();
 
     inputSystem.addListener('click', (evt) => boardGameManager.handleEvent('click', evt, Renderer.getCameraContext()));
+    inputSystem.addListener('keydown', (evt) => boardGameManager.handleEvent('keydown', evt, Renderer.getCameraContext()));
+    inputSystem.addListener('mousedown', (evt) => boardGameManager.handleEvent('mousedown', evt, Renderer.getCameraContext()));
+    inputSystem.addListener('mousemove', (evt) => boardGameManager.handleEvent('mousemove', evt, Renderer.getCameraContext()));
+    inputSystem.addListener('mouseup', (evt) => boardGameManager.handleEvent('mouseup', evt, Renderer.getCameraContext()));
 
     const checkersGame = new CheckersGame();
+    const drawSomething = new DrawSomething();
     boardGameManager.register(checkersGame);
+    boardGameManager.register(drawSomething);
     gameRenderer.register(checkersGame);
+    gameRenderer.register(drawSomething);
 
     const chatbox = new Chatbox();
     chatbox.addSubmitListener((msg) => {
