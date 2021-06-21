@@ -87,8 +87,6 @@ export default class BattleshipGame {
   }
 
   handleNetworkEvent(data) {
-    console.log(data);
-
     if (this.gameActive && this.lobbyId === data.lobbyId) {
       if (data.action.move === 'shipsPlaced') {
         this.updateState(data.state);
@@ -250,8 +248,6 @@ export default class BattleshipGame {
   }
 
   placementComplete() {
-    console.log('done placement');
-
     this.sendNetworkUpdate({
       action: { move: 'shipsPlaced' },
     });

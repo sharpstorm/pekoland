@@ -230,15 +230,17 @@ export default class BattleshipBoard {
     this.hideShips = hideShips;
 
     this.shipsPlaced = false;
-    // this.board = document.createElement('canvas');
-    // this.cacheContext = this.board.getContext('2d');
+    this.cache = document.createElement('canvas');
+    this.cacheContext = this.cache.getContext('2d');
     this.boardSprite = SpriteManager.getInstance().getSprite('battleship-board');
     this.lastDrawnSize = -1;
+    this.canvasDirty = false;
 
     this.boardState = new BoardState();
   }
 
   addShip(shipType, x, y, orient) {
+    this.canvasDirty = true;
     return this.boardState.addShip(new Ship(shipType, x, y, orient));
   }
 
@@ -248,6 +250,7 @@ export default class BattleshipBoard {
 
   updateAlive() {
     this.boardState.updateShipsAlive();
+    this.canvasDirty = true;
   }
 
   getGridAtPosition(x, y, boardSize) {
@@ -263,6 +266,7 @@ export default class BattleshipBoard {
 
   setGridStateAtPosition(x, y, state) {
     this.boardState.setCellState(x, y, state);
+    this.canvasDirty = true;
   }
 
   getGridStateAtPosition(x, y) {
@@ -274,6 +278,8 @@ export default class BattleshipBoard {
   }
 
   fireAt(x, y) {
+    this.canvasDirty = true;
+
     const hit = this.boardState.getShipAt(x, y);
     if (hit !== undefined) {
       this.boardState.setCellState(x, y, STATE.HIT);
@@ -305,6 +311,7 @@ export default class BattleshipBoard {
   updateState(state) {
     this.boardState.inflate(state.board);
     this.shipsPlaced = state.fixed;
+    this.canvasDirty = true;
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -317,38 +324,43 @@ export default class BattleshipBoard {
   draw(ctx, x, y, size) {
     const { padding, cellSize } = this.getDrawParams(size);
 
-    /* if (this.lastDrawnSize !== size) {
-      this.board.width = size;
-      this.board.height = size;
-    } else {
-      ctx.drawImage(this.board, x, y);
-    } */
-    this.boardSprite.drawAt(ctx, x, y, size, size);
+    if (this.lastDrawnSize !== size || this.canvasDirty) {
+      this.cache.width = size;
+      this.cache.height = size;
+      const cacheCtx = this.cacheContext;
 
-    ctx.strokeStyle = '#000';
-    for (let j = 0; j < 10; j += 1) {
-      for (let i = 0; i < 10; i += 1) {
-        const state = this.boardState.getCellState(i, j);
-        if (state !== STATE.EMPTY) {
-          if (state === STATE.AIM) {
-            ctx.fillStyle = 'gold';
-          } else if (state === STATE.MISS) {
-            ctx.fillStyle = 'red';
-          } else if (state === STATE.HIT) {
-            ctx.fillStyle = 'DarkGreen';
+      cacheCtx.clearRect(0, 0, size, size);
+      this.boardSprite.drawAt(cacheCtx, 0, 0, size, size);
+
+      cacheCtx.strokeStyle = '#000';
+      for (let j = 0; j < 10; j += 1) {
+        for (let i = 0; i < 10; i += 1) {
+          const state = this.boardState.getCellState(i, j);
+          if (state !== STATE.EMPTY) {
+            if (state === STATE.AIM) {
+              cacheCtx.fillStyle = 'gold';
+            } else if (state === STATE.MISS) {
+              cacheCtx.fillStyle = 'red';
+            } else if (state === STATE.HIT) {
+              cacheCtx.fillStyle = 'DarkGreen';
+            }
+
+            cacheCtx.beginPath();
+            cacheCtx.rect(padding + (i * cellSize), padding + (j * cellSize), cellSize, cellSize);
+            cacheCtx.stroke();
+            cacheCtx.fill();
           }
-
-          ctx.beginPath();
-          ctx.rect(x + padding + (i * cellSize), y + padding + (j * cellSize), cellSize, cellSize);
-          ctx.stroke();
-          ctx.fill();
         }
       }
-    }
 
-    if (!this.hideShips) {
-      this.boardState.drawShips(ctx, x, y, cellSize, padding);
+      if (!this.hideShips) {
+        this.boardState.drawShips(cacheCtx, 0, 0, cellSize, padding);
+      }
+
+      this.canvasDirty = false;
+      this.lastDrawnSize = size;
     }
+    ctx.drawImage(this.cache, x, y);
   }
 }
 
