@@ -1,4 +1,5 @@
 import BattleshipBoard from './battleship-board.js';
+import SpriteManager from '../../managers/sprite-manager.js';
 
 const TYPES = [
   BattleshipBoard.SHIPTYPE.CARRIER,
@@ -21,55 +22,71 @@ export default class BattleshipPlacementUI {
     this.callback = callback;
 
     this.done = false;
+    this.background = SpriteManager.getInstance().getSprite('panel');
   }
 
   draw(ctx, x, y, size) {
     this.board.draw(ctx, x, y, size);
 
-    if (!this.done) {
-      // Draw UI
-      ctx.fillStyle = '#000';
-      ctx.beginPath();
-      ctx.rect(x + size + this.margin, y, size, size);
-      ctx.stroke();
-      ctx.fill();
+    const baseX = x + size + this.margin;
+    const baseY = y + 20;
+    this.background.drawAt(ctx, baseX, baseY, size, size - 20);
+    const height = size - 20;
 
-      ctx.fillStyle = '#FFF';
-      ctx.font = '1rem Arial';
-      ctx.fillText('Placing', x + size + this.margin + 20, y + 20);
+    if (!this.done) {
+      const padSize = Math.floor(height / 12);
+      const rowHeight = Math.floor(height / 6);
+      const colWidth = Math.floor(size / 2);
+
+      // Draw UI
+      ctx.font = '1.2rem Arial';
+      ctx.strokeStyle = '#000';
 
       for (let i = 0; i < 5; i += 1) {
+        const boxX = baseX + (Math.floor(i / 3) * colWidth);
+        const boxY = baseY + ((i % 3) * rowHeight) + padSize;
         if (i === this.currentPlacement) {
-          ctx.strokeStyle = '#F00';
+          ctx.fillStyle = '#CCC';
+          ctx.fillRect(boxX + 15, boxY + 5, colWidth - 30, rowHeight - 10);
         } else {
-          ctx.strokeStyle = '#FFF';
+          ctx.strokeRect(boxX + 15, boxY + 5, colWidth - 30, rowHeight - 10);
         }
-        ctx.strokeRect(x + size + this.margin + 10, y + 90 + (i * 50), 200, 30);
-        ctx.fillText(DISPLAY_NAME[i], x + size + this.margin + 20, y + 110 + (i * 50));
+        ctx.fillStyle = '#000';
+        this.drawCenterTextOn(ctx, DISPLAY_NAME[i], boxX + (colWidth / 2), boxY + (rowHeight / 2));
       }
 
-      ctx.strokeStyle = (this.currentOrient === BattleshipBoard.ORIENTATION.ORIENT_HORI) ? '#F00' : '#FFF';
-      ctx.strokeRect(x + size + this.margin + 10, y + 450, 200, 30);
-      ctx.fillText('Horizontal', x + size + this.margin + 20, y + 470);
+      if (this.currentOrient === BattleshipBoard.ORIENTATION.ORIENT_HORI) {
+        ctx.fillStyle = '#CCC';
+        ctx.fillRect(baseX + 15, baseY + rowHeight * 4, colWidth - 30, rowHeight - 10);
+      } else {
+        ctx.strokeRect(baseX + 15, baseY + rowHeight * 4, colWidth - 30, rowHeight - 10);
+      }
+      ctx.fillStyle = '#000';
+      this.drawCenterTextOn(ctx, 'Horizontal', baseX + (colWidth / 2), baseY + rowHeight * 4.5 - 5);
 
-      ctx.strokeStyle = (this.currentOrient === BattleshipBoard.ORIENTATION.ORIENT_VERT) ? '#F00' : '#FFF';
-      ctx.strokeRect(x + size + this.margin + 10, y + 500, 200, 30);
-      ctx.fillText('Vertical', x + size + this.margin + 20, y + 520);
+      if (this.currentOrient === BattleshipBoard.ORIENTATION.ORIENT_VERT) {
+        ctx.fillStyle = '#CCC';
+        ctx.fillRect(baseX + colWidth + 15, baseY + rowHeight * 4, colWidth - 30, rowHeight - 10);
+      } else {
+        ctx.strokeRect(baseX + colWidth + 15, baseY + rowHeight * 4, colWidth - 30, rowHeight - 10);
+      }
+      ctx.fillStyle = '#000';
+      this.drawCenterTextOn(ctx, 'Vertical', baseX + colWidth * 1.5, baseY + rowHeight * 4.5 - 5);
 
-      ctx.strokeStyle = '#FFF';
-      ctx.strokeRect(x + size + this.margin + 10, y + 570, 200, 30);
-      ctx.fillText('Done', x + size + this.margin + 20, y + 590);
+      ctx.strokeRect(baseX + 15, baseY + rowHeight * 5 + 15, (colWidth * 2) - 30, rowHeight - 30);
+      this.drawCenterTextOn(ctx, 'Done', baseX + colWidth, baseY + rowHeight * 5.5);
     } else {
       ctx.fillStyle = '#000';
-      ctx.beginPath();
-      ctx.rect(x + size + this.margin, y, size, size);
-      ctx.stroke();
-      ctx.fill();
-
-      ctx.fillStyle = '#FFF';
       ctx.font = '2rem Arial';
-      ctx.fillText('Waiting for Opponent to Place', x + size + this.margin + 40, y + 40);
+      this.drawCenterTextOn(ctx, 'Waiting for Opponent to Place', baseX + (size / 2), baseY + (height / 2));
     }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  drawCenterTextOn(ctx, text, x, y) {
+    const fontProps = ctx.measureText(text);
+    const fontHeight = fontProps.fontBoundingBoxAscent + fontProps.fontBoundingBoxDescent;
+    ctx.fillText(text, x - (fontProps.width / 2), y + (fontHeight / 2));
   }
 
   handleEvent(evtId, evt, drawParams) {
@@ -81,22 +98,32 @@ export default class BattleshipPlacementUI {
       const { boardSize, marginLeft, marginTop } = drawParams;
       const x = marginLeft;
       const y = marginTop + this.titleHeight;
-      for (let i = 0; i < 5; i += 1) {
-        if (evt.clientX > x + boardSize + this.margin + 10
-          && evt.clientX < x + boardSize + this.margin + 200
-          && evt.clientY > y + 90 + (i * 50)
-          && evt.clientY < y + 90 + (i * 50) + 30) {
-          this.currentPlacement = i;
-        }
-      }
+      const baseX = x + boardSize + this.margin;
+      const baseY = y + 20;
 
-      if (evt.clientX > x + boardSize + this.margin + 10
-        && evt.clientX < x + boardSize + this.margin + 200) {
-        if (evt.clientY > y + 450 && evt.clientY < y + 480) {
-          this.currentOrient = BattleshipBoard.ORIENTATION.ORIENT_HORI;
-        } else if (evt.clientY > y + 500 && evt.clientY < y + 530) {
-          this.currentOrient = BattleshipBoard.ORIENTATION.ORIENT_VERT;
-        } else if (evt.clientY > y + 570 && evt.clientY < y + 600) {
+      if (evt.clientX > baseX && evt.clientX < baseX + boardSize
+        && evt.clientY > baseY && evt.clientY < baseY + boardSize) {
+        // Right UI
+        const height = boardSize - 20;
+        const padSize = Math.floor(height / 12);
+        const rowHeight = Math.floor(height / 6);
+        const colWidth = Math.floor(boardSize / 2);
+
+        if (evt.clientY > baseY + padSize && evt.clientY < baseY + padSize + rowHeight * 3) {
+          // Placement
+          const row = Math.floor((evt.clientY - baseY - padSize) / rowHeight);
+          const col = Math.floor((evt.clientX - baseX) / colWidth);
+          this.currentPlacement = row + (col * 3);
+        } else if (evt.clientY > baseY + rowHeight * 4 && evt.clientY < baseY + rowHeight * 5) {
+          // Orientation
+          const col = Math.floor((evt.clientX - baseX) / colWidth);
+          if (col === 0) {
+            this.currentOrient = BattleshipBoard.ORIENTATION.ORIENT_HORI;
+          } else {
+            this.currentOrient = BattleshipBoard.ORIENTATION.ORIENT_VERT;
+          }
+        } else if (evt.clientY > baseY + rowHeight * 5 + 15
+          && evt.clientY < baseY + rowHeight * 6 - 15) {
           if (this.board.validatePlacement()) {
             this.board.setShipsPlaced(true);
             this.done = true;
