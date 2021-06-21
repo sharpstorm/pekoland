@@ -4,11 +4,12 @@
   "description": "An online multiplayer experience",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "NODE_OPTIONS='--experimental-vm-modules' jest ./game/test",
     "start": "parcel web/index.html --open",
     "build": "parcel build web/index.html",
     "bootstrap-db": "node ./server/bootstrap-faunadb.js"
   },
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sharpstorm/pekoland.git"
@@ -27,12 +28,14 @@
     "eslint-plugin-jsx-a11y": "^6.4.1",
     "eslint-plugin-react": "^7.24.0",
     "eslint-plugin-react-hooks": "^4.2.0",
+    "jest": "^27.0.4",
     "parcel-bundler": "^1.12.5"
   },
   "dependencies": {
     "assets": "^3.0.1",
     "classnames": "^2.3.1",
     "components": "^0.1.0",
+    "core-js": "^3.15.0",
     "dotenv": "^10.0.0",
     "faunadb": "^4.3.0",
     "react": "^17.0.2",
