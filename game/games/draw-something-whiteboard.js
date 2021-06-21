@@ -219,7 +219,7 @@ class DrawSomethingTimer {
 
   start() {
     if (!this.running) {
-      this.timer = setInterval(this.timerCount, 10);
+      this.timer = setInterval(this.timerCount, 1000);
       this.running = true;
     }
   }
