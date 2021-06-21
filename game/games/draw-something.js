@@ -4,6 +4,7 @@ import PlayerManager from '../managers/player-manager.js';
 import buildClientGamePacket from '../net/client/game-data-sender.js';
 import buildServerGamePacket from '../net/server/game-data-sender.js';
 import DrawSomethingWhiteboard, { DrawSomethingInputBox, DrawSomethingPrompt, DrawSomethingTimer, DrawSomethingScore } from './draw-something-whiteboard.js';
+import Player from '../models/player.js';
 
 export default class DrawSomething {
   constructor() {
@@ -14,7 +15,6 @@ export default class DrawSomething {
     this.prompt = new DrawSomethingPrompt();
     this.timer = new DrawSomethingTimer();
     this.score = new DrawSomethingScore();
-
 
     this.gameOn = false;
     this.currentTurn = undefined;
@@ -150,7 +150,7 @@ export default class DrawSomething {
     // console.log(data);
     const wb = this.whiteBoard;
     if (data.from !== PlayerManager.getInstance().getSelfId()) {
-      if (this.gameOn && wb !== undefined && this.lobbyId === data.lobbyId) {
+      if (this.gameOn && wb !== undefined && this.lobbyId === data.lobbyId && this.currentTurn !== PlayerManager.getInstance().getSelfId()) {
         wb.updateBoard(data.state.drawing);
         if (data.state.word !== undefined && data.state.word !== null) {
           this.currentWord = data.state.word;
@@ -199,18 +199,20 @@ export default class DrawSomething {
             from: PlayerManager.getInstance().getSelfId(),
             state: { nextRound: undefined, word: undefined, drawing: undefined },
           };
+          this.nextRound();
           setTimeout(() => {
             this.currentWord = this.wordList[Math.floor(Math.random() * (this.wordList.length))];
             this.wordList.splice(this.wordList.indexOf(this.currentWord), 1);
             data.state.word = this.currentWord;
             data.state.nextRound = true;
             data.state.timeUp = true;
-            this.nextRound();
+
             this.sendNetworkUpdate(data);
             // console.log(this.currentWord);
             this.prompt.set(`${this.currentTurn} is drawing`);
             this.timer.start();
           }, 1000);
+          this.whiteBoard.reset();
         }
       }
       if (this.currentTurn !== PlayerManager.getInstance().getSelfId()) {

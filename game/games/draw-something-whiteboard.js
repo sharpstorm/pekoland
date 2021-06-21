@@ -34,6 +34,7 @@ export default class DrawSomethingWhiteboard {
     canvCtx.fillStyle = 'black';
     canvCtx.rect(0, 0, 500, 500);
     canvCtx.fill();
+    this.isDrawing = false;
   }
 
   // eslint-disable-next-line class-methods-use-this
