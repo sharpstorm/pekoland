@@ -5,11 +5,11 @@ const TYPES = [
   BattleshipBoard.SHIPTYPE.CARRIER,
   BattleshipBoard.SHIPTYPE.BATTLESHIP,
   BattleshipBoard.SHIPTYPE.CRUISER,
-  BattleshipBoard.SHIPTYPE.SUBMARINE,
   BattleshipBoard.SHIPTYPE.DESTROYER,
+  BattleshipBoard.SHIPTYPE.OILER,
 ];
 
-const DISPLAY_NAME = ['Aircraft Carrier', 'Battleship', 'Cruiser', 'Submarine', 'Destroyer'];
+const DISPLAY_NAME = ['Aircraft Carrier', 'Battleship', 'Cruiser', 'Destroyer', 'Oiler'];
 
 export default class BattleshipPlacementUI {
   constructor(margin, titleHeight, board, callback) {

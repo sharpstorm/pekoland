@@ -1,5 +1,7 @@
+import SpriteManager from '../../managers/sprite-manager.js';
+
 const SIZE_CHART = [5, 4, 3, 3, 2];
-const SHIP_COLOR = ['blue', 'salmon', 'green', 'gray', 'magenta'];
+const SPRITES = ['battleship-cv', 'battleship-bb', 'battleship-cl', 'battleship-dd', 'battleship-ao'];
 const ORIENTATION = {
   ORIENT_HORI: 0,
   ORIENT_VERT: 1,
@@ -209,19 +211,15 @@ class BoardState {
   }
 
   drawShips(ctx, x, y, cellSize, padding) {
-    const cellPad = Math.floor(cellSize * 0.1); // 10% of cell as pad
     this.ships.forEach((ship) => {
       if (ship !== undefined) {
-        ctx.fillStyle = SHIP_COLOR[ship.type];
-        ctx.beginPath();
+        const sprite = SpriteManager.getInstance().getSprite(SPRITES[ship.type]
+          + ((ship.orient === ORIENTATION.ORIENT_VERT) ? '-90' : ''));
         const width = (ship.orient === ORIENTATION.ORIENT_HORI) ? SIZE_CHART[ship.type] : 1;
         const height = (ship.orient === ORIENTATION.ORIENT_VERT) ? SIZE_CHART[ship.type] : 1;
-        ctx.rect(x + (ship.x * cellSize) + padding + cellPad,
-          y + (ship.y * cellSize) + padding + cellPad,
-          (width * cellSize) - (cellPad * 2),
-          (height * cellSize) - (cellPad * 2));
-        ctx.stroke();
-        ctx.fill();
+
+        sprite.drawAt(ctx, x + (ship.x * cellSize) + padding, y + (ship.y * cellSize) + padding,
+          width * cellSize, height * cellSize);
       }
     });
   }
@@ -232,8 +230,9 @@ export default class BattleshipBoard {
     this.hideShips = hideShips;
 
     this.shipsPlaced = false;
-    this.board = document.createElement('canvas');
-    this.cacheContext = this.board.getContext('2d');
+    // this.board = document.createElement('canvas');
+    // this.cacheContext = this.board.getContext('2d');
+    this.boardSprite = SpriteManager.getInstance().getSprite('battleship-board');
     this.lastDrawnSize = -1;
 
     this.boardState = new BoardState();
@@ -311,54 +310,22 @@ export default class BattleshipBoard {
   // eslint-disable-next-line class-methods-use-this
   getDrawParams(size) {
     const cellSize = Math.floor(size / 11);
-    const padding = size - (cellSize * 10);
+    const padding = Math.floor((size - (cellSize * 10)) * 0.69);
     return { cellSize, padding };
   }
 
   draw(ctx, x, y, size) {
     const { padding, cellSize } = this.getDrawParams(size);
 
-    if (this.lastDrawnSize !== size || this.gridDirty) {
+    /* if (this.lastDrawnSize !== size) {
       this.board.width = size;
       this.board.height = size;
-
-      const cacheCtx = this.cacheContext;
-      cacheCtx.fillStyle = '#000';
-      cacheCtx.strokeStyle = '#CCC';
-      cacheCtx.font = 'Bold Arial 16px';
-      cacheCtx.clearRect(0, 0, size, size);
-      cacheCtx.beginPath();
-      cacheCtx.rect(x, y, size, size);
-      cacheCtx.stroke();
-      cacheCtx.fill();
-
-      for (let j = 0; j < 10; j += 1) {
-        for (let i = 0; i < 10; i += 1) {
-          cacheCtx.beginPath();
-          cacheCtx.rect(padding + (i * cellSize), padding + (j * cellSize), cellSize, cellSize);
-          cacheCtx.stroke();
-          cacheCtx.fill();
-        }
-      }
-
-      // Markers
-      const yMarker = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
-      for (let i = 0; i < 10; i += 1) {
-        cacheCtx.fillText(yMarker[i], 0, padding + (i * cellSize) + (cellSize / 2));
-      }
-
-      const xMarker = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
-      for (let i = 0; i < 10; i += 1) {
-        cacheCtx.fillText(xMarker[i], padding + (i * cellSize) + (cellSize / 2), padding - 4);
-      }
-
-      ctx.drawImage(this.board, x, y);
-      this.lastDrawnSize = size;
-      this.gridDirty = false;
     } else {
       ctx.drawImage(this.board, x, y);
-    }
+    } */
+    this.boardSprite.drawAt(ctx, x, y, size, size);
 
+    ctx.strokeStyle = '#000';
     for (let j = 0; j < 10; j += 1) {
       for (let i = 0; i < 10; i += 1) {
         const state = this.boardState.getCellState(i, j);
@@ -368,7 +335,7 @@ export default class BattleshipBoard {
           } else if (state === STATE.MISS) {
             ctx.fillStyle = 'red';
           } else if (state === STATE.HIT) {
-            ctx.fillStyle = 'MediumSeaGreen';
+            ctx.fillStyle = 'DarkGreen';
           }
 
           ctx.beginPath();
@@ -389,8 +356,8 @@ BattleshipBoard.SHIPTYPE = {
   CARRIER: 0,
   BATTLESHIP: 1,
   CRUISER: 2,
-  SUBMARINE: 3,
-  DESTROYER: 4,
+  DESTROYER: 3,
+  OILER: 4,
 };
 
 BattleshipBoard.ORIENTATION = ORIENTATION;
