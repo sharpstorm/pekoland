@@ -4,12 +4,12 @@
   "description": "An online multiplayer experience",
   "main": "index.js",
   "scripts": {
-    "test": "NODE_OPTIONS='--experimental-vm-modules' jest ./game/test",
+    "test": "jest ./game/test",
+    "testonly": "jest --verbose -t",
     "start": "parcel web/index.html --open",
     "build": "parcel build web/index.html",
     "bootstrap-db": "node ./server/bootstrap-faunadb.js"
   },
-  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sharpstorm/pekoland.git"
@@ -22,6 +22,9 @@
   },
   "homepage": "https://github.com/sharpstorm/pekoland#readme",
   "devDependencies": {
+    "@babel/core": "^7.14.6",
+    "@babel/preset-env": "^7.14.7",
+    "babel-jest": "^27.0.2",
     "eslint": "^7.28.0",
     "eslint-config-airbnb": "^18.2.1",
     "eslint-plugin-import": "^2.23.4",
