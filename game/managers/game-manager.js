@@ -209,7 +209,8 @@ class BoardGameManager {
   }
 
   handleEvent(eventId, event, camContext) {
-    if (eventId === 'click') {
+    if (event.type === 'click') {
+      // console.log(event);
       const worldX = camContext.x + event.clientX;
       const worldY = camContext.y + event.clientY;
 

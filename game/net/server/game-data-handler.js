@@ -43,7 +43,8 @@ function handleChat(data, conn) {
 }
 
 function handleGameUpdate(data, conn) {
-  console.log(data);
+  // console.log(data);
+
   if (!data.gameName || !data.lobbyId) {
     return;
   }
@@ -112,7 +113,7 @@ function handleJoinLobby(data, conn) {
       player2: WorldManager.getInstance().getJoiner(data.tableId),
       gameName: WorldManager.getInstance().getGameName(data.tableId),
     };
-    conn.send(buildGamePacket('start-game', newData));
+
     NetworkManager.getInstance().getConnection()
       .sendTo(buildGamePacket('start-game', newData), WorldManager.getInstance().getPeerId(WorldManager.getInstance().getJoiner(data.tableId)));
     NetworkManager.getInstance().getConnection()
