@@ -2,7 +2,6 @@ import { expect, jest, test } from '@jest/globals';
 import Connection, { BroadcastConnection } from '../net/connection';
 import NetworkManager from '../net/network-manager';
 import ConfigStore from '../net/config-store';
-import CallManager from '../net/call-manager';
 
 jest.mock('../net/config-store');
 jest.mock('../net/call-manager');
@@ -10,6 +9,11 @@ jest.mock('../net/call-manager');
 const TEST_TARGET = 'abcde';
 const TEST_RECV = 'teststring';
 const TEST_SEND = 'testsend';
+
+// eslint-disable-next-line no-undef
+afterEach(() => {
+  jest.useRealTimers();
+});
 
 test('[Network] Test Connection Object', async () => {
   const handlers = {};
@@ -65,7 +69,6 @@ test('[Network] Test Connection Object', async () => {
   expect(receiver).toHaveBeenCalled();
 });
 
-/* jest.setTimeout(11000);
 test('[Network] Test Connection Fail', async () => {
   const mockClient = {
     connect: () => {
@@ -74,11 +77,14 @@ test('[Network] Test Connection Fail', async () => {
     },
   };
 
+  jest.useFakeTimers();
   const conn = new Connection(mockClient, TEST_TARGET);
-  return expect(conn.connect()).rejects.toBeUndefined();
-}); */
+  const promise = conn.connect();
 
-jest.setTimeout(5000);
+  jest.runAllTimers();
+  return expect(promise).rejects.toBeUndefined();
+});
+
 test('[Network] Test BroadcastConnection', () => {
   const mockConn = (id) => {
     const handlers = {};
