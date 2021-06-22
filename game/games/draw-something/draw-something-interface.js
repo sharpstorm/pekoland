@@ -41,6 +41,7 @@ export default class DrawSomethingWhiteboard {
     image.src = this.canv.toDataURL('image/png');
     ctx.beginPath();
     ctx.strokeStyle = BORDER_COLOR;
+    const lineWidthOld = ctx.lineWidth;
     ctx.lineWidth = 5;
     ctx.fillStyle = 'white';
     const x = camContext.viewportWidth / 2 - (BOARD_SIZE / 2);
@@ -59,7 +60,7 @@ export default class DrawSomethingWhiteboard {
       this.canvCtx.lineTo(this.newX, this.newY);
       this.canvCtx.stroke();
     }
-    ctx.lineWidth = 1;
+    ctx.lineWidth = lineWidthOld;
   }
 
   updateBoard(image) {
@@ -111,6 +112,7 @@ class DrawSomethingInputBox {
 
     ctx.strokeStyle = BORDER_COLOR;
     ctx.stroke();
+    const lineWidthOld = ctx.lineWidth;
     ctx.lineWidth = this.lineWidth;
     ctx.beginPath();
 
@@ -126,6 +128,7 @@ class DrawSomethingInputBox {
       BORDER_COLOR = 'white';
       this.lineWidth = 1;
     }
+    ctx.lineWidth = lineWidthOld;
   }
 
   handle(e) {
