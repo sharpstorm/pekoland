@@ -73,6 +73,7 @@ export default class DrawSomething {
   }
 
   sendNetworkUpdate(data) {
+    this.checkWin();
     const dataToSend = data;
     if (dataToSend.state !== undefined) {
       dataToSend.gameName = this.gameName;
@@ -105,6 +106,7 @@ export default class DrawSomething {
     if (!this.gameOn) {
       return;
     }
+    this.checkWin();
     const wb = this.whiteBoard;
     if (this.gameOn && wb !== undefined && this.lobbyId === data.lobbyId
         && this.currentTurn !== PlayerManager.getInstance().getSelfId()) {
@@ -159,11 +161,13 @@ export default class DrawSomething {
   }
 
   endGame() {
+    this.players = [];
     this.gameOn = false;
     this.lobbyId = undefined;
   }
 
   spectateGame(p1, p2, lobbyId) {
+    this.players = [];
     this.gameOn = true;
     this.lobbyId = lobbyId;
     this.players.push(p1);
@@ -180,20 +184,23 @@ export default class DrawSomething {
     return this.whiteBoard.getImage();
   }
 
+  checkWin() {
+    if (this.wordList.length === 0 && !this.gameFin) {
+      this.prompt.set(`Final Score: ${this.players[0]}: ${this.scoreTable[this.players[0]]}, ${this.players[1]}: ${this.scoreTable[this.players[1]]}`);
+      if (this.scoreTable[this.players[0]] > this.scoreTable[this.players[1]]) {
+        alert(`${this.players[0]} wins`);
+      } else if (this.scoreTable[this.players[0]] < this.scoreTable[this.players[1]]) {
+        alert(`${this.players[1]} wins`);
+      } else {
+        alert('Its a draw');
+      }
+      this.timer.stop();
+      this.gameFin = true;
+    }
+  }
+
   draw(ctx, camContext) {
     if (this.gameOn) {
-      if (this.wordList.length === 0 && !this.gameFin) {
-        this.prompt.set(`Final Score: ${this.players[0]}: ${this.scoreTable[this.players[0]]}, ${this.players[1]}: ${this.scoreTable[this.players[1]]}`);
-        if (this.scoreTable[this.players[0]] > this.scoreTable[this.players[1]]) {
-          alert(`${this.players[0]} wins`);
-        } else if (this.scoreTable[this.players[0]] < this.scoreTable[this.players[1]]) {
-          alert(`${this.players[1]} wins`);
-        } else {
-          alert('Its a draw');
-        }
-        this.timer.stop();
-        this.gameFin = true;
-      }
       this.whiteBoard.draw(ctx, camContext);
       this.timer.draw(ctx, camContext);
       this.score.draw(ctx, camContext);
