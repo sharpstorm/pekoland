@@ -151,13 +151,6 @@ export default class DrawSomething {
     this.whiteBoard.reset();
     this.players.push(p1);
     this.players.push(p2);
-    if (PlayerManager.getInstance().getSelfId() === p2) {
-      if (this.players.length === 4) {
-        this.players.pop();
-        this.players.pop();
-        this.pCounter -= 1;
-      }
-    }
     this.nextRound();
   }
 

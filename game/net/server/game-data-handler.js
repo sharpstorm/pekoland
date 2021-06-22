@@ -113,7 +113,7 @@ function handleJoinLobby(data, conn) {
       player2: WorldManager.getInstance().getJoiner(data.tableId),
       gameName: WorldManager.getInstance().getGameName(data.tableId),
     };
-    conn.send(buildGamePacket('start-game', newData));
+
     NetworkManager.getInstance().getConnection()
       .sendTo(buildGamePacket('start-game', newData), WorldManager.getInstance().getPeerId(WorldManager.getInstance().getJoiner(data.tableId)));
     NetworkManager.getInstance().getConnection()
