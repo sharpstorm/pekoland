@@ -45,14 +45,15 @@ export default class NetworkManager {
 
     return Promise.all([configPromise, peerPromise])
       .then((() => {
-        this.state = NetworkManager.State.INITIALIZED;
+        this.state = (this.mode === NetworkManager.Mode.SERVER)
+          ? NetworkManager.State.READY
+          : NetworkManager.State.INITIALIZED;
         this.emitEvent(NetworkManager.Events.INITIALIZED);
       }).bind(this));
   }
 
   hookServerHandlers() {
     this.connection = new BroadcastConnection();
-    this.state = NetworkManager.State.READY;
 
     this.peer.on('connection', ((dataConnection) => {
       dataConnection.on('open', (() => {
