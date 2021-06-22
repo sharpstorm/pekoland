@@ -13,6 +13,7 @@ export default class DrawSomethingWhiteboard {
     this.x = undefined;
     this.y = undefined;
     this.canv = undefined;
+    this.canvContext = undefined;
     this.counter = 0;
     this.setup();
     this.freeze = false;
@@ -23,18 +24,15 @@ export default class DrawSomethingWhiteboard {
     canv.id = 'whiteboard';
     canv.height = 500;
     canv.width = 500;
-    const canvCtx = canv.getContext('2d');
-    canvCtx.fillStyle = 'black';
-    canvCtx.rect(0, 0, 500, 500);
-    canvCtx.fill();
+    this.canvCtx = canv.getContext('2d');
+    this.canvCtx.fillStyle = 'black';
+    this.canvCtx.fillRect(0, 0, 500, 500);
     this.canv = canv;
   }
 
   reset() {
-    const canvCtx = this.canv.getContext('2d');
-    canvCtx.fillStyle = 'black';
-    canvCtx.rect(0, 0, 500, 500);
-    canvCtx.fill();
+    this.canvCtx.fillStyle = 'black';
+    this.canvCtx.fillRect(0, 0, 500, 500);
     this.isDrawing = false;
   }
 
@@ -55,22 +53,21 @@ export default class DrawSomethingWhiteboard {
     ctx.drawImage(this.canv, x + 2.5, y + 2.5, 500, 500);
 
     if (this.isDrawing) {
-      const canvCtx = this.canv.getContext('2d');
-      canvCtx.beginPath();
-      canvCtx.lineWidth = 1;
-      canvCtx.strokeStyle = 'yellow';
-      canvCtx.moveTo(this.x, this.y);
-      canvCtx.lineTo(this.newX, this.newY);
-      canvCtx.stroke();
+      this.canvCtx.beginPath();
+      this.canvCtx.lineWidth = 1;
+      this.canvCtx.strokeStyle = 'yellow';
+      this.canvCtx.moveTo(this.x, this.y);
+      this.canvCtx.lineTo(this.newX, this.newY);
+      this.canvCtx.stroke();
     }
+    ctx.lineWidth = 1;
   }
 
   updateBoard(image) {
     if (!this.freeze) {
       const newImage = new Image();
       newImage.src = image;
-      const canvCtx = this.canv.getContext('2d');
-      canvCtx.drawImage(newImage, 0, 0);
+      this.canvCtx.drawImage(newImage, 0, 0);
     }
   }
 
@@ -87,7 +84,6 @@ export default class DrawSomethingWhiteboard {
     }
     if (e.type === 'mousemove') {
       if (this.counter > 1) {
-      // console.log(e.x)
         this.x = this.newX;
         this.y = this.newY;
         this.newX = e.x - this.topX;

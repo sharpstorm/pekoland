@@ -29,6 +29,13 @@ export default class DrawSomething {
     this.scoreTable = {};
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  importWordList() {
+    const fso = new ActiveXObject('Scripting.FileSystemObject');
+		const s = fso.OpenTextFile('test.txt', 1, false);
+    console.log(fileList);
+  }
+
   handleEvent(evtId, e) {
     const data = {
       from: PlayerManager.getInstance().getSelfId(),
@@ -37,17 +44,12 @@ export default class DrawSomething {
         word: undefined,
         drawing: undefined,
         nextDrawer: undefined,
-        orrect: undefined,
+        correct: undefined,
       },
     };
-    if (this.currentTurn === PlayerManager.getInstance().getSelfId()) {
-      if (evtId === 'keydown') {
-        this.inputBox.handle(e);
-      }
-      if (this.gameOn && this.currentTurn === PlayerManager.getInstance().getSelfId()) {
-        this.sendNetworkUpdate(data);
-        this.whiteBoard.handle(e);
-      }
+    if (this.gameOn && this.currentTurn === PlayerManager.getInstance().getSelfId()) {
+      this.sendNetworkUpdate(data);
+      this.whiteBoard.handle(e);
     } else if (evtId === 'keydown') {
       this.inputBox.handle(e);
       if (e.key === 'Enter') {
@@ -72,18 +74,18 @@ export default class DrawSomething {
 
   sendNetworkUpdate(data) {
     const dataToSend = data;
-    dataToSend.gameName = this.gameName;
-    dataToSend.lobbyId = this.lobbyId;
-    dataToSend.state.drawing = this.whiteBoard.getImage();
-    if (this.currentTurn === PlayerManager.getInstance().getSelfId()
-    && this.currentWord === undefined) {
-      this.currentWord = this.wordList[Math.floor(Math.random() * (this.wordList.length))];
-      this.wordList.splice(this.wordList.indexOf(this.currentWord), 1);
-      this.prompt.set(`Draw ${this.currentWord}`);
-      dataToSend.state.word = this.currentWord;
-      this.timer.start();
-    }
     if (dataToSend.state !== undefined) {
+      dataToSend.gameName = this.gameName;
+      dataToSend.lobbyId = this.lobbyId;
+      dataToSend.state.drawing = this.whiteBoard.getImage();
+      if (this.currentTurn === PlayerManager.getInstance().getSelfId()
+      && this.currentWord === undefined) {
+        this.currentWord = this.wordList[Math.floor(Math.random() * (this.wordList.length))];
+        this.wordList.splice(this.wordList.indexOf(this.currentWord), 1);
+        this.prompt.set(`Draw ${this.currentWord}`);
+        dataToSend.state.word = this.currentWord;
+        this.timer.start();
+      }
       if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.CLIENT) {
         NetworkManager.getInstance().send(buildClientGamePacket('game-update', data));
       } else if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.SERVER) {
@@ -100,7 +102,9 @@ export default class DrawSomething {
   }
 
   handleNetworkEvent(data) {
-    console.log(data);
+    if (!this.gameOn) {
+      return;
+    }
     const wb = this.whiteBoard;
     if (this.gameOn && wb !== undefined && this.lobbyId === data.lobbyId
         && this.currentTurn !== PlayerManager.getInstance().getSelfId()) {
@@ -186,7 +190,6 @@ export default class DrawSomething {
   draw(ctx, camContext) {
     if (this.gameOn) {
       if (this.wordList.length === 0 && !this.gameFin) {
-        console.log(this.scoreTable);
         this.prompt.set(`Final Score: ${this.players[0]}: ${this.scoreTable[this.players[0]]}, ${this.players[1]}: ${this.scoreTable[this.players[1]]}`);
         if (this.scoreTable[this.players[0]] > this.scoreTable[this.players[1]]) {
           alert(`${this.players[0]} wins`);
@@ -220,7 +223,6 @@ export default class DrawSomething {
             data.state.timeUp = true;
 
             this.sendNetworkUpdate(data);
-            // console.log(this.currentWord);
             this.prompt.set(`${this.currentTurn} is drawing`);
             this.timer.start();
           }, 1000);
