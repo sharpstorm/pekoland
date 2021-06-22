@@ -15,6 +15,7 @@ export default class DrawSomethingWhiteboard {
     this.canv = undefined;
     this.counter = 0;
     this.setup();
+    this.freeze = false;
   }
 
   setup() {
@@ -65,18 +66,18 @@ export default class DrawSomethingWhiteboard {
   }
 
   updateBoard(image) {
-    // console.log(image);
-    const newImage = new Image();
-    newImage.src = image;
-    const canvCtx = this.canv.getContext('2d');
-    canvCtx.drawImage(newImage, 0, 0);
+    if (!this.freeze) {
+      const newImage = new Image();
+      newImage.src = image;
+      const canvCtx = this.canv.getContext('2d');
+      canvCtx.drawImage(newImage, 0, 0);
+    }
   }
 
   getImage() {
     return this.canv.toDataURL('image/jpg');
   }
 
-  // eslint-disable-next-line class-methods-use-this
   handle(e) {
     if (e.type === 'mousedown') {
       this.isDrawing = true;
@@ -133,11 +134,9 @@ class DrawSomethingInputBox {
   }
 
   handle(e) {
-    // console.log(e);
     if (e.keyCode === 8) {
       this.text = this.text.substring(0, this.text.length - 1);
-    }
-    else if (e.key.length === 1) {
+    } else if (e.key.length === 1) {
       this.text += e.key;
     }
   }
@@ -266,4 +265,10 @@ class DrawSomethingScore {
   }
 }
 
-export { DrawSomethingWhiteboard, DrawSomethingInputBox, DrawSomethingPrompt, DrawSomethingTimer, DrawSomethingScore };
+export {
+  DrawSomethingWhiteboard,
+  DrawSomethingInputBox,
+  DrawSomethingPrompt,
+  DrawSomethingTimer,
+  DrawSomethingScore,
+};

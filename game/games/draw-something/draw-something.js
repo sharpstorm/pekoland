@@ -1,9 +1,15 @@
-import WorldManager from '../managers/world-manager.js';
-import NetworkManager from '../net/network-manager.js';
-import PlayerManager from '../managers/player-manager.js';
-import buildClientGamePacket from '../net/client/game-data-sender.js';
-import buildServerGamePacket from '../net/server/game-data-sender.js';
-import DrawSomethingWhiteboard, { DrawSomethingInputBox, DrawSomethingPrompt, DrawSomethingTimer, DrawSomethingScore } from './draw-something-whiteboard.js';
+import WorldManager from '../../managers/world-manager.js';
+import NetworkManager from '../../net/network-manager.js';
+import PlayerManager from '../../managers/player-manager.js';
+import buildClientGamePacket from '../../net/client/game-data-sender.js';
+import buildServerGamePacket from '../../net/server/game-data-sender.js';
+import {
+  DrawSomethingWhiteboard,
+  DrawSomethingInputBox,
+  DrawSomethingPrompt,
+  DrawSomethingTimer,
+  DrawSomethingScore,
+} from './draw-something-interface.js';
 
 export default class DrawSomething {
   constructor() {
@@ -23,8 +29,7 @@ export default class DrawSomething {
     this.scoreTable = {};
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  handleEvent(evtId, e, camContext) {
+  handleEvent(evtId, e) {
     const data = {
       from: PlayerManager.getInstance().getSelfId(),
       state: {
@@ -46,12 +51,7 @@ export default class DrawSomething {
     } else if (evtId === 'keydown') {
       this.inputBox.handle(e);
       if (e.key === 'Enter') {
-        // console.log(this.inputBox.getWord());
-        // console.log(this.currentWord);
         if (this.inputBox.getWord().toUpperCase() === this.currentWord.toUpperCase()) {
-          console.log('here');
-          console.log(this.currentWord);
-          console.log(this.inputBox.getWord());
           data.state.nextRound = true;
           this.currentWord = undefined;
           data.state.correct = true;
@@ -83,9 +83,7 @@ export default class DrawSomething {
       dataToSend.state.word = this.currentWord;
       this.timer.start();
     }
-    // console.log(this.whiteBoard.getImage());
     if (dataToSend.state !== undefined) {
-      // console.log(data);
       if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.CLIENT) {
         NetworkManager.getInstance().send(buildClientGamePacket('game-update', data));
       } else if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.SERVER) {
@@ -101,6 +99,31 @@ export default class DrawSomething {
     }
   }
 
+  handleNetworkEvent(data) {
+    console.log(data);
+    const wb = this.whiteBoard;
+    if (this.gameOn && wb !== undefined && this.lobbyId === data.lobbyId
+        && this.currentTurn !== PlayerManager.getInstance().getSelfId()) {
+      wb.updateBoard(data.state.drawing);
+    }
+    if (data.state.word !== undefined && data.state.word !== null) {
+      this.currentWord = data.state.word;
+      this.wordList.splice(this.wordList.indexOf(this.currentWord), 1);
+      this.prompt.set(`${data.from} is drawing`);
+      if (data.state.timeUp && this.players.includes(PlayerManager.getInstance().getSelfId())) {
+        this.prompt.set(`Draw ${data.state.word}`);
+      }
+      this.timer.start();
+    }
+    if (data.state.nextRound) {
+      this.whiteBoard.freeze = false;
+      this.nextRound();
+    }
+    if (data.state.correct) {
+      this.scoreTable[data.from] += 1;
+    }
+  }
+
   nextRound() {
     this.timer.reset();
     this.inputBox.reset();
@@ -113,10 +136,14 @@ export default class DrawSomething {
   }
 
   startGame(p1, p2, lobbyId) {
+    this.players = [];
     this.gameOn = true;
     this.lobbyId = lobbyId;
     this.currentTurn = p1;
     this.currentWord = undefined;
+    this.gameFin = false;
+    this.pCounter = 0;
+    this.wordList = ['Apple', 'Dog', 'Cat', 'Rabbit', 'Tree', 'Flower'];
     this.scoreTable[p1] = 0;
     this.scoreTable[p2] = 0;
     this.prompt.reset();
@@ -140,40 +167,20 @@ export default class DrawSomething {
   }
 
   spectateGame(p1, p2, lobbyId) {
-   
+    this.gameOn = true;
+    this.lobbyId = lobbyId;
+    this.players.push(p1);
+    this.players.push(p2);
+    this.prompt.set('Waiting for next round to start');
+    this.whiteBoard.freeze = true;
   }
 
   updateState(state) {
-   
+    this.whiteBoard.updateBoard(state);
   }
 
   getState() {
-   
-  }
-
-  handleNetworkEvent(data) {
-    console.log(data);
-    const wb = this.whiteBoard;
-    if (this.gameOn && wb !== undefined && this.lobbyId === data.lobbyId
-        && this.currentTurn !== PlayerManager.getInstance().getSelfId()) {
-      wb.updateBoard(data.state.drawing);
-    }
-    if (data.state.word !== undefined && data.state.word !== null) {
-      this.currentWord = data.state.word;
-      this.wordList.splice(this.wordList.indexOf(this.currentWord), 1);
-      this.prompt.set(`${data.from} is drawing`);
-      if (data.state.timeUp) {
-        this.prompt.set(`Draw ${data.state.word}`);
-      }
-      this.timer.start();
-    }
-    if (data.state.nextRound) {
-      console.log(data);
-      this.nextRound();
-    }
-    if (data.state.correct) {
-      this.scoreTable[data.from] += 1;
-    }
+    return this.whiteBoard.getImage();
   }
 
   draw(ctx, camContext) {
@@ -183,8 +190,7 @@ export default class DrawSomething {
         this.prompt.set(`Final Score: ${this.players[0]}: ${this.scoreTable[this.players[0]]}, ${this.players[1]}: ${this.scoreTable[this.players[1]]}`);
         if (this.scoreTable[this.players[0]] > this.scoreTable[this.players[1]]) {
           alert(`${this.players[0]} wins`);
-        }
-        else if (this.scoreTable[this.players[0]] < this.scoreTable[this.players[1]]) {
+        } else if (this.scoreTable[this.players[0]] < this.scoreTable[this.players[1]]) {
           alert(`${this.players[1]} wins`);
         } else {
           alert('Its a draw');
@@ -221,7 +227,8 @@ export default class DrawSomething {
           this.whiteBoard.reset();
         }
       }
-      if (this.currentTurn !== PlayerManager.getInstance().getSelfId()) {
+      if (this.currentTurn !== PlayerManager.getInstance().getSelfId()
+      && this.players.includes(PlayerManager.getInstance().getSelfId())) {
         this.inputBox.draw(ctx, camContext);
       }
     }

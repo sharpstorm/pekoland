@@ -26,7 +26,7 @@ import GameMenu, { GameOverlay } from './ui/ui-game.js';
 import { UIAnchor } from './ui/ui-element.js';
 
 import CheckersGame from './games/checkers.js';
-import DrawSomething from './games/draw-something.js';
+import DrawSomething from './games/draw-something/draw-something.js';
 import BattleshipGame from './games/battleship/battleship.js';
 
 import AdmissionPrompt from './ui/ui-admission-prompt.js';

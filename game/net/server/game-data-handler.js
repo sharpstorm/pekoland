@@ -43,7 +43,7 @@ function handleChat(data, conn) {
 }
 
 function handleGameUpdate(data, conn) {
-  console.log(data);
+  // console.log(data);
 
   if (!data.gameName || !data.lobbyId) {
     return;
