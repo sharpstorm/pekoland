@@ -3,6 +3,7 @@ import NetworkManager from '../../net/network-manager.js';
 import PlayerManager from '../../managers/player-manager.js';
 import buildClientGamePacket from '../../net/client/game-data-sender.js';
 import buildServerGamePacket from '../../net/server/game-data-sender.js';
+import wordListArray from './draw-something-wordlist.js';
 import {
   DrawSomethingWhiteboard,
   DrawSomethingInputBox,
@@ -25,15 +26,8 @@ export default class DrawSomething {
     this.currentTurn = undefined;
     this.currentWord = undefined;
     this.pCounter = 0;
-    this.wordList = ['Apple', 'Dog', 'Cat', 'Rabbit', 'Tree', 'Flower'];
+    this.wordList = undefined;
     this.scoreTable = {};
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  importWordList() {
-    const fso = new ActiveXObject('Scripting.FileSystemObject');
-		const s = fso.OpenTextFile('test.txt', 1, false);
-    console.log(fileList);
   }
 
   handleEvent(evtId, e) {
@@ -149,7 +143,7 @@ export default class DrawSomething {
     this.currentWord = undefined;
     this.gameFin = false;
     this.pCounter = 0;
-    this.wordList = ['Apple', 'Dog', 'Cat', 'Rabbit', 'Tree', 'Flower'];
+    this.wordList = wordListArray;
     this.scoreTable[p1] = 0;
     this.scoreTable[p2] = 0;
     this.prompt.reset();
