@@ -36,18 +36,18 @@ export default class NetworkManager {
       this.peer.on('open', ((id) => {
         this.peerId = id;
         console.log(`[NetworkManager] My Peer ID: ${id}`);
-        if (this.mode === NetworkManager.Mode.SERVER) {
-          this.hookServerHandlers();
-        }
         resolve(id);
       }).bind(this));
     }).bind(this));
 
     return Promise.all([configPromise, peerPromise])
       .then((() => {
-        this.state = (this.mode === NetworkManager.Mode.SERVER)
-          ? NetworkManager.State.READY
-          : NetworkManager.State.INITIALIZED;
+        if (this.mode === NetworkManager.Mode.SERVER) {
+          this.hookServerHandlers();
+          this.state = NetworkManager.State.READY;
+        } else {
+          this.state = NetworkManager.State.INITIALIZED;
+        }
         this.emitEvent(NetworkManager.Events.INITIALIZED);
       }).bind(this));
   }
