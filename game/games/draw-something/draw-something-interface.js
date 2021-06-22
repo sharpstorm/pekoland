@@ -1,5 +1,4 @@
 const BOARD_SIZE = 505;
-let TIMER_COUNTER = 30;
 let BORDER_COLOR = 'white';
 
 export default class DrawSomethingWhiteboard {
@@ -42,6 +41,7 @@ export default class DrawSomethingWhiteboard {
     image.src = this.canv.toDataURL('image/png');
     ctx.beginPath();
     ctx.strokeStyle = BORDER_COLOR;
+    const lineWidthOld = ctx.lineWidth;
     ctx.lineWidth = 5;
     ctx.fillStyle = 'white';
     const x = camContext.viewportWidth / 2 - (BOARD_SIZE / 2);
@@ -60,7 +60,7 @@ export default class DrawSomethingWhiteboard {
       this.canvCtx.lineTo(this.newX, this.newY);
       this.canvCtx.stroke();
     }
-    ctx.lineWidth = 1;
+    ctx.lineWidth = lineWidthOld;
   }
 
   updateBoard(image) {
@@ -112,6 +112,7 @@ class DrawSomethingInputBox {
 
     ctx.strokeStyle = BORDER_COLOR;
     ctx.stroke();
+    const lineWidthOld = ctx.lineWidth;
     ctx.lineWidth = this.lineWidth;
     ctx.beginPath();
 
@@ -127,6 +128,7 @@ class DrawSomethingInputBox {
       BORDER_COLOR = 'white';
       this.lineWidth = 1;
     }
+    ctx.lineWidth = lineWidthOld;
   }
 
   handle(e) {
@@ -184,17 +186,16 @@ class DrawSomethingPrompt {
   }
 }
 
+const TIMER_DURATION = 30;
 class DrawSomethingTimer {
   constructor() {
-    this.timer = undefined;
+    this.timerWorker = undefined;
     this.running = false;
+    this.timer = TIMER_DURATION;
+    this.handler = undefined;
   }
 
-  // eslint-disable-next-line class-methods-use-this
   draw(ctx, camContext) {
-    if (TIMER_COUNTER === 0) {
-      clearInterval(this.timer);
-    }
     ctx.beginPath();
     ctx.fillStyle = 'black';
     const x = camContext.viewportWidth / 2 - (BOARD_SIZE / 2) + BOARD_SIZE + 25;
@@ -205,35 +206,40 @@ class DrawSomethingTimer {
     ctx.beginPath();
     ctx.font = '30px Arial';
     ctx.fillStyle = 'white';
-    ctx.fillText(TIMER_COUNTER, x + 40, y + 35);
+    ctx.fillText(this.timer, x + 40, y + 35);
   }
 
-  // eslint-disable-next-line class-methods-use-this
   reset() {
-    TIMER_COUNTER = 30;
+    this.timer = TIMER_DURATION;
   }
 
-  start() {
+  start(handler) {
     if (!this.running) {
-      this.timer = setInterval(this.timerCount, 1000);
+      this.handler = handler;
+      this.timerWorker = setInterval(this.timerCount.bind(this), 1000);
       this.running = true;
     }
   }
 
   stop() {
-    TIMER_COUNTER = 0;
-    clearInterval(this.timer);
+    this.timer = 0;
+    clearInterval(this.timerWorker);
     this.running = false;
   }
 
-  // eslint-disable-next-line class-methods-use-this
   getTime() {
-    return TIMER_COUNTER;
+    return this.timer;
   }
 
-  // eslint-disable-next-line class-methods-use-this
   timerCount() {
-    TIMER_COUNTER -= 1;
+    this.timer -= 1;
+    if (this.timer === 0) {
+      this.stop();
+      if (this.handler !== undefined) {
+        this.handler();
+        this.handler = undefined;
+      }
+    }
   }
 }
 
