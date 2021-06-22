@@ -1,5 +1,10 @@
-import { expect, jest, test } from '@jest/globals';
-import Sprite, { AnimatableSprite, AvatarSprite, SlicedSprite, TiledSprite } from '../models/sprites';
+import { expect, test } from '@jest/globals';
+import Sprite, {
+  AnimatableSprite,
+  AvatarSprite,
+  SlicedSprite,
+  TiledSprite,
+} from '../models/sprites';
 import { getDummyContext } from './mock-canvas';
 import Player from '../models/player';
 
