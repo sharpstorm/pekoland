@@ -168,10 +168,6 @@ Promise.all([netSetupPromise, assetSetupPromise])
     const boardGameManager = GameManager.getInstance().getBoardGameManager();
 
     inputSystem.addListener('click', (evt) => boardGameManager.handleEvent('click', evt, Renderer.getCameraContext()));
-    inputSystem.addListener('keydown', (evt) => boardGameManager.handleEvent('keydown', evt, Renderer.getCameraContext()));
-    inputSystem.addListener('mousedown', (evt) => boardGameManager.handleEvent('mousedown', evt, Renderer.getCameraContext()));
-    inputSystem.addListener('mousemove', (evt) => boardGameManager.handleEvent('mousemove', evt, Renderer.getCameraContext()));
-    inputSystem.addListener('mouseup', (evt) => boardGameManager.handleEvent('mouseup', evt, Renderer.getCameraContext()));
 
     const checkersGame = new CheckersGame();
     const drawSomething = new DrawSomething();
