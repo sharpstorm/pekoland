@@ -109,6 +109,17 @@ export default function loadAssets() {
         spriteManager.registerSprite('battleship-ao', new Sprite(x, 654, 322, 92, 46));
       });
 
-    Promise.all([load1, load2, load3, load4, load5]).then(resolve);
+    const load6 = loadAsset('Images/checkers.png')
+      .then((x) => {
+        const spriteManager = SpriteManager.getInstance();
+        spriteManager.registerSprite('checkers-grid-brown', new Sprite(x, 0, 0, 147, 144));
+        spriteManager.registerSprite('checkers-grid-black', new Sprite(x, 147, 0, 144, 144));
+        spriteManager.registerSprite('checkers-piece-red-normal', new Sprite(x, 205, 173, 187, 187));
+        spriteManager.registerSprite('checkers-piece-black-normal', new Sprite(x, 0, 170, 187, 187));
+        spriteManager.registerSprite('checkers-piece-red-king', new Sprite(x, 0, 385, 187, 187));
+        spriteManager.registerSprite('checkers-piece-black-king', new Sprite(x, 210, 383, 187, 187));
+      });
+
+    Promise.all([load1, load2, load3, load4, load5, load6]).then(resolve);
   });
 }

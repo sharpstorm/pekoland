@@ -1,16 +1,26 @@
+import SpriteManager from '../../managers/sprite-manager.js';
+
 export default class GridBox {
   constructor(state, checkerPiece, unitSize) {
     this.checkerPiece = checkerPiece;
     this.state = state;
     this.unitSize = unitSize;
-
+    this.sprite = undefined;
     this.index = 0;
   }
 
   drawAt(ctx, x, y) {
     ctx.beginPath();
-    ctx.fillStyle = this.state;
-    ctx.rect(x, y, this.unitSize, this.unitSize);
+    // ctx.rect(x, y, this.unitSize, this.unitSize);
+    this.sprite.drawAt(ctx, x, y, this.unitSize, this.unitSize);
+    // ctx.drawImage(this.img, x, y, this.unitSize, this.unitSize);
+    // console.log(this.state);
+    if (this.state === 'green') {
+      ctx.fillStyle = 'green';
+      ctx.globalAlpha = 0.5;
+      ctx.fillRect(x, y, this.unitSize, this.unitSize);
+      ctx.globalAlpha = 1.0;
+    }
     ctx.stroke();
     ctx.fill();
     if (this.hasPiece()) {
@@ -29,6 +39,20 @@ export default class GridBox {
 
   setIndex(index) {
     this.index = index;
+    const aa = Math.floor(index / 8);
+    if (aa % 2 === 0) {
+      if (index % 2 !== 0) {
+        this.sprite = SpriteManager.getInstance().getSprite('checkers-grid-brown');
+      } else {
+        this.sprite = SpriteManager.getInstance().getSprite('checkers-grid-black');
+      }
+    } else if (aa % 2 !== 0) {
+      if (index % 2 !== 0) {
+        this.sprite = SpriteManager.getInstance().getSprite('checkers-grid-black');
+      } else {
+        this.sprite = SpriteManager.getInstance().getSprite('checkers-grid-brown');
+      }
+    }
   }
 
   getIndex() {

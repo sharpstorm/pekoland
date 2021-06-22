@@ -1,11 +1,11 @@
 /* eslint-disable class-methods-use-this */
 import CheckerBoard from './checker-board.js';
-import NetworkManager from '../net/network-manager.js';
-import PlayerManager from '../managers/player-manager.js';
-import buildClientGamePacket from '../net/client/game-data-sender.js';
-import buildServerGamePacket from '../net/server/game-data-sender.js';
+import NetworkManager from '../../net/network-manager.js';
+import PlayerManager from '../../managers/player-manager.js';
+import buildClientGamePacket from '../../net/client/game-data-sender.js';
+import buildServerGamePacket from '../../net/server/game-data-sender.js';
 import GridBox from './grid-box.js';
-import WorldManager from '../managers/world-manager.js';
+import WorldManager from '../../managers/world-manager.js';
 
 export default class CheckersGame {
   constructor() {
