@@ -1,11 +1,7 @@
-/**
- * @jest-environment jsdom
- */
-
 import { expect, jest, test } from '@jest/globals';
 import InputSystem from '../workers/input-system';
 
-test('Test InputSystem Attach Targets', () => {
+test('[Input System] Test InputSystem Attach Targets', () => {
   const attachedHandlersA = [];
   const attachedHandlersB = [];
 
@@ -53,7 +49,7 @@ test('Test InputSystem Attach Targets', () => {
   expect(attachedHandlersB).toContain(InputSystem.Events.KEY_UP);
 });
 
-test('Test InputSystem Add Listeners', () => {
+test('[Input System] Test InputSystem Add Listeners', () => {
   const handlers = {};
   const eventTarget = {
     addEventListener: (eventId, handler) => {

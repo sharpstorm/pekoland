@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest ./game/test",
-    "testonly": "jest --verbose -t",
+    "testonly": "jest -t",
     "start": "parcel web/index.html --open",
     "build": "parcel build web/index.html",
     "bootstrap-db": "node ./server/bootstrap-faunadb.js"

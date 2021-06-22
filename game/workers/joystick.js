@@ -4,11 +4,10 @@ import MapManager from '../managers/map-manager.js';
 import Renderer from '../managers/animation-manager.js';
 import GameConstants from '../game-constants.js';
 
-const playerManager = PlayerManager.getInstance();
-
 let joystickEventHandlers = [];
 
 function joystickWorker(e) {
+  const playerManager = PlayerManager.getInstance();
   const event = window.event ? window.event : e;
 
   if (event.keyCode === 37 || event.keyCode === 38
