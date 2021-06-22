@@ -1,7 +1,3 @@
-/**
- * @jest-environment jsdom
- */
-
 import { expect, jest, test } from '@jest/globals';
 import PlayerManager from '../managers/player-manager';
 import Player from '../models/player';
