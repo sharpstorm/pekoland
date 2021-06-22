@@ -85,7 +85,7 @@ export default class DrawSomething {
         this.wordList.splice(this.wordList.indexOf(this.currentWord), 1);
         this.prompt.set(`Draw ${this.currentWord}`);
         dataToSend.state.word = this.currentWord;
-        this.timer.start();
+        this.timer.start(this.timerEnd.bind(this));
       }
       if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.CLIENT) {
         NetworkManager.getInstance().send(buildClientGamePacket('game-update', data));
@@ -119,7 +119,7 @@ export default class DrawSomething {
       if (data.state.timeUp && this.players.includes(PlayerManager.getInstance().getSelfId())) {
         this.prompt.set(`Draw ${data.state.word}`);
       }
-      this.timer.start();
+      this.timer.start(this.timerEnd.bind(this));
     }
     if (data.state.nextRound) {
       this.whiteBoard.freeze = false;
@@ -199,36 +199,40 @@ export default class DrawSomething {
     }
   }
 
+  timerEnd() {
+    if (!this.gameFin) {
+      this.timer.stop();
+      this.timer.reset();
+      this.prompt.set('TIME\'S UP!');
+      if (this.currentTurn === PlayerManager.getInstance().getSelfId()) {
+        const data = {
+          from: PlayerManager.getInstance().getSelfId(),
+          state: { nextRound: undefined, word: undefined, drawing: undefined },
+        };
+        this.nextRound();
+        setTimeout(() => {
+          this.currentWord = this.wordList[Math.floor(Math.random() * (this.wordList.length))];
+          this.wordList.splice(this.wordList.indexOf(this.currentWord), 1);
+          data.state.word = this.currentWord;
+          data.state.nextRound = true;
+          data.state.timeUp = true;
+
+          this.sendNetworkUpdate(data);
+          this.prompt.set(`${this.currentTurn} is drawing`);
+          this.timer.start(this.timerEnd.bind(this));
+        }, 1000);
+        this.whiteBoard.reset();
+      }
+    }
+  }
+
   draw(ctx, camContext) {
     if (this.gameOn) {
       this.whiteBoard.draw(ctx, camContext);
       this.timer.draw(ctx, camContext);
       this.score.draw(ctx, camContext);
       this.prompt.draw(ctx, camContext);
-      if (this.timer.getTime() < 1 && !this.gameFin) {
-        this.timer.stop();
-        this.timer.reset();
-        this.prompt.set('TIME\'S UP!');
-        if (this.currentTurn === PlayerManager.getInstance().getSelfId()) {
-          const data = {
-            from: PlayerManager.getInstance().getSelfId(),
-            state: { nextRound: undefined, word: undefined, drawing: undefined },
-          };
-          this.nextRound();
-          setTimeout(() => {
-            this.currentWord = this.wordList[Math.floor(Math.random() * (this.wordList.length))];
-            this.wordList.splice(this.wordList.indexOf(this.currentWord), 1);
-            data.state.word = this.currentWord;
-            data.state.nextRound = true;
-            data.state.timeUp = true;
 
-            this.sendNetworkUpdate(data);
-            this.prompt.set(`${this.currentTurn} is drawing`);
-            this.timer.start();
-          }, 1000);
-          this.whiteBoard.reset();
-        }
-      }
       if (this.currentTurn !== PlayerManager.getInstance().getSelfId()
       && this.players.includes(PlayerManager.getInstance().getSelfId())) {
         this.inputBox.draw(ctx, camContext);
