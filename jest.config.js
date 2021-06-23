@@ -5,5 +5,6 @@ module.exports = {
   moduleNameMapper: {
     '\\.(css|less|sass|scss)$': '<rootDir>/web/test/styleMock.js',
     '\\.(gif|ttf|eot|svg|png|jpg|jpeg)$': '<rootDir>/web/test/fileMock.js',
+    'react-netlify-identity-auth': '<rootDir>/web/react-netlify-identity-auth/index.jsx',
   },
 };
