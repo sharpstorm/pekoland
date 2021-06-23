@@ -6,20 +6,20 @@ import GameConstants from '../game-constants.js';
 import {
   joystickWorker,
   addJoystickEventHandler,
-  removeJoystickEventHandler,
 } from '../workers/joystick.js';
 
 jest.mock('../managers/player-manager');
 
 const fakeMap = {
   checkCollision: () => false,
-}
+};
 
 jest.mock('../managers/map-manager');
 MapManager.getInstance.mockImplementation(() => ({
   getCurrentMap: () => fakeMap,
 }));
 
+// eslint-disable-next-line no-undef
 beforeEach(() => {
   PlayerManager.mockClear();
   const self = {
@@ -34,26 +34,24 @@ beforeEach(() => {
   self.moveTo = (x, y) => {
     self.testX = x;
     self.testY = y;
-  }
+  };
 
   self.resetAnim = () => {
     self.isAnimating = false;
     self.currentFrame = 6;
-  }
+  };
 
   self.reset = () => {
     self.x = 100;
     self.y = 100;
     self.direction = 0;
     self.resetAnim();
-  }
+  };
 
-  PlayerManager.getInstance.mockImplementation(() => {
-    return {
-      getSelf: () => self, 
-    };
-  });
-})
+  PlayerManager.getInstance.mockImplementation(() => ({
+    getSelf: () => self,
+  }));
+});
 
 test('[Joystick] Test Joystick', () => {
   const self = PlayerManager.getInstance().getSelf();
@@ -123,14 +121,13 @@ test('[Joystick] Test Joystick Debouncing', () => {
 
   expect(self.testX).toBe(100 + GameConstants.UNIT);
   expect(self.testY).toBe(100);
-
 });
 
 test('[Joystick] Test Joystick Event Handling', () => {
   const self = PlayerManager.getInstance().getSelf();
 
   let fired = false;
-  let expectedDirection = undefined;
+  let expectedDirection;
   let expectedDeltaX = 0;
   let expectedDeltaY = 0;
   const configExpected = (dir, x, y) => {
@@ -138,7 +135,7 @@ test('[Joystick] Test Joystick Event Handling', () => {
     expectedDirection = dir;
     expectedDeltaX = x * GameConstants.UNIT;
     expectedDeltaY = y * GameConstants.UNIT;
-  }
+  };
 
   addJoystickEventHandler((evt) => {
     expect(evt.id).toBe(expectedDirection);
@@ -180,4 +177,3 @@ test('[Joystick] Test Joystick Event Handling', () => {
   });
   expect(fired).toBe(true);
 });
-

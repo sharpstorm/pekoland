@@ -7,6 +7,7 @@ import Sprite, {
 } from '../models/sprites';
 import { getDummyContext } from './mock-canvas';
 import Player from '../models/player';
+import SpriteManager from '../managers/sprite-manager';
 
 test('[Sprite] Test Basic Sprite', () => {
   const sprite = new Sprite('test', 1, 2, 3, 4);
@@ -117,4 +118,41 @@ test('[Sprite] Test Tiled Sprite', () => {
   ctx.history.length = 0;
   sprite.drawAt(ctx, 0, 0, 4, 4); // Row Tile Strategy
   expect(ctx.history.length).toBe(4);
+});
+
+test('[Sprite] Test Sprite Manager', () => {
+  const spriteManager = new SpriteManager();
+  expect(Object.keys(spriteManager.sprites).length).toBe(0);
+
+  const sprite1 = {};
+  const sprite2 = {};
+
+  // Add
+  spriteManager.registerSprite('a', sprite1);
+  expect(Object.keys(spriteManager.sprites).length).toBe(1);
+  spriteManager.registerSprite('b', sprite2);
+  expect(Object.keys(spriteManager.sprites).length).toBe(2);
+
+  // Get
+  expect(spriteManager.getSprite('c')).toBeUndefined();
+  expect(spriteManager.getSprite('b')).toBe(sprite2);
+  expect(spriteManager.getSprite('a')).toBe(sprite1);
+
+  // Remove
+  spriteManager.removeSprite('c');
+  expect(Object.keys(spriteManager.sprites).length).toBe(2);
+
+  spriteManager.removeSprite('b');
+  expect(Object.keys(spriteManager.sprites).length).toBe(1);
+  expect(spriteManager.getSprite('b')).toBeUndefined();
+  expect(spriteManager.getSprite('a')).toBeDefined();
+
+  spriteManager.removeSprite('a');
+  expect(Object.keys(spriteManager.sprites).length).toBe(0);
+  expect(spriteManager.getSprite('b')).toBeUndefined();
+  expect(spriteManager.getSprite('a')).toBeUndefined();
+
+  const inst1 = SpriteManager.getInstance();
+  const inst2 = SpriteManager.getInstance();
+  expect(inst1).toBe(inst2);
 });
