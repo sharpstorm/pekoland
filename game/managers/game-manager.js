@@ -98,6 +98,7 @@ class VoiceChannelManager {
       audio.srcObject = stream;
       audio.autoplay = true;
       audio.play();
+      this.outputObjects[peerId] = audio;
     }
   }
 
