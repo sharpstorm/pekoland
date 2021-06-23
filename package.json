@@ -4,7 +4,7 @@
   "description": "An online multiplayer experience",
   "main": "index.js",
   "scripts": {
-    "test": "jest ./game/test",
+    "test": "jest",
     "testonly": "jest -t",
     "start": "parcel web/index.html --open",
     "build": "parcel build web/index.html",
@@ -24,6 +24,7 @@
   "devDependencies": {
     "@babel/core": "^7.14.6",
     "@babel/preset-env": "^7.14.7",
+    "@babel/preset-react": "^7.14.5",
     "babel-jest": "^27.0.2",
     "eslint": "^7.28.0",
     "eslint-config-airbnb": "^18.2.1",
