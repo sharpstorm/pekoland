@@ -8,12 +8,16 @@ export default class PlayerManager {
   }
 
   addPlayer(player) {
-    this.players[player.userId] = player;
+    if (player.userId) {
+      this.players[player.userId] = player;
+    }
   }
 
   setSelf(userId) {
-    this.self = userId;
-    this.emitEvent(PlayerManager.Events.SPAWN_SELF, this.self);
+    if (userId in this.players) {
+      this.self = userId;
+      this.emitEvent(PlayerManager.Events.SPAWN_SELF, this.self);
+    }
   }
 
   getSelf() {
@@ -39,6 +43,9 @@ export default class PlayerManager {
   removePlayer(userId) {
     if (this.players[userId] !== undefined) {
       delete this.players[userId];
+    }
+    if (userId === this.self) {
+      this.self = undefined;
     }
   }
 
