@@ -42,8 +42,9 @@ function handleChat(data, conn) {
   NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('chat-echo', data), conn.peer);
 }
 
-function handleGameUpdate(data) {
-  console.log(data);
+function handleGameUpdate(data, conn) {
+  // console.log(data);
+
   if (!data.gameName || !data.lobbyId) {
     return;
   }
@@ -51,8 +52,10 @@ function handleGameUpdate(data) {
   if (WorldManager.getInstance().lobbyExist(data.lobbyId)) {
     WorldManager.getInstance().updateLobbyGameState(data.lobbyId, data.state);
 
+    const partnerUserId = WorldManager.getInstance().getPlayerId(conn.peer);
     WorldManager.getInstance().lobbyForAll(data.lobbyId, (userId) => {
-      if (userId === PlayerManager.getInstance().getSelfId()) {
+      if (userId === PlayerManager.getInstance().getSelfId()
+        || userId === partnerUserId) {
         return;
       }
       NetworkManager.getInstance().getConnection()
@@ -110,7 +113,7 @@ function handleJoinLobby(data, conn) {
       player2: WorldManager.getInstance().getJoiner(data.tableId),
       gameName: WorldManager.getInstance().getGameName(data.tableId),
     };
-    conn.send(buildGamePacket('start-game', newData));
+
     NetworkManager.getInstance().getConnection()
       .sendTo(buildGamePacket('start-game', newData), WorldManager.getInstance().getPeerId(WorldManager.getInstance().getJoiner(data.tableId)));
     NetworkManager.getInstance().getConnection()

@@ -41,8 +41,11 @@ class RoomController {
       peerId,
       name,
     };
-    this.waitingRoom.push(playerInfo);
-    this.emitEvent(RoomController.Events.PLAYER_REQUEST_JOIN, playerInfo);
+
+    if (peerId in this.peerIdToUidMap) {
+      this.waitingRoom.push(playerInfo);
+      this.emitEvent(RoomController.Events.PLAYER_REQUEST_JOIN, playerInfo);
+    }
   }
 
   admitIntoWorld(peerId) {

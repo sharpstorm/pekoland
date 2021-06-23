@@ -17,6 +17,14 @@ export default class MapManager {
     if (id in this.maps) {
       delete this.maps[id];
     }
+    if (id === this.currentMapID) {
+      const remaining = Object.keys(this.maps);
+      if (remaining.length > 0) {
+        [this.currentMapID] = remaining;
+      } else {
+        this.currentMapID = undefined;
+      }
+    }
   }
 
   getMap(id) {
@@ -24,7 +32,9 @@ export default class MapManager {
   }
 
   setMap(id) {
-    this.currentMapID = id;
+    if (id in this.maps) {
+      this.currentMapID = id;
+    }
   }
 
   getCurrentMap() {

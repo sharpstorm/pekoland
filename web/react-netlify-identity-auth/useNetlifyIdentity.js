@@ -3,7 +3,7 @@
 // eslint-disable-next-line object-curly-newline
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import parseTokenFromLocation from './parseTokenFromLocation';
-import 'core-js';
+import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 
 const GO_TRUE_TOKEN_STORAGE_KEY = 'ni.goTrueToken';
