@@ -235,7 +235,6 @@ export default class BattleshipBoard {
     this.boardSprite = SpriteManager.getInstance().getSprite('battleship-board');
     this.lastDrawnSize = -1;
     this.canvasDirty = false;
-    this.hiddenBoardState = [];
 
     this.boardState = new BoardState();
   }

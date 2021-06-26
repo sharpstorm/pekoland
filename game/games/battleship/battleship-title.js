@@ -53,6 +53,15 @@ export default class BattleshipTitleBoard {
       || this.cachedProps.height !== height
       || this.cachedProps.state !== this.state
       || this.cachedProps.shots !== this.shots) {
+      this.cachedProps = {
+        x,
+        y,
+        width,
+        height,
+        state: this.state,
+        shots: this.shots,
+      };
+
       // Redraw on canvas
       this.cache.width = width;
       this.cache.height = height;
@@ -72,15 +81,6 @@ export default class BattleshipTitleBoard {
       cacheCtx.fillText(this.msg, marginLeft, marginTop);
 
       if (this.state === 1) {
-        this.cachedProps = {
-          x,
-          y,
-          width,
-          height,
-          state: this.state,
-          shots: this.shots,
-        };
-
         const shotsX = Math.floor((boxWidth * 1.5) + 40 - (cacheCtx.measureText(`${this.shots} shots left`).width / 2));
         cacheCtx.fillText(`${this.shots} shots left`, shotsX, (height / 2) - 5);
 

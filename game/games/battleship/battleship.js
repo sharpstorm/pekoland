@@ -93,7 +93,7 @@ export default class BattleshipGame {
           y: shot.y,
         }));
 
-        this.animateShots(result, myBoard, this.nextTurn.bind(this));
+        this.animateShots(result, myBoard);
         this.sendNetworkUpdate({
           action: { move: 'fireReply', result },
         });
