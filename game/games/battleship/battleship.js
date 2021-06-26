@@ -30,18 +30,7 @@ export default class BattleshipGame {
   constructor() {
     this.gameName = 'Battleship';
 
-    this.gameActive = false;
-    this.player1 = undefined;
-    this.player2 = undefined;
-    this.turn = undefined;
-    this.gameState = 0;
-    this.placementUI = undefined;
-    this.titleBoard = undefined;
-    this.player1Board = undefined;
-    this.player2Board = undefined;
-
-    // Aim Stage Temp Params
-    this.shots = [];
+    this.reset();
   }
 
   handleEvent(evtId, e, camContext) {
@@ -99,7 +88,9 @@ export default class BattleshipGame {
           x: shot.x,
           y: shot.y,
         }));
-        myBoard.updateAlive();
+
+        this.animateShots(result);
+        // myBoard.updateAlive();
         this.sendNetworkUpdate({
           action: { move: 'fireReply', result },
         });
@@ -119,7 +110,7 @@ export default class BattleshipGame {
           oppBoard.setGridStateAtPosition(shot.x, shot.y,
             shot.result ? BattleshipBoard.STATE.HIT : BattleshipBoard.STATE.MISS);
         });
-        oppBoard.updateAlive();
+        // oppBoard.updateAlive();
         const winner = this.checkWin();
         if (winner > 0) {
           this.titleBoard.setState(2 + winner);
@@ -185,7 +176,13 @@ export default class BattleshipGame {
     this.titleBoard = undefined;
     this.player1Board = undefined;
     this.player2Board = undefined;
+
+    // Aim Stage Temp Params
     this.shots = [];
+
+    // Animation Control
+    this.animationList = undefined;
+    this.currentFrame = undefined;
   }
 
   updateState(state) {
@@ -243,8 +240,17 @@ export default class BattleshipGame {
       leftBoard.draw(ctx, marginLeft, marginTop + titleHeight, boardSize);
       rightBoard.draw(ctx, marginLeft + margin + boardSize,
         marginTop + titleHeight, boardSize);
+
+      // Animation Layer
+      if (this.animationList !== undefined && this.animationList.length > 0) {
+        // Run Animation
+      }
     }
     this.titleBoard.draw(ctx, marginLeft, marginTop, boardSize * 2 + margin, titleHeight);
+  }
+
+  animateShots(shots) {
+    this.animationList = shots;
   }
 
   placementComplete() {
