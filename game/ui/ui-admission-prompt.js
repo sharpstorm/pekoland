@@ -49,14 +49,16 @@ export default class AdmissionPrompt extends UIElement {
     this.panelContainer.appendChild(this.acceptButton.node);
     this.panelContainer.appendChild(this.rejectButton.node);
 
-    this.acceptButton.addEventListener('click', () => {
+    this.acceptButton.addEventListener('click', (evt) => {
+      evt.stopPropagation();
       if (this.acceptHandler !== undefined) {
         this.acceptHandler();
       }
       this.resetState();
     });
 
-    this.rejectButton.addEventListener('click', () => {
+    this.rejectButton.addEventListener('click', (evt) => {
+      evt.stopPropagation();
       if (this.rejectHandler !== undefined) {
         this.rejectHandler();
       }
