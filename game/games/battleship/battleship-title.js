@@ -72,6 +72,15 @@ export default class BattleshipTitleBoard {
       cacheCtx.fillText(this.msg, marginLeft, marginTop);
 
       if (this.state === 1) {
+        this.cachedProps = {
+          x,
+          y,
+          width,
+          height,
+          state: this.state,
+          shots: this.shots,
+        };
+
         const shotsX = Math.floor((boxWidth * 1.5) + 40 - (cacheCtx.measureText(`${this.shots} shots left`).width / 2));
         cacheCtx.fillText(`${this.shots} shots left`, shotsX, (height / 2) - 5);
 
@@ -82,15 +91,6 @@ export default class BattleshipTitleBoard {
         cacheCtx.fillText('Fire', fireX + 20, (height / 2) + 5 + fontHeight);
         this.recalculateButtonBounds(x, y);
       }
-
-      this.cachedProps = {
-        x,
-        y,
-        width,
-        height,
-        state: this.state,
-        shots: this.shots,
-      };
     }
 
     ctx.drawImage(this.cache, x, y);
