@@ -40,8 +40,10 @@ export default class Chatbox extends UIElement {
 
   triggerListeners() {
     const text = this.inputBox.value;
-    this.submitListeners.forEach((x) => x(text));
-    this.inputBox.value = '';
+    if (text !== '') {
+      this.submitListeners.forEach((x) => x(text));
+      this.inputBox.value = '';
+    }
   }
 
   update() {
