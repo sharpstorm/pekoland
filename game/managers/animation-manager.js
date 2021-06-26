@@ -97,8 +97,8 @@ class GameLayer {
     this.drawables.push(game);
   }
 
-  render(ctx, cam) {
-    this.drawables.forEach((x) => x.draw(ctx, cam));
+  render(ctx, cam, majorUpdate) {
+    this.drawables.forEach((x) => x.draw(ctx, cam, majorUpdate));
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -180,7 +180,7 @@ class Renderer {
     });
 
     // Game Renderer
-    this.gameLayer.render(this.ctx, camContext);
+    this.gameLayer.render(this.ctx, camContext, majorUpdate);
 
     // Update Camera
     camContext.animate(delta);

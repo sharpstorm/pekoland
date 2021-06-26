@@ -22,6 +22,7 @@ import WorldManager from '../../managers/world-manager.js';
 import PlayerManager from '../../managers/player-manager.js';
 import buildClientGamePacket from '../../net/client/game-data-sender.js';
 import buildServerGamePacket from '../../net/server/game-data-sender.js';
+import SpriteManager from '../../managers/sprite-manager.js';
 
 const margin = 50;
 const titleHeight = 150;
@@ -30,22 +31,14 @@ export default class BattleshipGame {
   constructor() {
     this.gameName = 'Battleship';
 
-    this.gameActive = false;
-    this.player1 = undefined;
-    this.player2 = undefined;
-    this.turn = undefined;
-    this.gameState = 0;
-    this.placementUI = undefined;
-    this.titleBoard = undefined;
-    this.player1Board = undefined;
-    this.player2Board = undefined;
-
-    // Aim Stage Temp Params
-    this.shots = [];
+    this.reset();
   }
 
   handleEvent(evtId, e, camContext) {
     if (!this.gameActive) {
+      return;
+    }
+    if (evtId !== 'click') {
       return;
     }
 
@@ -99,32 +92,16 @@ export default class BattleshipGame {
           x: shot.x,
           y: shot.y,
         }));
-        myBoard.updateAlive();
+
+        this.animateShots(result, myBoard, this.nextTurn.bind(this));
         this.sendNetworkUpdate({
           action: { move: 'fireReply', result },
         });
-
-        const winner = this.checkWin();
-        if (winner > 0) {
-          this.titleBoard.setState(2 + winner);
-          this.gameState = 3;
-        } else {
-          this.nextTurn();
-        }
       } else if (data.action.move === 'fireReply') {
         const { result } = data.action;
         const { oppBoard } = this.resolveBoards(data.from);
 
-        result.forEach((shot) => {
-          oppBoard.setGridStateAtPosition(shot.x, shot.y,
-            shot.result ? BattleshipBoard.STATE.HIT : BattleshipBoard.STATE.MISS);
-        });
-        oppBoard.updateAlive();
-        const winner = this.checkWin();
-        if (winner > 0) {
-          this.titleBoard.setState(2 + winner);
-          this.gameState = 3;
-        }
+        this.animateShots(result, oppBoard);
       }
     }
   }
@@ -185,7 +162,14 @@ export default class BattleshipGame {
     this.titleBoard = undefined;
     this.player1Board = undefined;
     this.player2Board = undefined;
+
+    // Aim Stage Temp Params
     this.shots = [];
+
+    // Animation Control
+    this.animationList = undefined;
+    this.currentFrame = undefined;
+    this.animationTarget = undefined;
   }
 
   updateState(state) {
@@ -198,15 +182,36 @@ export default class BattleshipGame {
       if (this.player2 !== PlayerManager.getInstance().getSelfId()) {
         this.player2Board.updateState(state.player2Board);
       }
+      if (state.gameState === 2) {
+        // Fast Forward the animation
+        this.gameState = 1;
+        if (state.fireInfo !== undefined) {
+          const board = state.fireInfo.target === 1 ? this.player1Board : this.player2Board;
+          state.fireInfo.shots.forEach((cell) => {
+            board.setGridStateAtPosition(cell.x, cell.y,
+              cell.result ? BattleshipBoard.STATE.HIT : BattleshipBoard.STATE.MISS);
+          });
+        }
+      }
     }
   }
 
   getState() {
+    let fireInfo;
+
+    if (this.animationTarget !== undefined) {
+      // Include info for fast forwarding
+      fireInfo = {
+        target: this.animationTarget === this.player1Board ? 1 : 2,
+        shots: this.animationList,
+      };
+    }
     return {
       turn: this.turn,
       gameState: this.gameState,
       player1Board: this.player1Board.getState(),
       player2Board: this.player2Board.getState(),
+      fireInfo,
     };
   }
 
@@ -221,13 +226,14 @@ export default class BattleshipGame {
     return { boardSize, marginLeft, marginTop };
   }
 
-  draw(ctx, camContext) {
+  draw(ctx, camContext, majorUpdate) {
     if (!this.gameActive) {
       return;
     }
 
     const { boardSize, marginLeft, marginTop } = this.calculateDrawnParams(camContext);
 
+    this.titleBoard.draw(ctx, marginLeft, marginTop, boardSize * 2 + margin, titleHeight);
     if (this.gameState === 0 && this.placementUI) {
       // Placement State
       this.placementUI.draw(ctx, marginLeft, marginTop + titleHeight, boardSize);
@@ -243,8 +249,62 @@ export default class BattleshipGame {
       leftBoard.draw(ctx, marginLeft, marginTop + titleHeight, boardSize);
       rightBoard.draw(ctx, marginLeft + margin + boardSize,
         marginTop + titleHeight, boardSize);
+
+      // Animation Layer
+      if (this.animationList !== undefined && this.animationList.length > 0) {
+        const boardParams = leftBoard.getDrawParams(boardSize); // Both boards same size, same param
+        // Update frame
+        if (majorUpdate && this.currentFrame >= 0 && this.currentFrame < 15) {
+          this.currentFrame += 1;
+          if (this.currentFrame >= 15) {
+            // Update board
+            const cell = this.animationList[0];
+            this.animationTarget.setGridStateAtPosition(cell.x, cell.y,
+              cell.result ? BattleshipBoard.STATE.HIT : BattleshipBoard.STATE.MISS);
+            this.animationTarget.updateAlive();
+            this.animationList.splice(0, 1);
+
+            if (this.animationList.length === 0) {
+              this.animationList = undefined;
+              this.currentFrame = undefined;
+              this.animationList = undefined;
+              this.animateShotsFinished();
+              return;
+            }
+            this.currentFrame = 0;
+          }
+        }
+        const sprite = SpriteManager.getInstance().getSprite('battleship-explosion');
+        let cellX = marginLeft + boardParams.padding
+          + (boardParams.cellSize * this.animationList[0].x);
+        const cellY = marginTop + titleHeight + boardParams.padding
+          + (boardParams.cellSize * this.animationList[0].y);
+
+        if (this.animationTarget === rightBoard) {
+          // Shoot Left to Right
+          cellX += margin + boardSize;
+        }
+        sprite.getSpriteAtFrame(this.currentFrame).drawAt(ctx, cellX, cellY);
+      }
     }
-    this.titleBoard.draw(ctx, marginLeft, marginTop, boardSize * 2 + margin, titleHeight);
+  }
+
+  animateShots(shots, targetBoard) {
+    this.animationList = shots;
+    this.currentFrame = 0;
+    this.animationTarget = targetBoard;
+    this.gameState = 2;
+  }
+
+  animateShotsFinished() {
+    const winner = this.checkWin();
+    if (winner > 0) {
+      this.titleBoard.setState(2 + winner);
+      this.gameState = 3;
+    } else {
+      this.gameState = 1;
+      this.nextTurn();
+    }
   }
 
   placementComplete() {
@@ -275,7 +335,7 @@ export default class BattleshipGame {
     this.sendNetworkUpdate({
       action: { move: 'fire', shots: this.shots },
     });
-    this.nextTurn();
+    this.gameState = 2; // Disables input
   }
 
   isPlaying(playerId) {

@@ -107,6 +107,13 @@ export default function loadAssets() {
         spriteManager.registerSprite('battleship-cl', new Sprite(x, 514, 370, 138, 46));
         spriteManager.registerSprite('battleship-dd', new Sprite(x, 514, 322, 138, 46));
         spriteManager.registerSprite('battleship-ao', new Sprite(x, 654, 322, 92, 46));
+
+        const explosion = AnimatableSprite.generateFromTiledFrames(x, 0, 514, 48, 48, 50, 0, 15);
+        spriteManager.registerSprite('battleship-explosion', explosion);
+
+        spriteManager.registerSprite('battleship-fire', new Sprite(x, 688, 94, 62, 100));
+        spriteManager.registerSprite('battleship-receive', new Sprite(x, 658, 94, 30, 100));
+        spriteManager.registerSprite('battleship-plane', new Sprite(x, 694, 216, 46, 45));
       });
 
     Promise.all([load1, load2, load3, load4, load5]).then(resolve);

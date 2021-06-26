@@ -235,6 +235,7 @@ export default class BattleshipBoard {
     this.boardSprite = SpriteManager.getInstance().getSprite('battleship-board');
     this.lastDrawnSize = -1;
     this.canvasDirty = false;
+    this.hiddenBoardState = [];
 
     this.boardState = new BoardState();
   }
@@ -281,12 +282,7 @@ export default class BattleshipBoard {
     this.canvasDirty = true;
 
     const hit = this.boardState.getShipAt(x, y);
-    if (hit !== undefined) {
-      this.boardState.setCellState(x, y, STATE.HIT);
-      return true;
-    }
-    this.boardState.setCellState(x, y, STATE.MISS);
-    return false;
+    return (hit !== undefined);
   }
 
   isHit(x, y) {
