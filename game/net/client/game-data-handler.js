@@ -52,14 +52,18 @@ function handleDespawnPlayer(data, conn) {
 
 function handleMoveEcho(data, conn) {
   const player = PlayerManager.getInstance().getPlayer(data.userId);
-  player.moveTo(data.x, data.y);
-  player.direction = data.direction;
+  if (player !== undefined) {
+    player.moveTo(data.x, data.y);
+    player.direction = data.direction;
+  }
 }
 
 function handleChatEcho(data, conn) {
   const player = PlayerManager.getInstance().getPlayer(data.userId);
-  chatManager.addToHistory(player.name, data.message);
-  player.chat.updateMessage(data.message);
+  if (player !== undefined) {
+    chatManager.addToHistory(player.name, data.message);
+    player.chat.updateMessage(data.message);
+  }
 }
 
 function handleGameUpdateEcho(data, conn) {
