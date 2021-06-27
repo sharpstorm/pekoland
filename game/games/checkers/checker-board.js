@@ -1,8 +1,9 @@
 import CheckerPiece from './checker-piece.js';
 import GridBox from './grid-box.js';
+import SpriteManager from '../../managers/sprite-manager.js';
 
-const BOARD_SIZE = 900;
-
+const BOARD_SIZE = 800;
+const PANEL_SIZE = 900;
 export default class CheckerBoard {
   constructor(player1, player2, flipped) {
     this.player1 = player1;
@@ -39,7 +40,11 @@ export default class CheckerBoard {
 
   drawBoard(ctx, camContext) {
     const unit = BOARD_SIZE / 8;
-
+    const panelX = (camContext.viewportWidth / 2 - (BOARD_SIZE / 2))
+      - ((PANEL_SIZE - BOARD_SIZE) / 2);
+    const panelY = (camContext.viewportHeight / 2 - (BOARD_SIZE / 2))
+      - ((PANEL_SIZE - BOARD_SIZE) / 2);
+    SpriteManager.getInstance().getSprite('panel').drawAt(ctx, panelX, panelY, PANEL_SIZE, PANEL_SIZE);
     if (!this.flipped) {
       // Reference coordinate is bottom left
       const baseX = (camContext.viewportWidth / 2 - (BOARD_SIZE / 2));
@@ -290,6 +295,9 @@ export default class CheckerBoard {
   }
 
   inflateState(data) {
+    if (data === undefined || data === null) {
+      return;
+    }
     data.forEach((x, idx) => {
       const grid = this.gridArray[idx];
       grid.setState(x.state);

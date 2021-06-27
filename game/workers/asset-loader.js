@@ -107,8 +107,26 @@ export default function loadAssets() {
         spriteManager.registerSprite('battleship-cl', new Sprite(x, 514, 370, 138, 46));
         spriteManager.registerSprite('battleship-dd', new Sprite(x, 514, 322, 138, 46));
         spriteManager.registerSprite('battleship-ao', new Sprite(x, 654, 322, 92, 46));
+
+        const explosion = AnimatableSprite.generateFromTiledFrames(x, 0, 514, 48, 48, 50, 0, 15);
+        spriteManager.registerSprite('battleship-explosion', explosion);
+
+        spriteManager.registerSprite('battleship-fire', new Sprite(x, 688, 94, 62, 100));
+        spriteManager.registerSprite('battleship-receive', new Sprite(x, 658, 94, 30, 100));
+        spriteManager.registerSprite('battleship-plane', new Sprite(x, 694, 216, 46, 45));
       });
 
-    Promise.all([load1, load2, load3, load4, load5]).then(resolve);
+    const load6 = loadAsset('Images/checkers.png')
+      .then((x) => {
+        const spriteManager = SpriteManager.getInstance();
+        spriteManager.registerSprite('checkers-grid-brown', new Sprite(x, 0, 0, 147, 144));
+        spriteManager.registerSprite('checkers-grid-black', new Sprite(x, 147, 0, 144, 144));
+        spriteManager.registerSprite('checkers-piece-red-normal', new Sprite(x, 205, 173, 187, 187));
+        spriteManager.registerSprite('checkers-piece-black-normal', new Sprite(x, 0, 170, 187, 187));
+        spriteManager.registerSprite('checkers-piece-red-king', new Sprite(x, 0, 385, 187, 187));
+        spriteManager.registerSprite('checkers-piece-black-king', new Sprite(x, 210, 383, 187, 187));
+      });
+
+    Promise.all([load1, load2, load3, load4, load5, load6]).then(resolve);
   });
 }

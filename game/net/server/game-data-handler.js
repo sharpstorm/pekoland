@@ -30,16 +30,20 @@ function handleSpawnRequest(data, conn) {
 
 function handleMove(data, conn) {
   const player = PlayerManager.getInstance().getPlayer(data.userId);
-  player.moveTo(data.x, data.y);
-  player.direction = data.direction;
-  NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('move-echo', data), conn.peer);
+  if (player !== undefined) {
+    player.moveTo(data.x, data.y);
+    player.direction = data.direction;
+    NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('move-echo', data), conn.peer);
+  }
 }
 
 function handleChat(data, conn) {
   const player = PlayerManager.getInstance().getPlayer(data.userId);
-  chatManager.addToHistory(player.name, data.message);
-  player.chat.updateMessage(data.message);
-  NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('chat-echo', data), conn.peer);
+  if (player !== undefined) {
+    chatManager.addToHistory(player.name, data.message);
+    player.chat.updateMessage(data.message);
+    NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('chat-echo', data), conn.peer);
+  }
 }
 
 function handleGameUpdate(data, conn) {
