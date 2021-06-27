@@ -12,8 +12,8 @@ export default class GridBox {
   drawAt(ctx, x, y) {
     ctx.beginPath();
     this.sprite.drawAt(ctx, x, y, this.unitSize, this.unitSize);
-    if (this.state === GridBox.State.SELECTED) {
-      ctx.fillStyle = GridBox.State.SELECTED;
+    if (this.state === GridBox.State.SELECTABLE) {
+      ctx.fillStyle = GridBox.State.SELECTABLE;
       ctx.globalAlpha = 0.5;
       ctx.fillRect(x, y, this.unitSize, this.unitSize);
       ctx.globalAlpha = 1.0;
