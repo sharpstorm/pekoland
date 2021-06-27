@@ -11,18 +11,14 @@ export default class GridBox {
 
   drawAt(ctx, x, y) {
     ctx.beginPath();
-    // ctx.rect(x, y, this.unitSize, this.unitSize);
     this.sprite.drawAt(ctx, x, y, this.unitSize, this.unitSize);
-    // ctx.drawImage(this.img, x, y, this.unitSize, this.unitSize);
-    // console.log(this.state);
-    if (this.state === 'green') {
-      ctx.fillStyle = 'green';
+    if (this.state === GridBox.State.SELECTED) {
+      ctx.fillStyle = GridBox.State.SELECTED;
       ctx.globalAlpha = 0.5;
       ctx.fillRect(x, y, this.unitSize, this.unitSize);
       ctx.globalAlpha = 1.0;
     }
-    ctx.stroke();
-    ctx.fill();
+
     if (this.hasPiece()) {
       this.checkerPiece.drawAt(ctx, x, y);
     }

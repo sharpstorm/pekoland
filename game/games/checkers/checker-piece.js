@@ -6,14 +6,20 @@ export default class CheckerPiece {
     this.diameter = 90;
     this.king = false;
     this.color = (player === 1) ? 'red' : 'blue';
-    this.sprite = (this.color === 'red') ? SpriteManager.getInstance().getSprite('checkers-piece-red-normal') : SpriteManager.getInstance().getSprite('checkers-piece-black-normal');
+    this.sprite = (player === 1) ? SpriteManager.getInstance().getSprite('checkers-piece-red-normal') : SpriteManager.getInstance().getSprite('checkers-piece-black-normal');
+    this.kingSprite = (player === 1) ? SpriteManager.getInstance().getSprite('checkers-piece-red-king') : SpriteManager.getInstance().getSprite('checkers-piece-black-king');
   }
 
   drawAt(ctx, x, y) {
     ctx.beginPath();
     ctx.fillStyle = this.color;
     ctx.strokeStyle = '#FFF';
-    this.sprite.drawAt(ctx, x + (8), y + (5), this.diameter, this.diameter);
+    if (this.king) {
+      this.kingSprite.drawAt(ctx, x + 8, y + 5, this.diameter, this.diameter);
+    } else {
+      this.sprite.drawAt(ctx, x + 8, y + 5, this.diameter, this.diameter);
+    }
+
     ctx.stroke();
     ctx.fill();
   }
@@ -24,7 +30,6 @@ export default class CheckerPiece {
 
   setKing(king) {
     this.king = king;
-    this.sprite = (this.color === 'red') ? SpriteManager.getInstance().getSprite('checkers-piece-red-king') : SpriteManager.getInstance().getSprite('checkers-piece-black-king');
   }
 
   isKing() {
