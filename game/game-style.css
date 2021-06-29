@@ -6,10 +6,15 @@
 
 #chatbox-history {
   width: 100%;
+  visibility: hidden;
   background-color: rgba(0, 0, 0, 0.7);
   flex: 1 1 0;
   border-bottom: 1px solid #CCC;
   overflow-y: scroll;
+}
+
+#chatbox.expanded > #chatbox-history {
+  visibility: visible;
 }
 
 #chatbox-history::-webkit-scrollbar {
@@ -45,6 +50,12 @@
   flex: 1 1 0;
 }
 
+#chatbox-expand {
+  background: rgba(0, 0, 0, 0.8);
+  padding: 0 4px;
+  color: #FFF;
+}
+
 #chatbox-btn-send {
   background: rgba(0, 0, 0, 0.8);
   color: #FFF;
@@ -54,7 +65,7 @@
   padding: 0 8px;
 }
 
-#chatbox-btn-send:hover {
+#chatbox-btn-send:hover, #chatbox-expand:hover {
   background: rgba(80, 80, 80, 0.8);
 }
 
