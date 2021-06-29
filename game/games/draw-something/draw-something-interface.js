@@ -1,3 +1,5 @@
+import SpriteManager from '../../managers/sprite-manager.js';
+
 const BOARD_SIZE = 505;
 let BORDER_COLOR = 'white';
 
@@ -161,28 +163,31 @@ class DrawSomethingInputBox {
 class DrawSomethingPrompt {
   constructor() {
     this.text = 'GET READY...';
+    this.background = SpriteManager.getInstance().getSprite('panel');
+    this.cachedWidth = undefined;
   }
 
   draw(ctx, camContext) {
-    ctx.beginPath();
-    ctx.fillStyle = 'black';
     const x = camContext.viewportWidth / 2 - (BOARD_SIZE / 2);
     const y = (camContext.viewportHeight / 2 - (BOARD_SIZE / 2)) - 75;
-    ctx.rect(x, y, BOARD_SIZE, 50);
-    ctx.fill();
+    this.background.drawAt(ctx, x, y, BOARD_SIZE, 50);
 
-    ctx.beginPath();
     ctx.font = '30px Arial';
-    ctx.fillStyle = 'white';
-    ctx.fillText(this.text, x, y + 30);
+    ctx.fillStyle = 'black';
+    if (this.cachedWidth === undefined) {
+      this.cachedWidth = ctx.measureText(this.text).width;
+    }
+    ctx.fillText(this.text, x + (BOARD_SIZE - this.cachedWidth) / 2, y + 35);
   }
 
   reset() {
     this.text = 'GET READY...';
+    this.cachedWidth = undefined;
   }
 
   set(text) {
     this.text = `${text}`;
+    this.cachedWidth = undefined;
   }
 }
 
@@ -193,19 +198,16 @@ class DrawSomethingTimer {
     this.running = false;
     this.timer = TIMER_DURATION;
     this.handler = undefined;
+    this.background = SpriteManager.getInstance().getSprite('panel');
   }
 
   draw(ctx, camContext) {
-    ctx.beginPath();
-    ctx.fillStyle = 'black';
     const x = camContext.viewportWidth / 2 - (BOARD_SIZE / 2) + BOARD_SIZE + 25;
     const y = (camContext.viewportHeight / 2 - (BOARD_SIZE / 2));
-    ctx.rect(x, y, 100, 50);
-    ctx.fill();
+    this.background.drawAt(ctx, x, y, 100, 50);
 
-    ctx.beginPath();
     ctx.font = '30px Arial';
-    ctx.fillStyle = 'white';
+    ctx.fillStyle = 'black';
     ctx.fillText(this.timer, x + 40, y + 35);
   }
 
@@ -246,24 +248,27 @@ class DrawSomethingTimer {
 class DrawSomethingScore {
   constructor() {
     this.score = 0;
+    this.cachedWidth = undefined;
+    this.background = SpriteManager.getInstance().getSprite('panel');
   }
 
   draw(ctx, camContext) {
-    ctx.beginPath();
-    ctx.fillStyle = 'black';
     const x = camContext.viewportWidth / 2 - (BOARD_SIZE / 2) + BOARD_SIZE + 25;
     const y = (camContext.viewportHeight / 2 - (BOARD_SIZE / 2)) + 75;
-    ctx.rect(x, y, 200, 50);
-    ctx.fill();
+    this.background.drawAt(ctx, x, y, 200, 50);
 
-    ctx.beginPath();
     ctx.font = '30px Arial';
-    ctx.fillStyle = 'white';
-    ctx.fillText(`Score: ${this.score}`, x + 40, y + 35);
+    ctx.fillStyle = 'black';
+    const text = `Score: ${this.score}`;
+    if (this.cachedWidth === undefined) {
+      this.cachedWidth = ctx.measureText(text).width;
+    }
+    ctx.fillText(text, x + (200 - this.cachedWidth) / 2, y + 35);
   }
 
   increase() {
     this.score += 1;
+    this.cachedWidth = undefined;
   }
 }
 
