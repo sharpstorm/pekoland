@@ -16,6 +16,10 @@ export default class DrawSomethingWhiteboard {
     this.counter = 0;
     this.setup();
     this.freeze = false;
+
+    // Caching
+    this.cache = undefined;
+    this.dirty = false;
   }
 
   setup() {
@@ -37,8 +41,6 @@ export default class DrawSomethingWhiteboard {
 
   // eslint-disable-next-line class-methods-use-this
   draw(ctx, camContext) {
-    const image = new Image();
-    image.src = this.canv.toDataURL('image/png');
     ctx.beginPath();
     ctx.strokeStyle = BORDER_COLOR;
     const lineWidthOld = ctx.lineWidth;
@@ -50,16 +52,22 @@ export default class DrawSomethingWhiteboard {
     this.topY = y;
     ctx.rect(x, y, BOARD_SIZE, BOARD_SIZE);
     ctx.stroke();
-    ctx.drawImage(this.canv, x + 2.5, y + 2.5, 500, 500);
 
-    if (this.isDrawing) {
+    if (this.isDrawing && this.newX && this.newY && this.x && this.y) {
       this.canvCtx.beginPath();
       this.canvCtx.lineWidth = 1;
       this.canvCtx.strokeStyle = 'yellow';
       this.canvCtx.moveTo(this.x, this.y);
       this.canvCtx.lineTo(this.newX, this.newY);
       this.canvCtx.stroke();
+      this.x = this.newX;
+      this.y = this.newY;
+      this.newX = undefined;
+      this.newY = undefined;
+      this.dirty = true;
     }
+
+    ctx.drawImage(this.canv, x + 2.5, y + 2.5, 500, 500);
     ctx.lineWidth = lineWidthOld;
   }
 
@@ -72,26 +80,31 @@ export default class DrawSomethingWhiteboard {
   }
 
   getImage() {
-    return this.canv.toDataURL('image/jpg');
+    if (this.cache === undefined || this.dirty) {
+      this.cache = this.canv.toDataURL('image/jpg');
+      this.dirty = false;
+    }
+    return this.cache;
   }
 
   handle(e) {
     if (e.type === 'mousedown') {
       this.isDrawing = true;
+      this.dirty = true;
+      this.x = e.x - this.topX;
+      this.y = e.y - this.topY;
     }
     if (e.type === 'mouseup') {
       this.isDrawing = false;
+      this.x = undefined;
+      this.y = undefined;
+      this.newX = undefined;
+      this.newY = undefined;
     }
-    if (e.type === 'mousemove') {
-      if (this.counter > 1) {
-        this.x = this.newX;
-        this.y = this.newY;
-        this.newX = e.x - this.topX;
-        this.newY = e.y - this.topY;
-        this.counter = 0;
-      }
+    if (e.type === 'mousemove' && this.isDrawing) {
+      this.newX = e.x - this.topX;
+      this.newY = e.y - this.topY;
     }
-    this.counter += 1;
   }
 }
 
