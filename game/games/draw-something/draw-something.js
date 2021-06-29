@@ -28,6 +28,7 @@ export default class DrawSomething {
     this.pCounter = 0;
     this.wordList = undefined;
     this.scoreTable = {};
+    this.lastUpdate = undefined;
   }
 
   handleEvent(evtId, e) {
@@ -42,7 +43,10 @@ export default class DrawSomething {
       },
     };
     if (this.gameOn && this.currentTurn === PlayerManager.getInstance().getSelfId()) {
-      this.sendNetworkUpdate(data);
+      if (this.lastUpdate === undefined || Date.now() > this.lastUpdate + 100) {
+        this.sendNetworkUpdate(data);
+        this.lastUpdate = Date.now();
+      }
       this.whiteBoard.handle(e);
     } else if (evtId === 'keydown') {
       this.inputBox.handle(e);
