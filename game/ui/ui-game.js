@@ -1,5 +1,6 @@
 import { createElement } from './ui-utils.js';
 import UIElement, { UIAnchor } from './ui-element.js';
+import { LongButton } from './ui-button.js';
 
 class GameMenu extends UIElement {
   constructor(gameList) {
@@ -79,21 +80,21 @@ class GameMenu extends UIElement {
 
 class GameOverlay extends UIElement {
   constructor() {
-    super('80%', '70%', '15%', '20%', new UIAnchor(true, true, true, true)); // Center
+    super(0, 20, 200, 50, new UIAnchor(true, true, false, true)); // Center
     this.initObject();
     this.leaveListener = undefined;
   }
 
   initObject() {
     this.node.id = 'game-overlay';
-    this.leaveBtn = createElement('div', { id: 'game-overlay-window-leave' }, 'LeaveGame');
+    this.leaveBtn = new LongButton(0, 0, 120, 36, new UIAnchor(true, true, false, true), 'Leave Game');
     this.leaveBtn.addEventListener('click', (evt) => {
       evt.stopPropagation();
       if (this.leaveListener !== undefined) {
         this.leaveListener();
       }
     });
-    this.gameOverlayWindow = createElement('div', { id: 'game-overlay-window' }, this.leaveBtn);
+    this.gameOverlayWindow = createElement('div', { id: 'game-overlay-window' }, this.leaveBtn.node);
     this.node.appendChild(this.gameOverlayWindow);
     this.close();
   }
