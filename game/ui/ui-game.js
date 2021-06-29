@@ -1,10 +1,11 @@
 import { createElement } from './ui-utils.js';
 import UIElement, { UIAnchor } from './ui-element.js';
-import { LongButton } from './ui-button.js';
+import Button, { LongButton } from './ui-button.js';
+import SpriteManager from '../managers/sprite-manager.js';
 
 class GameMenu extends UIElement {
   constructor(gameList) {
-    super('30%', '30%', '40%', '40%', new UIAnchor(true, true, true, true)); // Center
+    super(0, 0, 600, 400, new UIAnchor(true, true, true, true)); // Center
     this.cardList = [];
     this.gameNameList = [];
     this.initObject(gameList);
@@ -22,18 +23,29 @@ class GameMenu extends UIElement {
         createElement('div', { eventListener: { click: (evt) => evt.stopPropagation() || this.emitEvent('gamePressed', game.gameName) } }, game.gameName),
       );
     });
+    const closeBtn = new Button(10, 10, 36, 36, new UIAnchor(true, true, false, false),
+      SpriteManager.getInstance().getSprite('icon-cross'));
+    closeBtn.addEventListener('click', (evt) => {
+      evt.stopPropagation();
+      this.close();
+    });
 
     this.gameMenu = createElement('div', { id: 'game-menu' },
       this.titleWindow,
       this.gamesWindow,
       createElement('div', { id: 'game-menu-join' },
-        createElement('div', { eventListener: { click: (evt) => evt.stopPropagation() || this.emitEvent('joinYes') }, style: { borderRight: '1px solid #CCC' } }, 'Yes'),
+        createElement('div', { eventListener: { click: (evt) => evt.stopPropagation() || this.emitEvent('joinYes') }, style: { borderRight: '1px solid #772108' } }, 'Yes'),
         createElement('div', { eventListener: { click: (evt) => evt.stopPropagation() || this.emitEvent('joinNo') } }, 'No')),
       createElement('div', { id: 'game-menu-spectate' },
-        createElement('div', { eventListener: { click: (evt) => evt.stopPropagation() || this.emitEvent('spectateYes') }, style: { borderRight: '1px solid #CCC' } }, 'Yes'),
+        createElement('div', { eventListener: { click: (evt) => evt.stopPropagation() || this.emitEvent('spectateYes') }, style: { borderRight: '1px solid #772108' } }, 'Yes'),
         createElement('div', { eventListener: { click: (evt) => evt.stopPropagation() || this.emitEvent('spectateNo') } }, 'No')),
       createElement('div', { id: 'game-menu-waiting' }),
-      createElement('div', { id: 'game-menu-title-closebtn', eventListener: { click: (evt) => evt.stopPropagation() || this.close() } }));
+      closeBtn.node);
+
+    const panelBack = super.drawImage((ctx) => {
+      SpriteManager.getInstance().getSprite('panel').drawAt(ctx, 0, 0, this.width, this.height);
+    });
+    this.gameMenu.style.background = panelBack;
 
     this.node.appendChild(this.gameMenu);
     this.node.style.display = 'none';

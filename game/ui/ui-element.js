@@ -86,6 +86,17 @@ class UIElement {
   addEventListener(evtId, handler) {
     this.node.addEventListener(evtId, handler);
   }
+
+  drawImage(drawFunc) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const { width, height } = this;
+    canvas.width = width;
+    canvas.height = height;
+
+    drawFunc(ctx);
+    return `url('${canvas.toDataURL()}')`;
+  }
 }
 
 export { UIElement as default, UIAnchor };

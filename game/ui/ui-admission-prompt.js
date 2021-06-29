@@ -20,7 +20,7 @@ export default class AdmissionPrompt extends UIElement {
   initObject() {
     this.node.id = 'admit-prompt';
     this.panelContainer = createElement('div', { style: { position: 'relative', width: '100%', height: '100%' } });
-    const panelBack = this.drawImage((ctx) => {
+    const panelBack = super.drawImage((ctx) => {
       SpriteManager.getInstance().getSprite('panel').drawAt(ctx, 0, 0, 220, 100);
     });
     this.panelContainer.style.background = panelBack;
@@ -92,16 +92,5 @@ export default class AdmissionPrompt extends UIElement {
     } else {
       this.waitingQueue.push({ text, accept, reject });
     }
-  }
-
-  drawImage(drawFunc) {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    const { width, height } = this;
-    canvas.width = width;
-    canvas.height = height;
-
-    drawFunc(ctx);
-    return `url('${canvas.toDataURL()}')`;
   }
 }
