@@ -15,7 +15,7 @@ exports.handler = async function handle(event, context) {
 
   // This is an administrator only route
   if (!user.app_metadata.roles || user.app_metadata.roles.length === 0
-    || !user.app_metadata.roles.includes('Admin')) {
+    || !user.app_metadata.roles.includes('admin')) {
     return {
       statusCode: 401,
       body: JSON.stringify({ message: 'Unauthorized' }),

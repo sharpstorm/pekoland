@@ -54,7 +54,7 @@ exports.handler = async function handle(event, context) {
     }
     if (ret !== undefined && ret.data !== undefined) {
       // Only administrator or report owner can delete
-      if ((user.app_metadata.roles && user.app_metadata.roles.length > 0 && user.app_metadata.roles.includes('Admin'))
+      if ((user.app_metadata.roles && user.app_metadata.roles.length > 0 && user.app_metadata.roles.includes('admin'))
         || ret.data.submitted_by === user.email.toLowerCase()) {
         await client.query(q.Delete(q.Ref(q.Collection('reports'), data.report_id)));
         return {
