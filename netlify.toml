@@ -37,6 +37,12 @@
   force = true
 
 [[redirects]]
+  from = "/admin.html"
+  to = "/"
+  status = 301
+  force = true
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200

@@ -19,7 +19,7 @@ export default function HomeView() {
     }
   }, [identity.ready]);
 
-  function makeTile(link, imageAsset, text) {
+  function makeTile(link, imageAsset, text, isRefresh) {
     const icon = (
       <img
         src={imageAsset}
@@ -35,6 +35,33 @@ export default function HomeView() {
     );
 
     if (typeof link === 'string') {
+      const content = (
+        <>
+          {icon}
+          <div className="flexbox flex-col flex-equal flex-center" style={{ textAlign: 'center' }}>
+            <h1>{text}</h1>
+          </div>
+        </>
+      );
+
+      if (isRefresh === true) {
+        return (
+          <div className="panel panel-sm panel-dark" style={{ textAlign: 'center', margin: '8px' }}>
+            <a
+              href={link}
+              className="flexbox"
+              style={{
+                width: '100%',
+                height: '100%',
+                color: '#FFF',
+                textDecoration: 'none',
+              }}
+            >
+              {content}
+            </a>
+          </div>
+        );
+      }
       return (
         <div className="panel panel-sm panel-dark" style={{ textAlign: 'center', margin: '8px' }}>
           <Link
@@ -47,10 +74,7 @@ export default function HomeView() {
               textDecoration: 'none',
             }}
           >
-            {icon}
-            <div className="flexbox flex-col flex-equal flex-center" style={{ textAlign: 'center' }}>
-              <h1>{text}</h1>
-            </div>
+            {content}
           </Link>
         </div>
       );
@@ -110,7 +134,12 @@ export default function HomeView() {
               target: '',
             });
           }, require('../assets/icon-launch.svg'), 'Start Game')}
-          {makeTile('/report', require('../assets/icon-report.svg'), 'Contact Admins')}
+          {(identity.user
+            && identity.user.app_metadata
+            && identity.user.app_metadata.roles
+            && identity.user.app_metadata.roles.includes('admin'))
+            ? makeTile('/admin', require('../assets/icon-admin.svg'), 'Admin Panel', true)
+            : makeTile('/report', require('../assets/icon-report.svg'), 'Contact Admins')}
         </div>
       </div>
     </>
