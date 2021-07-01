@@ -1,5 +1,4 @@
 [build]
-
   base = "./"
   publish = "build-out/"
   command = "echo 'No Build'"
@@ -16,10 +15,26 @@
   publish = "game-dev-dist/"
   command = "parcel build web/index.html --out-dir game-dev-dist && cp -r game game-dev-dist/game"
 
+[dev]
+  autoLaunch = false
+
 [[redirects]]
   from = "/functions/*"
   to = "/.netlify/functions/:splat"
   status = 200
+
+[[redirects]]
+  from = "/admin/*"
+  to = "/admin.html"
+  status = 200
+  force = true
+  conditions = {Role = ["admin"]}
+
+[[redirects]]
+  from = "/admin/*"
+  to = "/"
+  status = 301
+  force = true
 
 [[redirects]]
   from = "/*"

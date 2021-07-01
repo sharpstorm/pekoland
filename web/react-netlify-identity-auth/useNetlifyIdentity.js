@@ -62,6 +62,7 @@ const useNetlifyIdentity = ({ url: _url }) => {
   // Thin wrapper around useState setter to inject expires_at
   const setGoTrueToken = useCallback((newGoTrueToken) => {
     const expiresAt = new Date(JSON.parse(window.atob(newGoTrueToken.access_token.split('.')[1])).exp * 1000);
+    document.cookie = `nf_jwt=${newGoTrueToken.access_token}`;
     _setGoTrueToken({ ...newGoTrueToken, expires_at: expiresAt });
   }, []);
 
@@ -82,6 +83,7 @@ const useNetlifyIdentity = ({ url: _url }) => {
     console.log('Logging Out');
     localStorage.removeItem(GO_TRUE_TOKEN_STORAGE_KEY);
     localStorage.removeItem(USER_STORAGE_KEY);
+    document.cookie = '';
     _setGoTrueToken();
     setUser();
     if (goTrueTokenRefreshTimeoutId) {
@@ -120,7 +122,9 @@ const useNetlifyIdentity = ({ url: _url }) => {
     const goTrueTokenString = localStorage.getItem(GO_TRUE_TOKEN_STORAGE_KEY);
     const userString = localStorage.getItem(USER_STORAGE_KEY);
     if (goTrueTokenString && userString) {
-      _setGoTrueToken(JSON.parse(goTrueTokenString));
+      const tokenData = JSON.parse(goTrueTokenString);
+      document.cookie = `nf_jwt=${tokenData.access_token}`;
+      _setGoTrueToken(tokenData);
       setUser(JSON.parse(userString));
       setProvisionalUser();
     }
