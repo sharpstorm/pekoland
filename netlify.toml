@@ -5,15 +5,15 @@
 
 [context.production]
   publish = "dist/"
-  command = "parcel build web/index.html && cp -r game dist/game"
+  command = "parcel build web/index.html web/admin.html --no-source-maps && cp -r game dist/game"
 
 [context.react-staging]
   publish = "react-staging-dist/"
-  command = "parcel build web/index.html --out-dir react-staging-dist && cp -r game react-staging-dist/game"
+  command = "parcel build web/index.html web/admin.html --no-source-maps --out-dir react-staging-dist && cp -r game react-staging-dist/game"
 
 [context.game-dev]
   publish = "game-dev-dist/"
-  command = "parcel build web/index.html --out-dir game-dev-dist && cp -r game game-dev-dist/game"
+  command = "parcel build web/index.html web/admin.html --no-source-maps --out-dir game-dev-dist && cp -r game game-dev-dist/game"
 
 [dev]
   autoLaunch = false
