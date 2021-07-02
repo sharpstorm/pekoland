@@ -48,17 +48,32 @@ exports.handler = async function handle(event, context) {
   try {
     const usersUrl = `${identity.url}/admin/users/${data.user_id}`;
     const adminAuthHeader = `Bearer ${identity.token}`;
+    let targetUser;
     try {
-      await fetch(usersUrl, {
-        method: 'DELETE',
+      targetUser = await fetch(usersUrl, {
+        method: 'GET',
         headers: { Authorization: adminAuthHeader },
-      });
+      }).then((x) => x.json());
     } catch {
       return {
         statusCode: 404,
         body: JSON.stringify({ message: 'User not Found' }),
       };
     }
+    if (targetUser.app_metadata
+      && targetUser.app_metadata.roles
+      && targetUser.app_metadata.roles.includes('admin')) {
+      return {
+        statusCode: 401,
+        body: JSON.stringify({
+          message: 'Not allowed to delete an admin',
+        }),
+      };
+    }
+    await fetch(usersUrl, {
+      method: 'DELETE',
+      headers: { Authorization: adminAuthHeader },
+    });
     return {
       statusCode: 200,
       body: JSON.stringify({
