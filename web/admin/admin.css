@@ -1,5 +1,8 @@
 #admin-user-list {
   list-style-type: none;
+  overflow-y: scroll;
+  max-height: 60vh;
+  padding: 0 8px;
 }
 
 #admin-user-list > li {

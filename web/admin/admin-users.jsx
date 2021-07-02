@@ -122,7 +122,12 @@ export default function AdminUsersView() {
                 className="btn-danger"
                 style={{ marginLeft: '8px' }}
                 disabled={user.isAdmin}
-                onClick={() => userListStore.deleteUser(user.id, identity.authorizedFetch)}
+                onClick={() => {
+                  // eslint-disable-next-line no-restricted-globals
+                  if (confirm(`Confirm Delete ${user.email}?`)) {
+                    userListStore.deleteUser(user.id, identity.authorizedFetch);
+                  }
+                }}
               >
                 Delete
               </Button>
