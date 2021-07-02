@@ -46,6 +46,20 @@ button.btn.btn-accent:disabled, button.btn.btn-accent:disabled:hover {
   background-color: var(--color-dark-gray);
 }
 
+button.btn.btn-danger {
+  border: none;
+  background-color: var(--color-danger);
+  color: var(--color-font-light);
+}
+
+button.btn.btn-danger:hover {
+  background-color: var(--color-danger-dark);
+}
+
+button.btn.btn-danger:disabled, button.btn.btn-danger:disabled:hover {
+  background-color: var(--color-dark-gray);
+}
+
 button.btn.loading {
   transition: border linear 0.2s, background ease-in 0.5s;
   background: transparent;
