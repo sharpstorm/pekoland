@@ -34,8 +34,9 @@ function AdminApp() {
         <Route exact path="/admin/home" component={AdminHomeView} />
         <Route exact path="/admin/users" component={AdminUsersView} />
         <Route exact path="/admin/reports" component={AdminReportsView} />
+        <Redirect to="/admin/home" />
       </RouteAnimatorSwitch>
-      <Redirect exact from="/admin" to="/admin/home" />
+      <Route exact path="/admin" render={() => <Redirect to="/admin/home" />} />
     </main>
   );
 }
