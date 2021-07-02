@@ -107,7 +107,7 @@ export default function AdminUsersView() {
           <li key={user.id}>
             <div>{user.email}</div>
             <div>{user.ign}</div>
-            <div>{user.roles.includes('admin') ? 'Yes' : 'No'}</div>
+            <div>{user.isAdmin ? 'Yes' : 'No'}</div>
             <div style={{ display: 'flex' }}>
               <Button
                 className="btn-accent"
@@ -121,7 +121,7 @@ export default function AdminUsersView() {
               <Button
                 className="btn-danger"
                 style={{ marginLeft: '8px' }}
-                disabled={user.roles.includes('admin')}
+                disabled={user.isAdmin}
                 onClick={() => userListStore.deleteUser(user.id, identity.authorizedFetch)}
               >
                 Delete

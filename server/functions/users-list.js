@@ -41,7 +41,7 @@ exports.handler = async function handle(event, context) {
       .map((x) => ({
         email: x.email.toLowerCase(),
         id: x.id,
-        roles: x.app_metadata.roles,
+        isAdmin: (x.app_metadata.roles && x.app_metadata.roles.includes('admin')),
         ign: x.user_metadata.ign,
       }));
 
