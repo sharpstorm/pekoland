@@ -39,7 +39,7 @@ exports.handler = async function handle(event, context) {
     };
   }
 
-  if (data.report_id === undefined || data.status === undefined) {
+  if (data.report_id === undefined || data.status === undefined || data.action === undefined) {
     return {
       statusCode: 400,
       body: JSON.stringify({ message: 'Bad Request' }),
@@ -57,6 +57,7 @@ exports.handler = async function handle(event, context) {
       ret = await client.query(q.Update(q.Ref(q.Collection('reports'), data.report_id), {
         data: {
           status: data.status,
+          action: data.action,
         },
       }));
     } catch {

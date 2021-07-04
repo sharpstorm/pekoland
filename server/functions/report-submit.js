@@ -63,6 +63,7 @@ exports.handler = async function handle(event, context) {
         status: 0,
         submitted_by: user.email.toLowerCase(),
         timestamp: Date.now(),
+        action: '',
       },
     }));
 
