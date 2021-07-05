@@ -8,6 +8,9 @@
   --color-background: #eee;
   --color-gray: #ccc;
   --color-dark-gray: #888;
+
+  --color-danger: #dc3545;
+  --color-danger-dark: #c82333;
 }
 
 body {
