@@ -1,17 +1,17 @@
-#admin-user-list {
+#admin-user-list, #admin-report-list {
   list-style-type: none;
   overflow-y: scroll;
   max-height: 60vh;
   padding: 0 8px;
 }
 
-#admin-user-list > li {
+#admin-user-list > li, #admin-report-list > li {
   display: flex;
   padding: 16px 0;
   border-bottom: 1px solid #CCC;
 }
 
-#admin-user-list > li > div {
+#admin-user-list > li > div, #admin-report-list > li > div {
   flex: 1 1 0;
 }
 
@@ -40,29 +40,4 @@
 
 #admin-report-table > tbody > tr > td:nth-child(2) {
   border-left: 1px solid #CCC;
-}
-
-#admin-report-table > tbody > tr > td > textarea {
-  font-family: 'Poppins', sans-serif;
-  width: 100%;
-  background: none;
-  border: none;
-  color: var(--color-font-light);
-  resize: none;
-  overflow-y: scroll;
-  max-height: 10vh;
-}
-
-#admin-report-table > tbody > tr > td > select {
-  background: none;
-  border: 2px solid #CCC;
-  color: #FFF;
-  padding: 4px 12px;
-  border-radius: 4px;
-  width: 100%;
-}
-
-#admin-report-table > tbody > tr > td > select > option {
-  background: #000;
-  color: #FFF;
 }

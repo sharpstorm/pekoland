@@ -54,7 +54,7 @@ const ReportListStore = () => {
       }
     });
 
-  const deleteReport = (fetchAgent, reportId) => fetchAgent('/functions/report-list', {
+  const deleteReport = (fetchAgent, reportId) => fetchAgent('/functions/report-remove', {
     method: 'POST',
     body: JSON.stringify({ report_id: reportId }),
   })
@@ -69,7 +69,7 @@ const ReportListStore = () => {
       setLastUpdate(Date.now());
     });
 
-  const updateReport = (fetchAgent, reportId, status, action) => fetchAgent('/functions/report-list', {
+  const updateReport = (fetchAgent, reportId, status, action) => fetchAgent('/functions/report-update', {
     method: 'POST',
     body: JSON.stringify({ report_id: reportId, status, action }),
   })
@@ -121,7 +121,7 @@ export default function AdminReportsView() {
     const reportListElement = (reportListStore.getReports() === undefined)
       ? (<h2>Loading Reports</h2>)
       : (
-        <ul id="admin-user-list">
+        <ul id="admin-report-list">
           <li key="header">
             <div style={{ fontSize: '1.2em', fontWeight: '600', letterSpacing: '1px' }}>Report ID</div>
             <div style={{ fontSize: '1.2em', fontWeight: '600', letterSpacing: '1px' }}>Submitted At</div>
@@ -168,11 +168,15 @@ export default function AdminReportsView() {
   const [reportDetail, setReportDetail] = useState(undefined);
   const [actionState, setActionState] = useState(0);
   const [newState, setNewState] = useState();
+  const [isLoading, setIsLoading] = useState(0);
 
   useEffect(() => {
     if (currentReport !== undefined) {
       reportListStore.getDetailedReport(identity.authorizedFetch, currentReport)
-        .then((x) => setReportDetail(x));
+        .then((x) => {
+          console.log('done');
+          setReportDetail(x);
+        });
     }
   }, [currentReport]);
 
@@ -216,6 +220,7 @@ export default function AdminReportsView() {
                       <Select
                         options={REPORT_STATUS}
                         selectedIndex={newState.status}
+                        style={{ width: '100%' }}
                         onChange={
                           (evt) => {
                             const updated = newState;
@@ -232,7 +237,12 @@ export default function AdminReportsView() {
                 </tr>
                 <tr>
                   <td colSpan="2">
-                    <textarea value={reportDetail.description} readOnly rows="40" />
+                    <TextAreaInput
+                      style={{ width: '100%', maxHeight: '10vh' }}
+                      value={reportDetail.description}
+                      readOnly
+                      rows="40"
+                    />
                   </td>
                 </tr>
                 <tr>
@@ -241,6 +251,7 @@ export default function AdminReportsView() {
                 <tr>
                   <td colSpan="2">
                     <TextAreaInput
+                      style={{ width: '100%', maxHeight: '10vh' }}
                       value={actionState === 0 ? reportDetail.action : newState.action}
                       readOnly={actionState === 0}
                       onChange={actionState === 0 ? undefined : (evt) => {
@@ -257,6 +268,7 @@ export default function AdminReportsView() {
             <div className="flexbox" style={{ margin: '16px auto', maxWidth: '800px' }}>
               <Button
                 className="btn-accent"
+                disabled={isLoading !== 0}
                 onClick={() => {
                   setNewState({
                     action: reportDetail.action,
@@ -269,8 +281,10 @@ export default function AdminReportsView() {
                 Update
               </Button>
               <Button
-                className="btn-primary"
+                className={`btn-primary${isLoading === 2 ? ' loading' : ''}`}
+                disabled={isLoading !== 0}
                 onClick={() => {
+                  setIsLoading(2);
                   reportListStore.updateReport(identity.authorizedFetch,
                     reportDetail.id, newState.status, newState.action)
                     .then(() => {
@@ -279,6 +293,7 @@ export default function AdminReportsView() {
                       newReport.action = newState.action;
                       setReportDetail(newReport);
                     })
+                    .then(() => setIsLoading(0))
                     .then(() => setActionState(0));
                 }}
                 style={{ display: (actionState === 1) ? 'block' : 'none' }}
@@ -286,13 +301,21 @@ export default function AdminReportsView() {
                 Save
               </Button>
               <Button
-                className="btn-danger"
+                className={`btn-danger${isLoading === 1 ? ' loading' : ''}`}
+                disabled={isLoading !== 0}
                 style={{ marginLeft: '8px' }}
                 onClick={() => {
                   // eslint-disable-next-line no-restricted-globals
                   if (confirm(`Confirm delete report ${reportDetail.id}`)) {
-                    reportListStore.deleteReport(identity.authorizedFetch, reportDetail.id);
-                    setCurrentReport(undefined);
+                    setIsLoading(1);
+                    reportListStore.deleteReport(identity.authorizedFetch, reportDetail.id)
+                      .then(() => {
+                        setIsLoading(0);
+                        setCurrentReport(undefined);
+                      })
+                      .catch(() => {
+                        alert('Failed to delete report');
+                      });
                   }
                 }}
               >
@@ -319,6 +342,7 @@ export default function AdminReportsView() {
       history.replace('/admin/home');
     } else {
       setCurrentReport(undefined);
+      setReportDetail(undefined);
     }
   };
 
