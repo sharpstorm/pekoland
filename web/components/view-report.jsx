@@ -33,7 +33,7 @@ const makeReportCache = () => {
       }
     });
 
-  const createReport = (fetchAgent, reportType, reportText) => fetchAgent('/functions/report-list', {
+  const createReport = (fetchAgent, reportType, reportText) => fetchAgent('/functions/report-submit', {
     method: 'POST',
     body: JSON.stringify({
       issue_type: reportType,
@@ -65,10 +65,8 @@ const makeReportCache = () => {
       }
       return resp.json();
     })
-    .then((x) => {
-      const reportClone = reports;
-      reportClone.push(x);
-      setReports(reportClone);
+    .then(() => {
+      setReports(reports.filter((x) => x.id !== reportId));
       setLastUpdate(Date.now());
     });
 
@@ -278,23 +276,9 @@ export default function ReportView() {
 
     const isFormValid = () => problemText !== '';
     const submitForm = () => {
-      identity.authorizedFetch('report-submit', {
-        method: 'POST',
-        body: JSON.stringify({
-          issue_type: problemType,
-          issue_description: problemText,
-        }),
-      })
-        .then((resp) => {
-          if (resp.status > 399) {
-            alert('Failed to submit report');
-            return;
-          }
-          alert('Successfully submitted report');
-        })
-        .catch(() => {
-          alert('Failed to submit report');
-        });
+      reportCache.createReport(identity.authorizedFetch, problemType, problemText)
+        .then(() => setCurrentView(0))
+        .catch(() => alert('Failed to create report'));
     };
 
     return (
