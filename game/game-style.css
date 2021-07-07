@@ -191,3 +191,44 @@
 #admit-prompt.show {
   transform: translateX(0);
 }
+
+#drawer-menu {
+  overflow: hidden;
+}
+
+#drawer-menu > div {
+  transition: transform 1s ease-in-out;
+  will-change: transform;
+  transform: translateY(100%);
+}
+
+#drawer-menu > div.show {
+  transform: translateY(0);
+}
+
+#customize-world-menu {
+  transition: transform 1s ease-in-out;
+  will-change: transform;
+  transform: translateY(calc(-50px - 100%));
+}
+
+#customize-world-menu.show {
+  transform: translateY(0);
+}
+
+#furniture-list::-webkit-scrollbar { height: 8px; }
+#furniture-list::-webkit-scrollbar-track { background: #e0a466; border-radius: 4px }
+#furniture-list::-webkit-scrollbar-thumb { background: #772108; border-radius: 4px; }
+#furniture-list > div {
+  background-color: #e0a466;
+  border: 4px solid transparent;
+  border-radius: 4px;
+  height: 100px;
+  width: auto;
+  margin: auto 8px;
+}
+
+#furniture-list > div.selected {
+  border: 4px solid #772108;
+}
+

@@ -30,6 +30,8 @@ import DrawSomething from './games/draw-something/draw-something.js';
 import BattleshipGame from './games/battleship/battleship.js';
 
 import AdmissionPrompt from './ui/ui-admission-prompt.js';
+import DrawerMenu from './ui/ui-drawer-menu.js';
+import CustomizeWorldMenu from './ui/ui-world-customize.js';
 
 const networkManager = NetworkManager.getInstance();
 const inputSystem = new InputSystem(document.getElementById('ui-overlay'), document);
@@ -163,7 +165,6 @@ Promise.all([netSetupPromise, assetSetupPromise])
     const uiRenderer = Renderer.getUILayer();
     const gameRenderer = Renderer.getGameLayer();
     const playerManager = PlayerManager.getInstance();
-    const worldManager = WorldManager.getInstance();
     const chatManager = GameManager.getInstance().getTextChannelManager();
     const boardGameManager = GameManager.getInstance().getBoardGameManager();
 
@@ -194,10 +195,32 @@ Promise.all([netSetupPromise, assetSetupPromise])
     chatManager.addChangeListener(() => chatbox.update());
     uiRenderer.addElement(chatbox);
 
+    const customizeWorldMenu = new CustomizeWorldMenu();
+    customizeWorldMenu.addFurniture({ sprite: SpriteManager.getInstance().getSprite('icon-hamburger') });
+    customizeWorldMenu.addFurniture({ sprite: SpriteManager.getInstance().getSprite('icon-hamburger') });
+    customizeWorldMenu.addFurniture({ sprite: SpriteManager.getInstance().getSprite('icon-hamburger') });
+    customizeWorldMenu.addFurniture({ sprite: SpriteManager.getInstance().getSprite('icon-hamburger') });
+    customizeWorldMenu.addFurniture({ sprite: SpriteManager.getInstance().getSprite('icon-hamburger') });
+    uiRenderer.addElement(customizeWorldMenu);
+
+    const drawerMenu = new DrawerMenu(networkManager.getOperationMode()
+      === NetworkManager.Mode.SERVER);
+    // eslint-disable-next-line no-restricted-globals
+    drawerMenu.setQuitHandler(() => (confirm('Are you sure you want to leave?') ? window.close() : ''));
+    drawerMenu.setCustomizeWorldHandler(() => {
+      Renderer.setRenderMapGrid(true);
+      customizeWorldMenu.setVisible(true);
+      drawerMenu.setVisible(false);
+    });
+    uiRenderer.addElement(drawerMenu);
+
     const menuBtn = new Button(10, 10, 36, 36, new UIAnchor(false, true, true, false),
       SpriteManager.getInstance().getSprite('icon-hamburger'));
-
+    menuBtn.addEventListener('click', () => {
+      drawerMenu.toggleVisible();
+    });
     uiRenderer.addElement(menuBtn);
+
     const micBtn = new Button(174, 10, 36, 36, new UIAnchor(false, true, true, false),
       SpriteManager.getInstance().getSprite('icon-mic-muted'));
     micBtn.setVisible(false);
@@ -244,7 +267,7 @@ Promise.all([netSetupPromise, assetSetupPromise])
         };
         NetworkManager.getInstance().send(buildClientGamePacket('register-lobby', data));
       } else if (networkManager.getOperationMode() === NetworkManager.Mode.SERVER) {
-        worldManager.createLobby(boardGameManager.tableId,
+        WorldManager.getInstance().createLobby(boardGameManager.tableId,
           playerManager.getSelfId(), gameName);
         boardGameManager.gameState = 'hosting';
         boardGameManager.displayPage(3);

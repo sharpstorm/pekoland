@@ -56,9 +56,11 @@ export default class Map {
     const ctx = canvas.getContext('2d');
     const unit = this.getUnitLength();
     ctx.strokeStyle = 'black';
-    for (let x = 0; x < this.mapWidth; x += unit) {
-      for (let y = 0; y < this.mapHeight; y += unit) {
-        ctx.strokeRect(x, y, unit, unit);
+    for (let x = 0; x * unit < this.mapWidth; x += 1) {
+      for (let y = 0; y * unit < this.mapHeight; y += 1) {
+        if (!this.checkCollision(x * GameConstants.UNIT, y * GameConstants.UNIT)) {
+          ctx.strokeRect(x * unit, y * unit, unit, unit);
+        }
       }
     }
     this.gridCache = new Image();
