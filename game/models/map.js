@@ -8,6 +8,7 @@ export default class Map {
     this.mapHeight = mapHeight;
     this.widthGrids = widthGrids;
     this.heightGrids = heightGrids;
+    this.gridCache = undefined;
 
     this.initCollisionMap();
   }
@@ -47,6 +48,23 @@ export default class Map {
     }
   }
 
+  initGridCache() {
+    const canvas = document.createElement('canvas');
+    canvas.width = this.mapWidth;
+    canvas.height = this.mapHeight;
+
+    const ctx = canvas.getContext('2d');
+    const unit = this.getUnitLength();
+    ctx.strokeStyle = 'black';
+    for (let x = 0; x < this.mapWidth; x += unit) {
+      for (let y = 0; y < this.mapHeight; y += unit) {
+        ctx.strokeRect(x, y, unit, unit);
+      }
+    }
+    this.gridCache = new Image();
+    this.gridCache.src = canvas.toDataURL('image/png');
+  }
+
   draw(ctx, camContext) {
     if (this.MapImage === undefined) {
       return;
@@ -63,6 +81,27 @@ export default class Map {
 
     const scale = this.getUnitLength() / GameConstants.UNIT;
     ctx.drawImage(this.MapImage, scale * (camContext.x + drawOffsetX),
+      scale * (camContext.y + drawOffsetY),
+      scale * camContext.viewportWidth,
+      scale * camContext.viewportHeight,
+      drawOffsetX, drawOffsetY, camContext.viewportWidth, camContext.viewportHeight);
+  }
+
+  drawGrid(ctx, camContext) {
+    if (this.gridCache === undefined) {
+      this.initGridCache();
+    }
+    let drawOffsetX = 0;
+    let drawOffsetY = 0;
+
+    if (camContext.x < 0) {
+      drawOffsetX -= camContext.x;
+    }
+    if (camContext.y < 0) {
+      drawOffsetY -= camContext.y;
+    }
+    const scale = this.getUnitLength() / GameConstants.UNIT;
+    ctx.drawImage(this.gridCache, scale * (camContext.x + drawOffsetX),
       scale * (camContext.y + drawOffsetY),
       scale * camContext.viewportWidth,
       scale * camContext.viewportHeight,

@@ -122,6 +122,7 @@ class Renderer {
     this.uiLayer = new UILayer();
     this.gameLayer = new GameLayer();
     this.eventListeners = [];
+    this.renderMapGrid = false;
 
     this.dimens = {
       width: this.canvas.width,
@@ -172,6 +173,9 @@ class Renderer {
     const camContext = this.cameraContext;
     if (MapManager.getInstance().getCurrentMap() !== undefined) {
       MapManager.getInstance().getCurrentMap().draw(ctx, camContext);
+      if (this.renderMapGrid) {
+        MapManager.getInstance().getCurrentMap().drawGrid(ctx, camContext);
+      }
     }
 
     PlayerManager.getInstance().getPlayers().forEach((player) => {
@@ -206,6 +210,10 @@ class Renderer {
   synchronizeCanvasSize() {
     this.canvas.width = this.dimens.width;
     this.canvas.height = this.dimens.height;
+  }
+
+  setRenderMapGrid(active) {
+    this.renderMapGrid = (active === true);
   }
 
   getUILayer() {
