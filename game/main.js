@@ -32,6 +32,7 @@ import BattleshipGame from './games/battleship/battleship.js';
 import AdmissionPrompt from './ui/ui-admission-prompt.js';
 import DrawerMenu from './ui/ui-drawer-menu.js';
 import CustomizeWorldMenu from './ui/ui-world-customize.js';
+import MapManager from './managers/map-manager.js';
 
 const networkManager = NetworkManager.getInstance();
 const inputSystem = new InputSystem(document.getElementById('ui-overlay'), document);
@@ -168,7 +169,7 @@ Promise.all([netSetupPromise, assetSetupPromise])
     const chatManager = GameManager.getInstance().getTextChannelManager();
     const boardGameManager = GameManager.getInstance().getBoardGameManager();
 
-    Renderer.registerFurnitureHandler('furniture-game-table', boardGameManager.handleEvent.bind(boardGameManager));
+    Renderer.getMapRenderer().registerFurnitureHandler('furniture-game-table', boardGameManager.handleEvent.bind(boardGameManager));
 
     const checkersGame = new CheckersGame();
     const drawSomething = new DrawSomething();
@@ -196,11 +197,18 @@ Promise.all([netSetupPromise, assetSetupPromise])
     uiRenderer.addElement(chatbox);
 
     const customizeWorldMenu = new CustomizeWorldMenu();
-    customizeWorldMenu.addFurniture({ sprite: SpriteManager.getInstance().getSprite('icon-hamburger') });
-    customizeWorldMenu.addFurniture({ sprite: SpriteManager.getInstance().getSprite('icon-hamburger') });
-    customizeWorldMenu.addFurniture({ sprite: SpriteManager.getInstance().getSprite('icon-hamburger') });
-    customizeWorldMenu.addFurniture({ sprite: SpriteManager.getInstance().getSprite('icon-hamburger') });
-    customizeWorldMenu.addFurniture({ sprite: SpriteManager.getInstance().getSprite('icon-hamburger') });
+    MapManager.getInstance().getFurnitureFactory().forEachType((furniture) => {
+      customizeWorldMenu.addFurniture(furniture);
+    });
+    Renderer.getMapRenderer().registerFurnitureHandler('place', (unitX, unitY) => {
+      MapManager.getInstance().getCurrentMap()
+        .setFurnitureAt(unitX, unitY, customizeWorldMenu.getSelectedFurniture());
+    });
+    customizeWorldMenu.setSaveHandler(() => {
+      console.log('Saved furniture placement');
+      Renderer.getMapRenderer().setFurniturePlacementMode(false);
+      customizeWorldMenu.setVisible(false);
+    });
     uiRenderer.addElement(customizeWorldMenu);
 
     const drawerMenu = new DrawerMenu(networkManager.getOperationMode()
@@ -208,7 +216,7 @@ Promise.all([netSetupPromise, assetSetupPromise])
     // eslint-disable-next-line no-restricted-globals
     drawerMenu.setQuitHandler(() => (confirm('Are you sure you want to leave?') ? window.close() : ''));
     drawerMenu.setCustomizeWorldHandler(() => {
-      Renderer.setRenderMapGrid(true);
+      Renderer.getMapRenderer().setFurniturePlacementMode(true);
       customizeWorldMenu.setVisible(true);
       drawerMenu.setVisible(false);
     });

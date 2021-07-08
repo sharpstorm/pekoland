@@ -29,14 +29,16 @@ export default class DrawerMenu extends UIElement {
     this.panelContainer.style.background = panelBack;
 
     const quitBtn = new LongButton(0, 12, 180, 36, new UIAnchor(false, true, true, true), 'Leave Game');
-    quitBtn.addEventListener('click', () => {
+    quitBtn.addEventListener('click', (evt) => {
+      evt.stopPropagation();
       if (this.quitHandler !== undefined) this.quitHandler();
     });
     this.panelContainer.appendChild(quitBtn.node);
 
     if (furnitureBtnEnabled) {
       const furnitureBtn = new LongButton(0, 54, 180, 36, new UIAnchor(false, true, true, true), 'Customize World');
-      furnitureBtn.addEventListener('click', () => {
+      furnitureBtn.addEventListener('click', (evt) => {
+        evt.stopPropagation();
         if (this.furnitureHandler !== undefined) this.furnitureHandler();
       });
       this.panelContainer.appendChild(furnitureBtn.node);

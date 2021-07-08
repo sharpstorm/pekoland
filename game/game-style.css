@@ -223,9 +223,10 @@
   background-color: #e0a466;
   border: 4px solid transparent;
   border-radius: 4px;
-  height: 100px;
+  height: 72px;
   width: auto;
   margin: auto 8px;
+  padding: 8px;
 }
 
 #furniture-list > div.selected {

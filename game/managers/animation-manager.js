@@ -113,7 +113,7 @@ class GameLayer {
 
 class MapRenderer {
   constructor() {
-    this.renderMapGrid = false;
+    this.furniturePlacement = false;
     this.furnitureHandlers = {};
   }
 
@@ -121,7 +121,7 @@ class MapRenderer {
     const currentMap = MapManager.getInstance().getCurrentMap();
     if (currentMap !== undefined) {
       currentMap.draw(ctx, camContext);
-      if (this.renderMapGrid) {
+      if (this.furniturePlacement) {
         currentMap.drawGrid(ctx, camContext);
       }
     }
@@ -137,6 +137,18 @@ class MapRenderer {
       const worldX = camContext.x + event.clientX;
       const worldY = camContext.y + event.clientY;
 
+      if (this.furniturePlacement) {
+        // Special override
+        const unit = currentMap.getUnitLength();
+        const unitX = Math.floor(worldX / unit) * unit;
+        const unitY = Math.floor(worldY / unit) * unit;
+
+        if (this.furnitureHandlers.place !== undefined) {
+          this.furnitureHandlers.place(unitX, unitY, event);
+        }
+        return;
+      }
+
       const furniture = currentMap.getFurniture(worldX, worldY);
       if (furniture !== undefined && furniture in this.furnitureHandlers) {
         const unit = currentMap.getUnitLength();
@@ -150,6 +162,10 @@ class MapRenderer {
 
   registerFurnitureHandler(furnitureId, handler) {
     this.furnitureHandlers[furnitureId] = handler;
+  }
+
+  setFurniturePlacementMode(active) {
+    this.furniturePlacement = (active === true);
   }
 }
 
@@ -250,20 +266,16 @@ class Renderer {
     this.canvas.height = this.dimens.height;
   }
 
-  setRenderMapGrid(active) {
-    this.mapRenderer.renderMapGrid = (active === true);
-  }
-
-  registerFurnitureHandler(furnitureId, handler) {
-    this.mapRenderer.registerFurnitureHandler(furnitureId, handler);
-  }
-
   getUILayer() {
     return this.uiLayer;
   }
 
   getGameLayer() {
     return this.gameLayer;
+  }
+
+  getMapRenderer() {
+    return this.mapRenderer;
   }
 
   static getInstance() {

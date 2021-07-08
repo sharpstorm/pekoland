@@ -39,8 +39,7 @@ export default class Map {
 
       for (let y = 0; y < this.mapHeight; y += unit) {
         const pixel = ctx.getImageData(x + (unit / 2), y + (unit / 2), 1, 1).data;
-        if ((pixel[3] === 255 && pixel[0] === 0 && pixel[1] === 0 && pixel[2] === 0)
-          || (pixel[3] === 255 && pixel[0] === 255 && pixel[1] === 0 && pixel[2] === 0)) {
+        if (pixel[3] === 255 && pixel[0] === 0 && pixel[1] === 0 && pixel[2] === 0) {
           collisionCol.push(1);
         } else {
           collisionCol.push(0);
@@ -77,7 +76,6 @@ export default class Map {
         for (let y = 0; y * unit < this.mapHeight; y += 1) {
           const item = this.furnitureMatrix[x][y];
           if (item !== undefined) {
-            console.log('something');
             this.furnitureFactory.getFurniture(item).drawAt(ctx, x * unit, y * unit, unit, unit);
           }
         }
@@ -154,14 +152,14 @@ export default class Map {
   checkCollision(playerX, playerY) {
     const x = Math.floor(playerX / GameConstants.UNIT);
     const y = Math.floor(playerY / GameConstants.UNIT);
-    return this.collisionMatrix[x][y] === 1;
+    return this.collisionMatrix[x][y] === 1 || this.furnitureMatrix[x][y] !== undefined;
   }
 
   hookFurnitureFactory(factory) {
     this.furnitureFactory = factory;
   }
 
-  getFurniture(worldX, worldY) {
+  normaliseCoordinates(worldX, worldY) {
     const scale = this.getUnitLength() / GameConstants.UNIT;
     const scaledX = worldX * scale;
     const scaledY = worldY * scale;
@@ -171,7 +169,20 @@ export default class Map {
     }
     const x = Math.floor(worldX / GameConstants.UNIT);
     const y = Math.floor(worldY / GameConstants.UNIT);
+    return { x, y };
+  }
 
+  getFurniture(worldX, worldY) {
+    const { x, y } = this.normaliseCoordinates(worldX, worldY);
     return this.furnitureMatrix[x][y];
+  }
+
+  setFurnitureAt(worldX, worldY, furnitureId) {
+    const { x, y } = this.normaliseCoordinates(worldX, worldY);
+    if (this.collisionMatrix[x][y] === 1) {
+      return; // Not allowed to place on colliders
+    }
+    this.furnitureMatrix[x][y] = furnitureId;
+    this.refreshComposite();
   }
 }

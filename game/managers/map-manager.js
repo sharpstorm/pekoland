@@ -13,6 +13,10 @@ class FurnitureFactory {
     }
     return undefined;
   }
+
+  forEachType(handler) {
+    Object.values(this.furnitureTypes).forEach(handler);
+  }
 }
 
 let instance;
