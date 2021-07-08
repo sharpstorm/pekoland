@@ -168,7 +168,7 @@ Promise.all([netSetupPromise, assetSetupPromise])
     const chatManager = GameManager.getInstance().getTextChannelManager();
     const boardGameManager = GameManager.getInstance().getBoardGameManager();
 
-    inputSystem.addListener('click', (evt) => boardGameManager.handleEvent('click', evt, Renderer.getCameraContext()));
+    Renderer.registerFurnitureHandler('furniture-game-table', boardGameManager.handleEvent.bind(boardGameManager));
 
     const checkersGame = new CheckersGame();
     const drawSomething = new DrawSomething();

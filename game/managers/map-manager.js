@@ -1,12 +1,32 @@
+class FurnitureFactory {
+  constructor() {
+    this.furnitureTypes = {};
+  }
+
+  registerFurnitureTemplate(furniture) {
+    this.furnitureTypes[furniture.id] = furniture;
+  }
+
+  getFurniture(id) {
+    if (id in this.furnitureTypes) {
+      return this.furnitureTypes[id];
+    }
+    return undefined;
+  }
+}
+
 let instance;
 
 export default class MapManager {
   constructor() {
     this.maps = {};
     this.currentMapID = undefined;
+    this.furnitureFactory = new FurnitureFactory();
   }
 
   registerMap(id, map) {
+    map.hookFurnitureFactory(this.furnitureFactory);
+    map.refreshComposite();
     this.maps[id] = map;
     if (this.currentMapID === undefined) {
       this.currentMapID = id;
@@ -15,6 +35,7 @@ export default class MapManager {
 
   removeMap(id) {
     if (id in this.maps) {
+      this.maps[id].hookFurnitureFactory(undefined);
       delete this.maps[id];
     }
     if (id === this.currentMapID) {
@@ -39,6 +60,10 @@ export default class MapManager {
 
   getCurrentMap() {
     return this.maps[this.currentMapID];
+  }
+
+  getFurnitureFactory() {
+    return this.furnitureFactory;
   }
 
   static getInstance() {

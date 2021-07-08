@@ -111,6 +111,48 @@ class GameLayer {
   }
 }
 
+class MapRenderer {
+  constructor() {
+    this.renderMapGrid = false;
+    this.furnitureHandlers = {};
+  }
+
+  render(ctx, camContext) {
+    const currentMap = MapManager.getInstance().getCurrentMap();
+    if (currentMap !== undefined) {
+      currentMap.draw(ctx, camContext);
+      if (this.renderMapGrid) {
+        currentMap.drawGrid(ctx, camContext);
+      }
+    }
+  }
+
+  propagateEvent(eventId, event, camContext) {
+    if (eventId !== 'click') {
+      return;
+    }
+
+    const currentMap = MapManager.getInstance().getCurrentMap();
+    if (currentMap !== undefined) {
+      const worldX = camContext.x + event.clientX;
+      const worldY = camContext.y + event.clientY;
+
+      const furniture = currentMap.getFurniture(worldX, worldY);
+      if (furniture !== undefined && furniture in this.furnitureHandlers) {
+        const unit = currentMap.getUnitLength();
+        const unitX = Math.floor(worldX / unit) * unit;
+        const unitY = Math.floor(worldY / unit) * unit;
+
+        this.furnitureHandlers[furniture](unitX, unitY, event);
+      }
+    }
+  }
+
+  registerFurnitureHandler(furnitureId, handler) {
+    this.furnitureHandlers[furnitureId] = handler;
+  }
+}
+
 let instance;
 class Renderer {
   constructor() {
@@ -121,8 +163,8 @@ class Renderer {
     this.ctx = this.canvas.getContext('2d', { alpha: false });
     this.uiLayer = new UILayer();
     this.gameLayer = new GameLayer();
+    this.mapRenderer = new MapRenderer();
     this.eventListeners = [];
-    this.renderMapGrid = false;
 
     this.dimens = {
       width: this.canvas.width,
@@ -153,6 +195,7 @@ class Renderer {
 
   // eslint-disable-next-line class-methods-use-this
   propagateEvent(eventID, event) {
+    this.mapRenderer.propagateEvent(eventID, event, this.cameraContext);
     this.gameLayer.propagateEvent(eventID, event, this.cameraContext);
   }
 
@@ -171,12 +214,7 @@ class Renderer {
 
     // Draw using current camera context
     const camContext = this.cameraContext;
-    if (MapManager.getInstance().getCurrentMap() !== undefined) {
-      MapManager.getInstance().getCurrentMap().draw(ctx, camContext);
-      if (this.renderMapGrid) {
-        MapManager.getInstance().getCurrentMap().drawGrid(ctx, camContext);
-      }
-    }
+    this.mapRenderer.render(ctx, camContext);
 
     PlayerManager.getInstance().getPlayers().forEach((player) => {
       player.drawAt(ctx, player.x, player.y, GameConstants.UNIT, GameConstants.UNIT, camContext);
@@ -213,7 +251,11 @@ class Renderer {
   }
 
   setRenderMapGrid(active) {
-    this.renderMapGrid = (active === true);
+    this.mapRenderer.renderMapGrid = (active === true);
+  }
+
+  registerFurnitureHandler(furnitureId, handler) {
+    this.mapRenderer.registerFurnitureHandler(furnitureId, handler);
   }
 
   getUILayer() {
