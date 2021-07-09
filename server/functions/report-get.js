@@ -57,10 +57,12 @@ exports.handler = async function handle(event, context) {
       // Only administrator or report owner can view
       if ((user.app_metadata.roles && user.app_metadata.roles.length > 0 && user.app_metadata.roles.includes('admin'))
         || ret.data.submitted_by === user.email.toLowerCase()) {
+        const report = ret.data;
+        report.id = data.report_id;
         return {
           statusCode: 200,
           body: JSON.stringify({
-            report: ret.data,
+            report,
           }),
         };
       }

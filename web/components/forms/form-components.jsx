@@ -55,6 +55,7 @@ class TextAreaInput extends React.Component {
         rows={this.props.rows}
         onChange={this.handleChange}
         style={this.props.style}
+        className="form-control"
       />
     );
   }
@@ -85,6 +86,7 @@ class Select extends React.Component {
         value={this.state.selectedIndex}
         onChange={this.handleChange}
         style={this.props.style}
+        className="form-control"
       >
         {this.options.map((x) => (
           <option value={x.value} key={x.value}>{x.label}</option>

@@ -13,15 +13,6 @@ exports.handler = async function handle(event, context) {
     };
   }
 
-  // This is an administrator only route
-  if (!user.app_metadata.roles || user.app_metadata.roles.length === 0
-    || !user.app_metadata.roles.includes('admin')) {
-    return {
-      statusCode: 401,
-      body: JSON.stringify({ message: 'Unauthorized' }),
-    };
-  }
-
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 400,
@@ -35,7 +26,14 @@ exports.handler = async function handle(event, context) {
   });
 
   try {
-    const ret = await client.query(q.Paginate(q.Match(q.Index('reports_by_time'))));
+    let ret;
+    if (!user.app_metadata.roles || user.app_metadata.roles.length === 0
+      || !user.app_metadata.roles.includes('admin')) {
+      // This is Normal User Route
+      ret = await client.query(q.Paginate(q.Match(q.Index('reports_by_user'), user.email.toLowerCase())));
+    } else {
+      ret = await client.query(q.Paginate(q.Match(q.Index('reports_by_time'))));
+    }
 
     // Block out potentially extra info
     const scrubbed = ret.data.map((x) => ({

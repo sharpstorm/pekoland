@@ -1,6 +1,7 @@
 const faunadb = require('faunadb');
 
 const q = faunadb.query;
+const REPORT_TYPES = ['', 'Report User', 'Report Bug', 'Report Problem', 'Help Request'];
 
 exports.handler = async function handle(event, context) {
   const { identity, user } = context.clientContext;
@@ -37,29 +38,23 @@ exports.handler = async function handle(event, context) {
     };
   }
 
+  if (data.issue_type < 1 || data.issue_type >= REPORT_TYPES.length || data.issue_description === '') {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ message: 'Bad Request' }),
+    };
+  }
+
   // Validate OK
   const client = new faunadb.Client({
     secret: process.env.FAUNADB_SECRET,
   });
 
-  // Build metadata
-  const metadata = {};
-  if (data.issue_type === 1) {
-    if (!data.metadata || !data.metadata.user) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ message: 'Bad Request' }),
-      };
-    }
-    metadata.user = data.metadata.user;
-  }
-
   try {
-    await client.query(q.Create(q.Collection('reports'), {
+    const doc = await client.query(q.Create(q.Collection('reports'), {
       data: {
         type: data.issue_type,
         description: data.issue_description,
-        metadata,
         status: 0,
         submitted_by: user.email.toLowerCase(),
         timestamp: Date.now(),
@@ -70,6 +65,7 @@ exports.handler = async function handle(event, context) {
     return {
       statusCode: 200,
       body: JSON.stringify({
+        id: doc.ref.id,
         type: data.issue_type,
         description: data.issue_description,
         timestamp: Date.now(),
