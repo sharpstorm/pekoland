@@ -9,6 +9,7 @@ import buildClientGamePacket from './game-data-sender.js';
 import Renderer from '../../managers/animation-manager.js';
 import GameManager from '../../managers/game-manager.js';
 import { GameOverlay } from '../../ui/ui-game.js';
+import MapManager from '../../managers/map-manager.js';
 
 const chatManager = GameManager.getInstance().getTextChannelManager();
 
@@ -35,6 +36,7 @@ function handleSpawnReply(data, conn) {
   data.others.forEach((x) => {
     PlayerManager.getInstance().addPlayer(inflatePlayer(x));
   });
+  MapManager.getInstance().getCurrentMap().setFurnitureToState(data.furniture);
 }
 
 function handleSpawnReject(data, conn) {

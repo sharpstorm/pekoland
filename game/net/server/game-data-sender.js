@@ -19,6 +19,7 @@ function buildSpawnReply(opCode, data) {
     opCode,
     self: flattenPlayer(data.self),
     others: data.others.map((x) => flattenPlayer(x)),
+    furniture: data.furniture,
   };
 }
 

@@ -115,6 +115,7 @@ function setupServerHooks() {
     NetworkManager.getInstance().getConnection().sendTo(buildServerGamePacket('spawn-reply', {
       self: player,
       others: PlayerManager.getInstance().getPlayers(),
+      furniture: MapManager.getInstance().getCurrentMap().getFurnitureList(),
     }), playerInfo.peerId);
 
     // Broadcast to everyone else
