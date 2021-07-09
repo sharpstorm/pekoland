@@ -23,6 +23,7 @@ import {
 import Chatbox from './ui/ui-chatbox.js';
 import Button, { LongButton } from './ui/ui-button.js';
 import GameMenu, { GameOverlay } from './ui/ui-game.js';
+import AvatarMenu from './ui/ui-avatar.js';
 import { UIAnchor } from './ui/ui-element.js';
 
 import CheckersGame from './games/checkers/checkers.js';
@@ -72,7 +73,7 @@ networkManager.on('initialized', () => {
     });
 
     const playerManager = PlayerManager.getInstance();
-    playerManager.addPlayer(new Player(networkManager.configStore.userId, networkManager.configStore.name, SpriteManager.getInstance().getSprite('rabbit-avatar')));
+    playerManager.addPlayer(new Player(networkManager.configStore.userId, networkManager.configStore.name, SpriteManager.getInstance().getSprite('fox-avatar')));
     playerManager.setSelf(networkManager.configStore.userId);
     Renderer.getCameraContext().centerOn(playerManager.getSelf().x, playerManager.getSelf().y);
   }
@@ -266,11 +267,23 @@ Promise.all([netSetupPromise, assetSetupPromise])
     GameManager.getInstance().getBoardGameManager().registerGameOverlayUI(gameOverlay);
     gameOverlay.registerLeaveListener(() => { boardGameManager.leaveGame(); });
 
+    const rabbitAvatar = SpriteManager.getInstance().getSprite('rabbit-avatar');
+    const rabbitBrownAvatar = SpriteManager.getInstance().getSprite('rabbit-brown-avatar');
+    const chickAvatar = SpriteManager.getInstance().getSprite('chick-avatar');
+    const avatarArr = [];
+    avatarArr.push('rabbit-avatar');
+    avatarArr.push('rabbit-brown-avatar');
+    avatarArr.push('chick-avatar');
+    avatarArr.push('fox-avatar');
+
+    const avatarMenu = new AvatarMenu(avatarArr);
+
     uiRenderer.addElement(gameMenu);
     uiRenderer.addElement(gameOverlay);
     uiRenderer.addElement(menuBtn);
     uiRenderer.addElement(connectBtn);
     uiRenderer.addElement(micBtn);
+    uiRenderer.addElement(avatarMenu);
 
     Renderer.init();
     window.requestAnimationFrame(Renderer.render.bind(Renderer));

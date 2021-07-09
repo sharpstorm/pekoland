@@ -7,7 +7,7 @@ import SpriteManager from '../managers/sprite-manager.js';
 export default function loadAssets() {
   return new Promise((resolve) => {
     // Rabbit
-    const load1 = loadAsset('Images/rabbit.png')
+    const load1 = loadAsset('Images/avatars/rabbit.png')
       .then((rabbitSheet) => {
         const rabbitSprite = new AvatarSprite(
           AnimatableSprite.generateFromTiledFrames(rabbitSheet, 7, 118, 24, 36, 33, 0, 7),
@@ -16,6 +16,39 @@ export default function loadAssets() {
           AnimatableSprite.generateFromTiledFrames(rabbitSheet, 0, 79, 36, 36, 40, 0, 7),
         );
         SpriteManager.getInstance().registerSprite('rabbit-avatar', rabbitSprite);
+      });
+
+    const load7 = loadAsset('Images/avatars/rabbit-brown.png')
+      .then((rabbitSheet) => {
+        const rabbitSprite = new AvatarSprite(
+          AnimatableSprite.generateFromTiledFrames(rabbitSheet, 7, 118, 24, 36, 33, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(rabbitSheet, 0, 159, 36, 36, 40, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(rabbitSheet, 7, 38, 24, 36, 33, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(rabbitSheet, 0, 79, 36, 36, 40, 0, 7),
+        );
+        SpriteManager.getInstance().registerSprite('rabbit-brown-avatar', rabbitSprite);
+      });
+
+    const load8 = loadAsset('Images/avatars/chick.png')
+      .then((rabbitSheet) => {
+        const chickSprite = new AvatarSprite(
+          AnimatableSprite.generateFromTiledFrames(rabbitSheet, 1, 81, 25, 25, 25, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(rabbitSheet, 4, 108, 25, 25, 33, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(rabbitSheet, 1, 28, 25, 25, 25, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(rabbitSheet, 4, 55, 25, 25, 33, 0, 7),
+        );
+        SpriteManager.getInstance().registerSprite('chick-avatar', chickSprite);
+      });
+
+    const load9 = loadAsset('Images/avatars/fox.png')
+      .then((rabbitSheet) => {
+        const chickSprite = new AvatarSprite(
+          AnimatableSprite.generateFromTiledFrames(rabbitSheet, 1, 106, 35, 35, 33, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(rabbitSheet, 1, 143, 35, 35, 49, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(rabbitSheet, 1, 37, 35, 35, 33, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(rabbitSheet, 1, 72, 35, 35, 49, 0, 7),
+        );
+        SpriteManager.getInstance().registerSprite('fox-avatar', chickSprite);
       });
 
     const load2 = loadAsset('Images/chat-bubble.png')
@@ -127,6 +160,6 @@ export default function loadAssets() {
         spriteManager.registerSprite('checkers-piece-black-king', new Sprite(x, 210, 383, 187, 187));
       });
 
-    Promise.all([load1, load2, load3, load4, load5, load6]).then(resolve);
+    Promise.all([load1, load2, load3, load4, load5, load6, load7, load8, load9]).then(resolve);
   });
 }
