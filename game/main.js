@@ -129,14 +129,17 @@ function setupServerHooks() {
   });
 
   // Issue World Load
-  NetworkManager.getInstance().sendServer('furniture-get')
-    .then((reply) => {
-      const furnitureList = reply.data;
-      if (furnitureList === undefined || furnitureList === null) {
-        return;
-      }
-      MapManager.getInstance().getCurrentMap().setFurnitureToState(furnitureList);
-    });
+  return new Promise((resolve) => {
+    NetworkManager.getInstance().sendServer('furniture-get')
+      .then((reply) => {
+        const furnitureList = reply.data;
+        if (furnitureList === undefined || furnitureList === null) {
+          return;
+        }
+        MapManager.getInstance().getCurrentMap().setFurnitureToState(furnitureList);
+        resolve();
+      });
+  });
 }
 
 networkManager.on('modeChanged', (mode) => {
@@ -157,10 +160,13 @@ Promise.all([netSetupPromise, assetSetupPromise])
     return spawnPromise;
   })
   .then(() => {
-    console.log('setup successful');
     if (networkManager.getOperationMode() === NetworkManager.Mode.SERVER) {
-      setupServerHooks();
+      return setupServerHooks();
     }
+    return '';
+  })
+  .then(() => {
+    console.log('setup successful');
 
     document.getElementById('loading-panel').style.display = 'none';
     document.getElementById('game-container').style.display = 'block';
