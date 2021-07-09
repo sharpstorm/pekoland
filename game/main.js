@@ -227,6 +227,7 @@ Promise.all([netSetupPromise, assetSetupPromise])
       const newArrangement = MapManager.getInstance().getCurrentMap().getFurnitureList();
       NetworkManager.getInstance().sendServer('furniture-save', newArrangement)
         .then(() => alert('Saved Furniture'));
+      NetworkManager.getInstance().send(buildServerGamePacket('furniture-sync', newArrangement));
     });
     uiRenderer.addElement(customizeWorldMenu);
 

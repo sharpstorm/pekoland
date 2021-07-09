@@ -113,6 +113,10 @@ function handleEndGame(data, conn) {
   alert(`${data.msg} has left the game`);
 }
 
+function handleFurnitureSync(data) {
+  MapManager.getInstance().getCurrentMap().setFurnitureToState(data.furniture);
+}
+
 const handlers = {
   'handshake': handleHandshake,
   'spawn-reply': handleSpawnReply,
@@ -126,6 +130,7 @@ const handlers = {
   'lobby-reply': handleLobbyReply,
   'start-game': handleStartGame,
   'end-game': handleEndGame,
+  'furniture-sync': handleFurnitureSync,
 };
 
 // Conn will always be the server

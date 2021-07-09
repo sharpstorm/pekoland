@@ -101,6 +101,13 @@ function buildStartGame(opCode, data) {
   };
 }
 
+function buildFurnitureSync(opCode, data) {
+  return {
+    opCode,
+    furniture: data,
+  };
+}
+
 const handlers = {
   'handshake': buildEmptyPacket,
   'spawn-reply': buildSpawnReply,
@@ -114,6 +121,7 @@ const handlers = {
   'lobby-reply': buildLobbyReply,
   'start-game': buildStartGame,
   'end-game': buildLobbyReply,
+  'furniture-sync': buildFurnitureSync,
 };
 
 export default function buildGamePacket(opCode, data) {
