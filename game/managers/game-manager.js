@@ -2,7 +2,6 @@ import WorldManager from './world-manager.js';
 import NetworkManager from '../net/network-manager.js';
 import buildClientGamePacket from '../net/client/game-data-sender.js';
 import buildServerGamePacket from '../net/server/game-data-sender.js';
-import MapManager from './map-manager.js';
 import { timeout } from '../utils.js';
 
 // import Player from '../models/player.js';
@@ -209,36 +208,24 @@ class BoardGameManager {
     return false;
   }
 
-  handleEvent(eventId, event, camContext) {
-    if (event.type === 'click') {
-      // console.log(event);
-      const worldX = camContext.x + event.clientX;
-      const worldY = camContext.y + event.clientY;
-
-      // Round to nearest 100
-      const floorX = Math.floor(worldX / 100) * 100;
-      const floorY = Math.floor(worldY / 100) * 100;
-
-      const clickedData = MapManager.getInstance().getCurrentMap().getFurniture(worldX, worldY);
-
-      if (clickedData === 'BoardGame' && this.gameState === undefined && this.checkPlayerProximity(floorX, floorY)) {
-        this.tableId = `${floorX}-${floorY}`;
-        if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.CLIENT) {
-          NetworkManager.getInstance().send(buildClientGamePacket('check-lobby-state-request', { tableId: this.tableId }));
-          this.gameState = 'waitingCheck';
-        } else if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.SERVER) {
-          if (WorldManager.getInstance().lobbyExist(this.tableId)) {
-            if (WorldManager.getInstance().getJoiner(this.tableId) === undefined) {
-              if (WorldManager.getInstance().getHost(this.tableId) !== PlayerManager
-                .getInstance().getSelfId()) {
-                this.displayPage(1);
-              }
-            } else {
-              this.displayPage(2);
+  handleEvent(unitX, unitY) {
+    if (this.gameState === undefined && this.checkPlayerProximity(unitX, unitY)) {
+      this.tableId = `${unitX}-${unitY}`;
+      if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.CLIENT) {
+        NetworkManager.getInstance().send(buildClientGamePacket('check-lobby-state-request', { tableId: this.tableId }));
+        this.gameState = 'waitingCheck';
+      } else if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.SERVER) {
+        if (WorldManager.getInstance().lobbyExist(this.tableId)) {
+          if (WorldManager.getInstance().getJoiner(this.tableId) === undefined) {
+            if (WorldManager.getInstance().getHost(this.tableId) !== PlayerManager
+              .getInstance().getSelfId()) {
+              this.displayPage(1);
             }
           } else {
-            this.displayPage(0);
+            this.displayPage(2);
           }
+        } else {
+          this.displayPage(0);
         }
       }
     }

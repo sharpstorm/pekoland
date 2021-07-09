@@ -7,10 +7,12 @@ import { ArrowLeft } from './icons';
 
 // Send Message Headers
 const SENDOP_CONFIG_CHANGED = 'pekoconn-config-changed';
+const SENDOP_GAME_OP = 'pekoconn-game-reply';
 
 // Recv Message Headers
 const RECVOP_CONFIG_REQUEST = 'pekoconn-config-request';
 const RECVOP_UPDATE_PEERID = 'pekoconn-update-peerid';
+const RECVOP_GAME_OP = 'pekoconn-game-op';
 
 export default function LaunchGameView() {
   const identity = useIdentityContext();
@@ -21,6 +23,9 @@ export default function LaunchGameView() {
   const [partnerString, setPartnerString] = useState('');
   const [broadcastChannel, setBroadcastChannel] = useState(undefined);
   const [windowId, setWindowId] = useState(undefined);
+  const [furnitureState, setFurnitureState] = useState(undefined);
+  const [awaitingFurniture, setAwaitingFurniture] = useState(false);
+  const [echoFurnitureUpdate, setEchoFurnitureUpdate] = useState(undefined);
   const [connectionError, setConnectionError] = useState('');
 
   function launchGame() {
@@ -77,15 +82,54 @@ export default function LaunchGameView() {
           partnerString,
         });
       } else if (data.op === RECVOP_UPDATE_PEERID) {
+        setAwaitingFurniture(true);
         identity.authorizedFetch('/functions/host-id-write', {
           method: 'POST',
           body: JSON.stringify({
             peer_id: data.peerId,
           }),
-        });
+        })
+          .then((x) => x.json())
+          .then((x) => {
+            setFurnitureState(x.furniture);
+            setAwaitingFurniture(false);
+          });
+      } else if (data.op === RECVOP_GAME_OP) {
+        if (data.payload.op === 'furniture-get') {
+          setEchoFurnitureUpdate(channel);
+        } else {
+          if (data.payload.op === 'furniture-save') {
+            setFurnitureState(data.payload.data);
+          }
+          identity.authorizedFetch('/functions/game-op', {
+            method: 'POST',
+            body: JSON.stringify(data.payload),
+          })
+            .then((x) => x.json())
+            .then((x) => {
+              channel.postMessage({
+                op: SENDOP_GAME_OP,
+                channel: windowId,
+                reply: x,
+              });
+            });
+        }
       }
     };
   }
+
+  useEffect(() => {
+    if (!awaitingFurniture && echoFurnitureUpdate) {
+      echoFurnitureUpdate.postMessage({
+        op: SENDOP_GAME_OP,
+        channel: windowId,
+        reply: {
+          message: 'OK',
+          data: furnitureState,
+        },
+      });
+    }
+  }, [awaitingFurniture, echoFurnitureUpdate, furnitureState]);
 
   useEffect(() => {
     if (identity.ready && !identity.user) {

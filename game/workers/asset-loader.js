@@ -3,6 +3,7 @@ import Map from '../models/map.js';
 import Sprite, { AnimatableSprite, AvatarSprite, SlicedSprite } from '../models/sprites.js';
 import MapManager from '../managers/map-manager.js';
 import SpriteManager from '../managers/sprite-manager.js';
+import Furniture from '../models/furniture.js';
 
 export default function loadAssets() {
   return new Promise((resolve) => {
@@ -34,14 +35,7 @@ export default function loadAssets() {
         SpriteManager.getInstance().registerSprite('chat-bubble', sprite);
       });
 
-    // Map
-    const load3 = loadAsset(['Images/template1.png', 'Images/template1_collision.png'])
-      .then(([map, colli]) => {
-        const map1 = new Map(map, colli, 3300, 1200, 66, 24);
-        MapManager.getInstance().registerMap('testMap', map1);
-      });
-
-    const load4 = loadAsset('Images/ui.png')
+    const load3 = loadAsset('Images/ui.png')
       .then((x) => {
         const spriteManager = SpriteManager.getInstance();
         spriteManager.registerSprite('button', new Sprite(x, 1, 1, 36, 36));
@@ -91,7 +85,7 @@ export default function loadAssets() {
         spriteManager.registerSprite('panel', panel);
       });
 
-    const load5 = loadAsset('Images/battleship.png')
+    const load4 = loadAsset('Images/battleship.png')
       .then((x) => {
         const spriteManager = SpriteManager.getInstance();
         spriteManager.registerSprite('battleship-board', new Sprite(x, 0, 0, 512, 512));
@@ -116,7 +110,7 @@ export default function loadAssets() {
         spriteManager.registerSprite('battleship-plane', new Sprite(x, 694, 216, 46, 45));
       });
 
-    const load6 = loadAsset('Images/checkers.png')
+    const load5 = loadAsset('Images/checkers.png')
       .then((x) => {
         const spriteManager = SpriteManager.getInstance();
         spriteManager.registerSprite('checkers-grid-brown', new Sprite(x, 0, 0, 147, 144));
@@ -125,6 +119,26 @@ export default function loadAssets() {
         spriteManager.registerSprite('checkers-piece-black-normal', new Sprite(x, 0, 170, 187, 187));
         spriteManager.registerSprite('checkers-piece-red-king', new Sprite(x, 0, 385, 187, 187));
         spriteManager.registerSprite('checkers-piece-black-king', new Sprite(x, 210, 383, 187, 187));
+      });
+
+    // Map and Furniture
+    const load6 = loadAsset(['Images/template1.png', 'Images/template1_collision.png', 'Images/furniture.png'])
+      .then(([map, colli, furniture]) => {
+        // Init Furniture List
+        const furnitureFactory = MapManager.getInstance().getFurnitureFactory();
+        furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-game-table', 'Game Table', new Sprite(furniture, 0, 0, 72, 72)));
+        furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-sofa1', 'Sofa 1', new Sprite(furniture, 72, 0, 72, 72)));
+        furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-sofa2', 'Sofa 2', new Sprite(furniture, 144, 0, 72, 72)));
+        furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-table1', 'Table 1', new Sprite(furniture, 0, 72, 72, 72)));
+        furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-sofa3', 'Sofa 3', new Sprite(furniture, 72, 72, 72, 72)));
+        furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-plant1', 'Plant A', new Sprite(furniture, 144, 72, 72, 72)));
+        furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-plant2', 'Plant B', new Sprite(furniture, 0, 144, 72, 72)));
+        furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-deco1', 'Bird Statue', new Sprite(furniture, 72, 144, 72, 72)));
+        furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-plant3', 'Plant C', new Sprite(furniture, 144, 144, 72, 72)));
+
+        // Init Map
+        const map1 = new Map(map, colli, 3300, 1200, 66, 24);
+        MapManager.getInstance().registerMap('testMap', map1);
       });
 
     Promise.all([load1, load2, load3, load4, load5, load6]).then(resolve);

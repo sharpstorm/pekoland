@@ -131,6 +131,10 @@ export default class NetworkManager {
     }
   }
 
+  sendServer(opCode, data) {
+    return this.configStore.fetchGameOperation(opCode, data);
+  }
+
   getConnection() {
     return this.connection;
   }

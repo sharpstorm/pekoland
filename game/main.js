@@ -30,6 +30,9 @@ import DrawSomething from './games/draw-something/draw-something.js';
 import BattleshipGame from './games/battleship/battleship.js';
 
 import AdmissionPrompt from './ui/ui-admission-prompt.js';
+import DrawerMenu from './ui/ui-drawer-menu.js';
+import CustomizeWorldMenu from './ui/ui-world-customize.js';
+import MapManager from './managers/map-manager.js';
 
 const networkManager = NetworkManager.getInstance();
 const inputSystem = new InputSystem(document.getElementById('ui-overlay'), document);
@@ -112,6 +115,7 @@ function setupServerHooks() {
     NetworkManager.getInstance().getConnection().sendTo(buildServerGamePacket('spawn-reply', {
       self: player,
       others: PlayerManager.getInstance().getPlayers(),
+      furniture: MapManager.getInstance().getCurrentMap().getFurnitureList(),
     }), playerInfo.peerId);
 
     // Broadcast to everyone else
@@ -123,6 +127,19 @@ function setupServerHooks() {
 
   roomController.on('playerReject', (playerInfo) => {
     NetworkManager.getInstance().getConnection().sendTo(buildServerGamePacket('spawn-reject', 'Host Rejected Your Admission'), playerInfo.peerId);
+  });
+
+  // Issue World Load
+  return new Promise((resolve) => {
+    NetworkManager.getInstance().sendServer('furniture-get')
+      .then((reply) => {
+        const furnitureList = reply.data;
+        if (furnitureList === undefined || furnitureList === null) {
+          return;
+        }
+        MapManager.getInstance().getCurrentMap().setFurnitureToState(furnitureList);
+        resolve();
+      });
   });
 }
 
@@ -144,10 +161,13 @@ Promise.all([netSetupPromise, assetSetupPromise])
     return spawnPromise;
   })
   .then(() => {
-    console.log('setup successful');
     if (networkManager.getOperationMode() === NetworkManager.Mode.SERVER) {
-      setupServerHooks();
+      return setupServerHooks();
     }
+    return '';
+  })
+  .then(() => {
+    console.log('setup successful');
 
     document.getElementById('loading-panel').style.display = 'none';
     document.getElementById('game-container').style.display = 'block';
@@ -163,11 +183,10 @@ Promise.all([netSetupPromise, assetSetupPromise])
     const uiRenderer = Renderer.getUILayer();
     const gameRenderer = Renderer.getGameLayer();
     const playerManager = PlayerManager.getInstance();
-    const worldManager = WorldManager.getInstance();
     const chatManager = GameManager.getInstance().getTextChannelManager();
     const boardGameManager = GameManager.getInstance().getBoardGameManager();
 
-    inputSystem.addListener('click', (evt) => boardGameManager.handleEvent('click', evt, Renderer.getCameraContext()));
+    Renderer.getMapRenderer().registerFurnitureHandler('furniture-game-table', boardGameManager.handleEvent.bind(boardGameManager));
 
     const checkersGame = new CheckersGame();
     const drawSomething = new DrawSomething();
@@ -194,10 +213,41 @@ Promise.all([netSetupPromise, assetSetupPromise])
     chatManager.addChangeListener(() => chatbox.update());
     uiRenderer.addElement(chatbox);
 
+    const customizeWorldMenu = new CustomizeWorldMenu();
+    MapManager.getInstance().getFurnitureFactory().forEachType((furniture) => {
+      customizeWorldMenu.addFurniture(furniture);
+    });
+    Renderer.getMapRenderer().registerFurnitureHandler('place', (unitX, unitY) => {
+      MapManager.getInstance().getCurrentMap()
+        .setFurnitureAt(unitX, unitY, customizeWorldMenu.getSelectedFurniture());
+    });
+    customizeWorldMenu.setSaveHandler(() => {
+      Renderer.getMapRenderer().setFurniturePlacementMode(false);
+      customizeWorldMenu.setVisible(false);
+      const newArrangement = MapManager.getInstance().getCurrentMap().getFurnitureList();
+      NetworkManager.getInstance().sendServer('furniture-save', newArrangement)
+        .then(() => alert('Saved Furniture'));
+    });
+    uiRenderer.addElement(customizeWorldMenu);
+
+    const drawerMenu = new DrawerMenu(networkManager.getOperationMode()
+      === NetworkManager.Mode.SERVER);
+    // eslint-disable-next-line no-restricted-globals
+    drawerMenu.setQuitHandler(() => (confirm('Are you sure you want to leave?') ? window.close() : ''));
+    drawerMenu.setCustomizeWorldHandler(() => {
+      Renderer.getMapRenderer().setFurniturePlacementMode(true);
+      customizeWorldMenu.setVisible(true);
+      drawerMenu.setVisible(false);
+    });
+    uiRenderer.addElement(drawerMenu);
+
     const menuBtn = new Button(10, 10, 36, 36, new UIAnchor(false, true, true, false),
       SpriteManager.getInstance().getSprite('icon-hamburger'));
-
+    menuBtn.addEventListener('click', () => {
+      drawerMenu.toggleVisible();
+    });
     uiRenderer.addElement(menuBtn);
+
     const micBtn = new Button(174, 10, 36, 36, new UIAnchor(false, true, true, false),
       SpriteManager.getInstance().getSprite('icon-mic-muted'));
     micBtn.setVisible(false);
@@ -244,7 +294,7 @@ Promise.all([netSetupPromise, assetSetupPromise])
         };
         NetworkManager.getInstance().send(buildClientGamePacket('register-lobby', data));
       } else if (networkManager.getOperationMode() === NetworkManager.Mode.SERVER) {
-        worldManager.createLobby(boardGameManager.tableId,
+        WorldManager.getInstance().createLobby(boardGameManager.tableId,
           playerManager.getSelfId(), gameName);
         boardGameManager.gameState = 'hosting';
         boardGameManager.displayPage(3);
