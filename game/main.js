@@ -127,6 +127,16 @@ function setupServerHooks() {
   roomController.on('playerReject', (playerInfo) => {
     NetworkManager.getInstance().getConnection().sendTo(buildServerGamePacket('spawn-reject', 'Host Rejected Your Admission'), playerInfo.peerId);
   });
+
+  // Issue World Load
+  NetworkManager.getInstance().sendServer('furniture-get')
+    .then((reply) => {
+      const furnitureList = reply.data;
+      if (furnitureList === undefined || furnitureList === null) {
+        return;
+      }
+      MapManager.getInstance().getCurrentMap().setFurnitureToState(furnitureList);
+    });
 }
 
 networkManager.on('modeChanged', (mode) => {
@@ -205,9 +215,11 @@ Promise.all([netSetupPromise, assetSetupPromise])
         .setFurnitureAt(unitX, unitY, customizeWorldMenu.getSelectedFurniture());
     });
     customizeWorldMenu.setSaveHandler(() => {
-      console.log('Saved furniture placement');
       Renderer.getMapRenderer().setFurniturePlacementMode(false);
       customizeWorldMenu.setVisible(false);
+      const newArrangement = MapManager.getInstance().getCurrentMap().getFurnitureList();
+      NetworkManager.getInstance().sendServer('furniture-save', newArrangement)
+        .then(() => alert('Saved Furniture'));
     });
     uiRenderer.addElement(customizeWorldMenu);
 

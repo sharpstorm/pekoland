@@ -177,12 +177,36 @@ export default class Map {
     return this.furnitureMatrix[x][y];
   }
 
+  getFurnitureList() {
+    return this.furnitureMatrix.flatMap((row, x) => row.map((item, y) => ({
+      x,
+      y,
+      id: item,
+    })))
+      .filter((x) => x.id !== undefined);
+  }
+
   setFurnitureAt(worldX, worldY, furnitureId) {
     const { x, y } = this.normaliseCoordinates(worldX, worldY);
     if (this.collisionMatrix[x][y] === 1) {
       return; // Not allowed to place on colliders
     }
     this.furnitureMatrix[x][y] = furnitureId;
+    this.refreshComposite();
+  }
+
+  setFurnitureToState(stateList) {
+    // Reset all
+    const unit = this.getUnitLength();
+    for (let x = 0; x * unit < this.mapWidth; x += 1) {
+      for (let y = 0; y * unit < this.mapHeight; y += 1) {
+        this.furnitureMatrix[x][y] = undefined;
+      }
+    }
+
+    stateList.forEach((item) => {
+      this.furnitureMatrix[item.x][item.y] = item.id;
+    });
     this.refreshComposite();
   }
 }
