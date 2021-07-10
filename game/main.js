@@ -33,6 +33,7 @@ import AdmissionPrompt from './ui/ui-admission-prompt.js';
 import DrawerMenu from './ui/ui-drawer-menu.js';
 import CustomizeWorldMenu from './ui/ui-world-customize.js';
 import MapManager from './managers/map-manager.js';
+import Whiteboard from './ui/ui-whiteboard.js';
 
 const networkManager = NetworkManager.getInstance();
 const inputSystem = new InputSystem(document.getElementById('ui-overlay'), document);
@@ -317,6 +318,9 @@ Promise.all([netSetupPromise, assetSetupPromise])
     const gameOverlay = new GameOverlay();
     GameManager.getInstance().getBoardGameManager().registerGameOverlayUI(gameOverlay);
     gameOverlay.registerLeaveListener(() => { boardGameManager.leaveGame(); });
+
+    const whiteboard = new Whiteboard();
+    uiRenderer.addElement(whiteboard);
 
     uiRenderer.addElement(gameMenu);
     uiRenderer.addElement(gameOverlay);
