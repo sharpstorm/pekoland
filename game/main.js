@@ -135,6 +135,7 @@ function setupServerHooks() {
       .then((reply) => {
         const furnitureList = reply.data;
         if (furnitureList === undefined || furnitureList === null) {
+          resolve();
           return;
         }
         MapManager.getInstance().getCurrentMap().setFurnitureToState(furnitureList);
