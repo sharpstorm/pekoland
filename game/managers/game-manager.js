@@ -13,6 +13,7 @@ let instance;
 class VoiceChannelManager {
   constructor() {
     this.connected = false;
+    this.outputMuted = false;
     this.microphoneStream = undefined;
     this.outputObjects = {};
   }
@@ -22,6 +23,7 @@ class VoiceChannelManager {
       return;
     }
 
+    this.outputsMuted = false;
     const networkManager = NetworkManager.getInstance();
     if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {
       networkManager.send(buildClientGamePacket('join-voice'));
@@ -86,18 +88,25 @@ class VoiceChannelManager {
   }
 
   addOutputStream(peerId, stream) {
+    let audio;
     if (peerId in this.outputObjects) {
-      const audio = this.outputObjects[peerId];
+      audio = this.outputObjects[peerId];
       audio.pause();
       audio.srcObject = stream;
       audio.load();
       audio.play();
     } else {
-      const audio = new Audio();
+      audio = new Audio();
       audio.srcObject = stream;
       audio.autoplay = true;
       audio.play();
       this.outputObjects[peerId] = audio;
+    }
+
+    if (this.outputMuted) {
+      audio.volume = 0;
+    } else {
+      audio.volume = 1;
     }
   }
 
@@ -113,6 +122,26 @@ class VoiceChannelManager {
     Object.keys(this.outputObjects).forEach((x) => {
       this.removeOutputStream(x);
     });
+  }
+
+  muteOutputs() {
+    if (this.outputMuted) return;
+
+    Object.keys(this.outputObjects).forEach((peerId) => {
+      const audio = this.outputObjects[peerId];
+      audio.volume = 0;
+    });
+    this.outputMuted = true;
+  }
+
+  unmuteOutputs() {
+    if (!this.outputMuted) return;
+
+    Object.keys(this.outputObjects).forEach((peerId) => {
+      const audio = this.outputObjects[peerId];
+      audio.volume = 1;
+    });
+    this.outputMuted = false;
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -143,6 +172,10 @@ class VoiceChannelManager {
 
   isMicConnected() {
     return this.microphoneStream !== undefined;
+  }
+
+  isOutputMuted() {
+    return this.outputMuted;
   }
 }
 

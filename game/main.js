@@ -268,17 +268,33 @@ Promise.all([netSetupPromise, assetSetupPromise])
       }
     });
 
+    const muteBtn = new Button(220, 10, 36, 36, new UIAnchor(false, true, true, false),
+      SpriteManager.getInstance().getSprite('icon-speaker'));
+    muteBtn.setVisible(false);
+    muteBtn.addEventListener('click', () => {
+      if (!voiceChannelManager.isOutputMuted()) {
+        voiceChannelManager.muteOutputs();
+        muteBtn.setContent(SpriteManager.getInstance().getSprite('icon-speaker-muted'));
+      } else {
+        voiceChannelManager.unmuteOutputs();
+        muteBtn.setContent(SpriteManager.getInstance().getSprite('icon-speaker'));
+      }
+    });
+
     const connectBtn = new LongButton(64, 10, 100, 36, new UIAnchor(false, true, true, false), 'Connect');
     connectBtn.addEventListener('click', () => {
       if (!voiceChannelManager.isConnected()) {
         voiceChannelManager.joinVoice();
         micBtn.setVisible(true);
+        muteBtn.setVisible(true);
         connectBtn.setContent('Disconnect');
       } else {
         voiceChannelManager.disconnectVoice();
         connectBtn.setContent('Connect');
         micBtn.setVisible(false);
         micBtn.setContent(SpriteManager.getInstance().getSprite('icon-mic-muted'));
+        muteBtn.setVisible(false);
+        muteBtn.setContent(SpriteManager.getInstance().getSprite('icon-speaker'));
       }
     });
 
@@ -327,6 +343,7 @@ Promise.all([netSetupPromise, assetSetupPromise])
     uiRenderer.addElement(menuBtn);
     uiRenderer.addElement(connectBtn);
     uiRenderer.addElement(micBtn);
+    uiRenderer.addElement(muteBtn);
 
     Renderer.init();
     window.requestAnimationFrame(Renderer.render.bind(Renderer));
