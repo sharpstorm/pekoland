@@ -62,6 +62,22 @@ function buildLobbyUpdate(opCode, data) {
   };
 }
 
+function buildWhiteboardAccess(opCode, data) {
+  return {
+    opCode,
+    boardId: data.id,
+  };
+}
+
+function buildUpdateWhiteboard(opCode, data) {
+  return {
+    opCode,
+    boardId: data.id,
+    state: data.state,
+    delta: data.delta,
+  };
+}
+
 const handlers = {
   'handshake': buildEmptyPacket,
   'spawn-request': buildSpawnRequest,
@@ -74,6 +90,9 @@ const handlers = {
   'register-lobby': buildLobbyUpdate,
   'join-lobby': buildLobbyUpdate,
   'leave-lobby': buildLobbyUpdate,
+  'join-whiteboard': buildWhiteboardAccess,
+  'leave-whiteboard': buildWhiteboardAccess,
+  'update-whiteboard': buildUpdateWhiteboard,
 };
 
 export default function buildGameDataPacket(opCode, data) {

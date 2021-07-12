@@ -139,7 +139,7 @@ class MapRenderer {
 
       if (this.furniturePlacement) {
         // Special override
-        const unit = currentMap.getUnitLength();
+        const unit = GameConstants.UNIT;
         const unitX = Math.floor(worldX / unit) * unit;
         const unitY = Math.floor(worldY / unit) * unit;
 
@@ -151,7 +151,7 @@ class MapRenderer {
 
       const furniture = currentMap.getFurniture(worldX, worldY);
       if (furniture !== undefined && furniture in this.furnitureHandlers) {
-        const unit = currentMap.getUnitLength();
+        const unit = GameConstants.UNIT;
         const unitX = Math.floor(worldX / unit) * unit;
         const unitY = Math.floor(worldY / unit) * unit;
 

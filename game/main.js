@@ -33,6 +33,7 @@ import AdmissionPrompt from './ui/ui-admission-prompt.js';
 import DrawerMenu from './ui/ui-drawer-menu.js';
 import CustomizeWorldMenu from './ui/ui-world-customize.js';
 import MapManager from './managers/map-manager.js';
+import Whiteboard from './ui/ui-whiteboard.js';
 
 const networkManager = NetworkManager.getInstance();
 const inputSystem = new InputSystem(document.getElementById('ui-overlay'), document);
@@ -186,6 +187,7 @@ Promise.all([netSetupPromise, assetSetupPromise])
     const playerManager = PlayerManager.getInstance();
     const chatManager = GameManager.getInstance().getTextChannelManager();
     const boardGameManager = GameManager.getInstance().getBoardGameManager();
+    const whiteboardManager = GameManager.getInstance().getWhiteboardManager();
 
     Renderer.getMapRenderer().registerFurnitureHandler('furniture-game-table', boardGameManager.handleEvent.bind(boardGameManager));
 
@@ -323,6 +325,13 @@ Promise.all([netSetupPromise, assetSetupPromise])
     uiRenderer.addElement(menuBtn);
     uiRenderer.addElement(connectBtn);
     uiRenderer.addElement(micBtn);
+
+    const whiteboard = new Whiteboard();
+    uiRenderer.addElement(whiteboard);
+    whiteboardManager.registerUI(whiteboard);
+    Renderer.getMapRenderer().registerFurnitureHandler('furniture-whiteboard', (unitX, unitY) => {
+      whiteboardManager.openBoard(unitX, unitY);
+    });
 
     Renderer.init();
     window.requestAnimationFrame(Renderer.render.bind(Renderer));

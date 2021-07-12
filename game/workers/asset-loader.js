@@ -135,6 +135,9 @@ export default function loadAssets() {
         furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-plant2', 'Plant B', new Sprite(furniture, 0, 144, 72, 72)));
         furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-deco1', 'Bird Statue', new Sprite(furniture, 72, 144, 72, 72)));
         furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-plant3', 'Plant C', new Sprite(furniture, 144, 144, 72, 72)));
+        furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-whiteboard', 'Whiteboard', new Sprite(furniture, 0, 216, 72, 72)));
+        furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-cooler', 'Water Cooler', new Sprite(furniture, 72, 216, 72, 72)));
+        furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-lamp1', 'Lamp A', new Sprite(furniture, 144, 216, 72, 72)));
 
         // Init Map
         const map1 = new Map(map, colli, 3300, 1200, 66, 24);
