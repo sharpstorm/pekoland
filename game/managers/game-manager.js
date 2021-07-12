@@ -416,22 +416,32 @@ class WhiteboardManager {
     const boardId = `${x}-${y}`; // Follows Table Convention
     const worldManager = WorldManager.getInstance();
 
+    this.currentBoard = boardId;
+
     if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.SERVER) {
-      worldManager.registerWhiteboard(boardId, (userId, state) => {
+      const openState = worldManager.registerWhiteboard(boardId, (userId, state, delta) => {
         // Notifier
         if (userId === PlayerManager.getInstance().getSelfId()) {
-          this.updateBoardState(boardId, state);
+          this.updateBoardState(boardId, state, delta);
         } else {
-          NetworkManager.getInstance().getConnection().sendTo(buildServerGamePacket('whiteboard-state-echo', { id: boardId, state }), worldManager.getPeerId(userId));
+          const update = { id: boardId };
+          if (delta !== undefined) {
+            update.delta = delta;
+          } else {
+            update.state = state;
+          }
+          NetworkManager.getInstance().getConnection().sendTo(buildServerGamePacket('whiteboard-state-echo', update), worldManager.getPeerId(userId));
         }
       });
       worldManager.addWhiteboardPlayer(boardId, PlayerManager.getInstance().getSelfId());
+      if (openState !== undefined) {
+        this.updateBoardState(boardId, openState);
+      }
     } else {
       // Register to receive updates
       NetworkManager.getInstance().send(buildClientGamePacket('join-whiteboard', { id: boardId }));
     }
 
-    this.currentBoard = boardId;
     this.boardUI.show();
     this.boardUI.setCloseListener(() => {
       this.currentBoard = undefined;
@@ -441,22 +451,30 @@ class WhiteboardManager {
         NetworkManager.getInstance().send(buildClientGamePacket('leave-whiteboard', { id: boardId }));
       }
     });
-    this.boardUI.setUpdateListener((data) => {
+    this.boardUI.setUpdateListener((state, delta) => {
       if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.SERVER) {
-        worldManager.updateWhiteboardState(this.currentBoard, data,
+        worldManager.updateWhiteboardState(this.currentBoard, state, delta,
           PlayerManager.getInstance().getSelfId());
       } else {
-        NetworkManager.getInstance().send(buildClientGamePacket('update-whiteboard', { id: boardId, state: data }));
+        NetworkManager.getInstance().send(buildClientGamePacket('update-whiteboard', { id: boardId, state, delta }));
       }
     });
   }
 
-  updateBoardState(boardId, state) {
+  updateBoardState(boardId, state, delta) {
     if (this.currentBoard !== boardId) {
       return;
     }
 
-    this.boardUI.setCanvasState(state);
+    if (delta) {
+      // Perform delta update
+      console.debug('delta update');
+      this.boardUI.deltaCanvasUpdate(delta);
+    } else {
+      // Stateful update
+      console.debug('state update');
+      this.boardUI.setCanvasState(state);
+    }
   }
 }
 

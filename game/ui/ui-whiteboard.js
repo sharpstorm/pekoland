@@ -30,6 +30,7 @@ export default class Whiteboard extends UIElement {
     this.updateTimer = undefined;
     this.closeListener = undefined;
     this.updateListener = undefined;
+    this.updateList = [];
 
     this.initObject();
   }
@@ -55,7 +56,16 @@ export default class Whiteboard extends UIElement {
     this.attachCanvasListeners();
 
     const clearBtn = new LongButton(0, 0, 200, 36, new UIAnchor(false, true, false, true), 'Clear Board');
-    clearBtn.addEventListener('click', () => this.drawingContext.clearRect(0, 0, SIZE, SIZE));
+    clearBtn.addEventListener('click', () => {
+      this.drawingContext.clearRect(0, 0, SIZE, SIZE);
+      this.updateList.push({
+        clear: true,
+        done: true,
+      });
+      if (this.updateTimer === undefined) {
+        this.triggerUpdateEvent();
+      }
+    });
 
     this.panelContainer = createElement('div', {
       style: {
@@ -101,6 +111,12 @@ export default class Whiteboard extends UIElement {
       };
       this.drawingContext.strokeStyle = COLORS[this.selectedColor];
       this.drawingContext.lineWidth = BRUSHES[this.selectedBrush];
+      this.updateList.push({
+        brush: this.selectedBrush,
+        color: this.selectedColor,
+        path: [],
+        done: false,
+      });
       requestAnimationFrame(this.refreshCanvas.bind(this));
     });
 
@@ -108,6 +124,9 @@ export default class Whiteboard extends UIElement {
       this.drawing = false;
       this.fromPt = undefined;
       this.toPt = undefined;
+      if (this.updateList.length > 0) {
+        this.updateList[this.updateList.length - 1].done = true;
+      }
     });
 
     canvas.addEventListener('mousemove', (evt) => {
@@ -137,6 +156,9 @@ export default class Whiteboard extends UIElement {
     ctx.lineTo(to.x, to.y);
     ctx.stroke();
 
+    if (this.updateList.length > 0) {
+      this.updateList[this.updateList.length - 1].path.push({ from, to });
+    }
     this.fromPt = to;
     this.toPt = undefined;
 
@@ -163,13 +185,49 @@ export default class Whiteboard extends UIElement {
     image.src = data;
   }
 
+  deltaCanvasUpdate(data) {
+    data.forEach((item) => {
+      const ctx = this.drawingContext;
+      if (item.clear) {
+        ctx.clearRect(0, 0, SIZE, SIZE);
+        return;
+      }
+
+      const oldStroke = ctx.strokeStyle;
+      const oldLine = ctx.lineWidth;
+
+      ctx.strokeStyle = COLORS[item.color];
+      ctx.lineWidth = BRUSHES[item.brush];
+
+      ctx.beginPath();
+      item.path.forEach(({ from, to }) => {
+        ctx.moveTo(from.x, from.y);
+        ctx.lineTo(to.x, to.y);
+        ctx.stroke();
+      });
+      ctx.strokeStyle = oldStroke;
+      ctx.lineWidth = oldLine;
+    });
+  }
+
   triggerUpdateEvent() {
     if (this.updateListener === undefined) {
       this.updateTimer = undefined;
       return;
     }
 
-    this.updateListener(this.drawingCanvas.toDataURL('image/png'));
+    const state = this.drawingCanvas.toDataURL('image/png');
+    const delta = this.updateList;
+    this.updateListener(state, delta);
+
+    if (this.updateList.length > 1) {
+      this.updateList = this.updateList.slice(-1);
+    }
+    if (this.updateList.length > 0) {
+      if (this.updateList[this.updateList.length - 1].done) {
+        this.updateList = [];
+      }
+    }
 
     if (this.drawing) {
       this.updateTimer = setTimeout(this.triggerUpdateEvent.bind(this), 500);

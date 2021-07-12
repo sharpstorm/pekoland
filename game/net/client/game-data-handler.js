@@ -118,7 +118,8 @@ function handleFurnitureSync(data) {
 }
 
 function handleWhiteboardEcho(data) {
-  GameManager.getInstance().getWhiteboardManager().updateBoardState(data.boardId, data.state);
+  GameManager.getInstance().getWhiteboardManager()
+    .updateBoardState(data.boardId, data.state, data.delta);
 }
 
 const handlers = {

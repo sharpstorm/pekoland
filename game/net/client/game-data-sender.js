@@ -74,6 +74,7 @@ function buildUpdateWhiteboard(opCode, data) {
     opCode,
     boardId: data.id,
     state: data.state,
+    delta: data.delta,
   };
 }
 

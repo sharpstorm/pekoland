@@ -276,7 +276,7 @@ export default class WorldManager {
   }
 
   addWhiteboardPlayer(boardId, playerId) {
-    console.log(`Player ${playerId} joined whiteboard`);
+    console.debug(`[WorldManager] Player ${playerId} joined whiteboard`);
     const board = this.whiteboards[boardId];
     if (board !== undefined) {
       board.users.push(playerId);
@@ -286,7 +286,7 @@ export default class WorldManager {
   }
 
   removeWhiteboardPlayer(boardId, playerId) {
-    console.log(`Player ${playerId} left whiteboard`);
+    console.debug(`[WorldManager] Player ${playerId} left whiteboard`);
     const board = this.whiteboards[boardId];
     if (board !== undefined) {
       const idx = board.users.findIndex((x) => x === playerId);
@@ -296,13 +296,13 @@ export default class WorldManager {
     }
   }
 
-  updateWhiteboardState(boardId, state, sender) {
+  updateWhiteboardState(boardId, state, delta, sender) {
     const board = this.whiteboards[boardId];
     if (board !== undefined) {
       board.state = state;
       board.users.forEach((x) => {
         if (x !== sender) {
-          board.notifier(x, state);
+          board.notifier(x, state, delta);
         }
       });
     }
