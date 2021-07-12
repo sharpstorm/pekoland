@@ -1,5 +1,3 @@
-/* eslint-disable no-extra-bind */
-
 class AudioMixer {
   constructor() {
     this.ctx = new AudioContext();
@@ -49,7 +47,7 @@ export default class CallManager {
       call.answer(this.sendStream);
       this.registerCall(call);
       this.emitEvent(CallManager.Events.CALL_RECEIVED, call.peer);
-    }).bind(this));
+    }));
     this.state = CallManager.State.READY;
   }
 
@@ -60,13 +58,13 @@ export default class CallManager {
 
     call.on('close', (() => {
       this.dispose(peerId);
-    }).bind(this));
+    }));
 
     call.on('stream', ((stream) => {
       console.log(`[CallManager] Audio Stream from Peer ${peerId}`);
       this.streams[peerId] = stream;
       this.emitEvent(CallManager.Events.CALL_STREAM_OPEN, { peerId, stream });
-    }).bind(this));
+    }));
   }
 
   callPeer(peerId) {

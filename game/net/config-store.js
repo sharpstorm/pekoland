@@ -1,5 +1,3 @@
-/* eslint-disable no-extra-bind */
-
 const BROADCAST_CHANNEL_ID = 'pekoland-data';
 
 // Receive Message Headers
@@ -49,7 +47,7 @@ export default class ConfigStore {
         if (this.listener) this.listener(data.reply);
         this.isBusy = false;
       }
-    }).bind(this);
+    });
   }
 
   updateConfig() {

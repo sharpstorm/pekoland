@@ -1,5 +1,3 @@
-/* eslint-disable no-extra-bind */
-
 import CallManager from './call-manager.js';
 import ConfigStore from './config-store.js';
 import Connection, { BroadcastConnection } from './connection.js';
@@ -28,7 +26,7 @@ export default class NetworkManager {
         ? NetworkManager.Mode.SERVER : NetworkManager.Mode.CLIENT;
 
       this.emitEvent(NetworkManager.Events.MODE_CHANGED, this.mode);
-    }).bind(this));
+    }));
     const peerPromise = new Promise(((resolve) => {
       // eslint-disable-next-line no-undef
       this.peer = new Peer(WEBRTC_CONFIG);
@@ -37,8 +35,8 @@ export default class NetworkManager {
         this.peerId = id;
         console.log(`[NetworkManager] My Peer ID: ${id}`);
         resolve(id);
-      }).bind(this));
-    }).bind(this));
+      }));
+    }));
 
     return Promise.all([configPromise, peerPromise])
       .then((() => {
@@ -49,7 +47,7 @@ export default class NetworkManager {
           this.state = NetworkManager.State.INITIALIZED;
         }
         this.emitEvent(NetworkManager.Events.INITIALIZED);
-      }).bind(this));
+      }));
   }
 
   hookServerHandlers() {
@@ -60,8 +58,8 @@ export default class NetworkManager {
         console.log('[NetworkManager] Connection with Remote Peer Established');
         this.connection.registerConnection(dataConnection);
         this.emitEvent(NetworkManager.Events.CLIENT_CONNECTED, dataConnection);
-      }).bind(this));
-    }).bind(this));
+      }));
+    }));
 
     this.configStore.updateRemote(this.peerId);
     window.onbeforeunload = () => {
@@ -99,7 +97,7 @@ export default class NetworkManager {
     return this.connection.connect().then((() => {
       this.state = NetworkManager.State.READY;
       this.emitEvent(NetworkManager.Events.CONNECTED);
-    }).bind(this))
+    }))
       .catch(() => {
         this.state = NetworkManager.State.INITIALIZED;
         this.emitEvent(NetworkManager.Events.CONNECTION_FAILED);

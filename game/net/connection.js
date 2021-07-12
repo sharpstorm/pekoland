@@ -1,5 +1,3 @@
-/* eslint-disable no-extra-bind */
-
 import { timeout } from '../utils.js';
 
 const CONN_TIMEOUT = 10000;
@@ -27,17 +25,17 @@ class Connection {
           });
           res(this.conn);
         });
-      }).bind(this)), CONN_TIMEOUT)
+      })), CONN_TIMEOUT)
         .then((() => {
           this.state = Connection.State.CONNECTED;
           console.log('[Connection] Connected to Peer');
           resolve(this.conn);
-        }).bind(this))
+        }))
         .catch(((err) => {
           this.state = Connection.State.CREATED;
           console.error('[Connection] Failed to Connect to Peer');
           reject(err);
-        }).bind(this));
+        }));
     });
   }
 
@@ -52,7 +50,7 @@ class Connection {
   handlerAdapter(handler) {
     return ((data) => {
       handler(data, this);
-    }).bind(this);
+    });
   }
 }
 
@@ -75,7 +73,7 @@ class BroadcastConnection {
     this.connections[peerId] = conn;
     conn.on('close', (() => {
       this.dispose(peerId);
-    }).bind(this));
+    }));
 
     if (this.dataHandler !== undefined) {
       conn.on('data', this.handlerAdapter(conn));
@@ -111,11 +109,11 @@ class BroadcastConnection {
     this.dataHandler = handler;
     Object.values(this.connections).forEach(((conn) => {
       conn.on('data', this.handlerAdapter(conn));
-    }).bind(this));
+    }));
   }
 
   handlerAdapter(conn) {
-    return ((data) => this.dataHandler(data, conn)).bind(this);
+    return ((data) => this.dataHandler(data, conn));
   }
 
   addCleanupHandler(handler) {
