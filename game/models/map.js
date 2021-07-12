@@ -93,7 +93,7 @@ export default class Map {
     ctx.strokeStyle = 'black';
     for (let x = 0; x * unit < this.mapWidth; x += 1) {
       for (let y = 0; y * unit < this.mapHeight; y += 1) {
-        if (!this.checkCollision(x * GameConstants.UNIT, y * GameConstants.UNIT)) {
+        if (this.collisionMatrix[x][y] !== 1) {
           ctx.strokeRect(x * unit, y * unit, unit, unit);
         }
       }
