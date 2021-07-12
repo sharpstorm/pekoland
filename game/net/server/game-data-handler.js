@@ -120,13 +120,12 @@ function handleJoinLobby(data, conn) {
       .sendTo(buildGamePacket('start-game', newData), WorldManager.getInstance().getPeerId(WorldManager.getInstance().getJoiner(data.tableId)));
     NetworkManager.getInstance().getConnection()
       .sendTo(buildGamePacket('start-game', newData), WorldManager.getInstance().getPeerId(WorldManager.getInstance().getHost(data.tableId)));
-    console.log(newData);
+
     if (newData.player1 === PlayerManager.getInstance().getSelfId()) {
       GameManager.getInstance().getBoardGameManager().gameState = 'playing';
       GameManager.getInstance().getBoardGameManager()
         .startGame(newData.gameName, newData.player1, newData.player2, newData.tableId);
     }
-    console.log(WorldManager.getInstance().gameLobbies);
   } else if (data.mode === 'spectator') {
     WorldManager.getInstance().addSpectator(data.tableId, data.userId);
     conn.send(buildGamePacket('start-game', {
@@ -141,27 +140,34 @@ function handleJoinLobby(data, conn) {
 }
 
 function handleLeaveLobby(data) {
-  console.log(WorldManager.getInstance().gameLobbies);
-  if (data.mode === 'player') {
+  const worldManager = WorldManager.getInstance();
+  if (data.mode === 'playing') {
+    // Send Opponent
+    const opponent = worldManager.getPeerId(worldManager.getOpponent(data.userId));
     NetworkManager.getInstance().getConnection()
-      .sendTo(buildGamePacket('end-game', PlayerManager.getInstance().getSelfId()), WorldManager.getInstance().getPeerId(WorldManager.getInstance().getOpponent(data.userId)));
-    const spectators = WorldManager.getInstance().getSpectators(data.tableId);
+      .sendTo(buildGamePacket('end-game', PlayerManager.getInstance().getSelfId()), opponent);
+
+    // Send Spectators
+    const spectators = worldManager.getSpectators(data.tableId);
     if (spectators !== undefined) {
       spectators.forEach((userId) => {
-        NetworkManager.getInstance().getConnection()
-          .sendTo(buildGamePacket('end-game', PlayerManager.getInstance().getSelfId()), WorldManager.getInstance().getPeerId(userId));
+        NetworkManager.getInstance().getConnection().sendTo(
+          buildGamePacket('end-game', PlayerManager.getInstance().getSelfId()),
+          worldManager.getPeerId(userId),
+        );
       });
     }
-    if (PlayerManager.getInstance().getSelfId() === WorldManager.getInstance()
-      .getOpponent(data.userId)) {
+
+    // Check if self is in game
+    if (PlayerManager.getInstance().getSelfId() === opponent) {
       GameManager.getInstance().getBoardGameManager().endGame();
       alert(`${data.userId} has left the game`);
     }
-    WorldManager.getInstance().closeLobby(data.tableId);
-  } else if (data.mode === 'spectator') {
-    WorldManager.getInstance().removeSpectator(data.tableId, data.userId);
+    worldManager.closeLobby(data.tableId);
+  } else if (data.mode === 'spectating') {
+    worldManager.removeSpectator(data.tableId, data.userId);
   } else if (data.mode === 'hosting') {
-    WorldManager.getInstance().closeLobby(data.tableId);
+    worldManager.closeLobby(data.tableId);
   }
 }
 
@@ -170,7 +176,6 @@ function handleJoinWhiteboard(data, conn) {
   const playerId = worldManager.getPlayerId(conn.peer);
 
   const state = worldManager.registerWhiteboard(data.boardId, (userId, newState, delta) => {
-    console.log(userId, PlayerManager.getInstance().getSelfId());
     if (userId === PlayerManager.getInstance().getSelfId()) {
       GameManager.getInstance().getWhiteboardManager()
         .updateBoardState(data.boardId, newState, delta);

@@ -82,23 +82,29 @@ function handleVoiceChannelData(data, conn) {
 }
 
 function handleLobbyReply(data, conn) {
-  if (data.msg === 'lobby-state-new') {
-    GameManager.getInstance().getBoardGameManager().displayPage(0);
-  } else if (data.msg === 'lobby-state-open') {
-    GameManager.getInstance().getBoardGameManager().displayPage(1);
-  } else if (data.msg === 'lobby-state-occupied') {
-    GameManager.getInstance().getBoardGameManager().displayPage(2);
+  const boardGameManager = GameManager.getInstance().getBoardGameManager();
+  if (data.msg === 'lobby-state-new'
+    || data.msg === 'lobby-state-open'
+    || data.msg === 'lobby-state-occupied') {
+    let page = 0;
+    if (data.msg === 'lobby-state-open') {
+      page = 1;
+    } else if (data.msg === 'lobby-state-occupied') {
+      page = 2;
+    }
+    boardGameManager.displayPage(page);
+    boardGameManager.setGameState('selecting');
   } else if (data.msg === 'lobby-register-fail') {
     alert('Failed to create lobby');
   } else if (data.msg === 'lobby-register-success') {
-    GameManager.getInstance().getBoardGameManager().displayPage(3);
+    boardGameManager.displayPage(3);
+    boardGameManager.setGameState('hosting');
   } else if (data.msg === 'lobby-join-fail') {
     alert('Failed to join lobby');
   }
 }
 
 function handleStartGame(data, conn) {
-  console.log(data);
   if (data.mode === 'player') {
     GameManager.getInstance().getBoardGameManager()
       .startGame(data.gameName, data.player1, data.player2, data.tableId);

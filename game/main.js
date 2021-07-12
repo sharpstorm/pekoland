@@ -334,7 +334,7 @@ Promise.all([netSetupPromise, assetSetupPromise])
       } else if (networkManager.getOperationMode() === NetworkManager.Mode.SERVER) {
         WorldManager.getInstance().createLobby(boardGameManager.tableId,
           playerManager.getSelfId(), gameName);
-        boardGameManager.gameState = 'hosting';
+        boardGameManager.setGameState('hosting');
         boardGameManager.displayPage(3);
       }
     });

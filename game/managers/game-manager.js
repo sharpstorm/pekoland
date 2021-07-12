@@ -202,6 +202,14 @@ class TextChannelManager {
   }
 }
 
+const BOARDGAME_STATE = {
+  WAITING_CHECK: 'waitingCheck',
+  SELECTING: 'selecting',
+  HOSTING: 'hosting',
+  PLAYING: 'playing',
+  SPECTATING: 'spectating',
+};
+
 class BoardGameManager {
   constructor() {
     this.gameList = [];
@@ -244,7 +252,7 @@ class BoardGameManager {
       this.tableId = `${unitX}-${unitY}`;
       if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.CLIENT) {
         NetworkManager.getInstance().send(buildClientGamePacket('check-lobby-state-request', { tableId: this.tableId }));
-        this.gameState = 'waitingCheck';
+        this.gameState = BOARDGAME_STATE.WAITING_CHECK;
       } else if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.SERVER) {
         if (WorldManager.getInstance().lobbyExist(this.tableId)) {
           if (WorldManager.getInstance().getJoiner(this.tableId) === undefined) {
@@ -258,12 +266,17 @@ class BoardGameManager {
         } else {
           this.displayPage(0);
         }
+        this.gameState = BOARDGAME_STATE.SELECTING;
       }
     }
   }
 
   getGame(gameName) {
     return this.gameList.find((x) => x.gameName === gameName);
+  }
+
+  setGameState(state) {
+    this.gameState = state;
   }
 
   displayPage(page) {
@@ -275,7 +288,7 @@ class BoardGameManager {
   }
 
   closeGameMenu() {
-    if (this.gameState === 'hosting') {
+    if (this.gameState === BOARDGAME_STATE.HOSTING) {
       if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.CLIENT) {
         NetworkManager.getInstance().send(buildClientGamePacket('leave-lobby', {
           userId: PlayerManager.getInstance().getSelfId(),
@@ -311,7 +324,7 @@ class BoardGameManager {
         }), WorldManager.getInstance().getPeerId(WorldManager
           .getInstance().getOpponent(PlayerManager.getInstance().getSelfId())));
       this.currentGame = WorldManager.getInstance().getGameName(this.tableId);
-      this.gameState = 'playing';
+      this.gameState = BOARDGAME_STATE.PLAYING;
       this.displayPage(-1);
       this.showGameOverlay();
       this.startGame(this.currentGame,
@@ -327,14 +340,14 @@ class BoardGameManager {
       this.currentGame = game.gameName;
       this.displayPage(-1);
 
-      this.gameState = 'playing';
+      this.gameState = BOARDGAME_STATE.PLAYING;
       this.showGameOverlay();
     }
   }
 
   joinGameSpectate() {
     if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.SERVER) {
-      this.gameState = 'spectating';
+      this.gameState = BOARDGAME_STATE.SPECTATING;
       const worldManager = WorldManager.getInstance();
       this.spectateGame(
         worldManager.getGameName(this.tableId),
@@ -367,7 +380,7 @@ class BoardGameManager {
       this.currentGame = gameName;
       this.closeGameMenu();
 
-      this.gameState = 'spectating';
+      this.gameState = BOARDGAME_STATE.SPECTATING;
       this.showGameOverlay();
     }
   }
@@ -396,28 +409,34 @@ class BoardGameManager {
       NetworkManager.getInstance().send(buildClientGamePacket('leave-lobby', {
         userId: selfId,
         tableId: this.tableId,
-        mode: (this.gameState === 'spectating') ? 'spectator' : 'player',
+        mode: this.gameState,
       }));
 
       game.endGame();
       this.closeGameOverlay();
     } else if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.SERVER) {
-      if (this.gameState === 'spectating') {
+      if (this.gameState === BOARDGAME_STATE.SPECTATING) {
         worldManager.removeSpectator(this.tableId, selfId);
       } else {
-        NetworkManager.getInstance().getConnection()
-          .sendTo(buildServerGamePacket('end-game', selfId), worldManager.getPeerId(worldManager.getOpponent(selfId)));
+        NetworkManager.getInstance().getConnection().sendTo(
+          buildServerGamePacket('end-game', selfId),
+          worldManager.getPeerId(worldManager.getOpponent(selfId)),
+        );
 
-        worldManager.closeLobby(this.tableId);
         const spectators = worldManager.getSpectators(this.tableId);
         if (spectators !== undefined) {
           spectators.forEach((userId) => {
-            NetworkManager.getInstance().getConnection()
-              .sendTo(buildServerGamePacket('end-game', selfId), worldManager.getPeerId(userId));
+            NetworkManager.getInstance().getConnection().sendTo(
+              buildServerGamePacket('end-game', selfId),
+              worldManager.getPeerId(userId),
+            );
           });
         }
+
+        worldManager.closeLobby(this.tableId);
       }
       game.endGame();
+      this.tableId = undefined;
       this.closeGameOverlay();
     }
 
