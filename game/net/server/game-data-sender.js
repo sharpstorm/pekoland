@@ -100,6 +100,14 @@ function buildStartGame(opCode, data) {
   };
 }
 
+function buildAvatarUpdateEcho(opCode, data) {
+  return {
+    opCode,
+    userId: data.userId,
+    avatarId: data.avatarId,
+  };
+}
+
 const handlers = {
   'handshake': buildEmptyPacket,
   'spawn-reply': buildSpawnReply,
@@ -113,6 +121,7 @@ const handlers = {
   'lobby-reply': buildLobbyReply,
   'start-game': buildStartGame,
   'end-game': buildLobbyReply,
+  'change-avatar-echo': buildAvatarUpdateEcho,
 };
 
 export default function buildGamePacket(opCode, data) {

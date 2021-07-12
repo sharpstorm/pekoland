@@ -62,6 +62,14 @@ function buildLobbyUpdate(opCode, data) {
   };
 }
 
+function buildAvatarUpdate(opCode, data) {
+  return {
+    opCode,
+    userId: data.userId,
+    avatarId: data.avatarId,
+  };
+}
+
 const handlers = {
   'handshake': buildEmptyPacket,
   'spawn-request': buildSpawnRequest,
@@ -74,6 +82,7 @@ const handlers = {
   'register-lobby': buildLobbyUpdate,
   'join-lobby': buildLobbyUpdate,
   'leave-lobby': buildLobbyUpdate,
+  'change-avatar': buildAvatarUpdate,
 };
 
 export default function buildGameDataPacket(opCode, data) {

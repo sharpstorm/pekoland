@@ -111,6 +111,13 @@ function handleEndGame(data, conn) {
   alert(`${data.msg} has left the game`);
 }
 
+function handleChangeAvatarEcho(data, conn) {
+  const player = PlayerManager.getInstance().getPlayer(data.userId);
+  if (player !== undefined) {
+    PlayerManager.getInstance().getPlayer(data.userId).changeSprite(data.avatarId);
+  }
+}
+
 const handlers = {
   'handshake': handleHandshake,
   'spawn-reply': handleSpawnReply,
@@ -124,6 +131,7 @@ const handlers = {
   'lobby-reply': handleLobbyReply,
   'start-game': handleStartGame,
   'end-game': handleEndGame,
+  'change-avatar-echo': handleChangeAvatarEcho,
 };
 
 // Conn will always be the server

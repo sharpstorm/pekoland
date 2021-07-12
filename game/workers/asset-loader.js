@@ -73,7 +73,6 @@ export default function loadAssets() {
         SpriteManager.getInstance().registerSprite('worm-avatar', wormSprite);
       });
 
-
     const load2 = loadAsset('Images/chat-bubble.png')
       .then((x) => {
         const sprite = SlicedSprite.from(x, [

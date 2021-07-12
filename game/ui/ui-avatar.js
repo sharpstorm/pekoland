@@ -11,6 +11,8 @@ class AvatarMenu extends UIElement {
     this.avatarArr = avatarArr;
     this.initObject();
     this.currentA = undefined;
+
+    this.eventListeners = {};
   }
 
   initObject() {
@@ -61,6 +63,7 @@ class AvatarMenu extends UIElement {
       PlayerManager.getInstance().getSelf().playerSprite = SpriteManager.getInstance()
         .getSprite(this.avatarArr[this.currentIndex]);
       this.node.style.display = 'none';
+      this.emitEvent('changeAvatar');
     });
 
     this.titleWindow.innerHTML = 'Choose Your Avatar';
@@ -73,8 +76,6 @@ class AvatarMenu extends UIElement {
     this.avatarMenu.appendChild(this.titleWindow);
     this.node.appendChild(this.avatarMenu);
     this.avatarMenu.appendChild(this.avatarWindow);
-    console.log(this.avatarArr[this.currentIndex]);
-
 
     const panelBack = super.drawImage((ctx) => {
       SpriteManager.getInstance().getSprite('panel').drawAt(ctx, 0, 0, this.width, this.height);
@@ -87,12 +88,21 @@ class AvatarMenu extends UIElement {
     this.avatarMenu.style.background = panelBack;
     this.avatarWindow.style.background = this.currentA;
 
-    console.log(this.avatarArr);
     this.node.style.display = 'none';
   }
 
   show() {
     this.node.style.display = 'block';
+  }
+
+  emitEvent(evtId, data) {
+    if (evtId in this.eventListeners) {
+      this.eventListeners[evtId](data);
+    }
+  }
+
+  on(evtId, handler) {
+    this.eventListeners[evtId] = handler;
   }
 }
 

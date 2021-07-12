@@ -1,5 +1,6 @@
 import Chat from './chat.js';
 import GameConstants from '../game-constants.js';
+import SpriteManager from '../managers/sprite-manager.js';
 
 export default class Player {
   constructor(userId, name, playerSprite) {
@@ -94,6 +95,10 @@ export default class Player {
     this.oldX = this.x;
     this.oldY = this.y;
     this.isAnimating = false;
+  }
+
+  changeSprite(spriteId) {
+    this.playerSprite = SpriteManager.getInstance().getSprite(spriteId);
   }
 }
 

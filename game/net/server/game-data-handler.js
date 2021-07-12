@@ -167,6 +167,14 @@ function handleLeaveLobby(data) {
   }
 }
 
+function handleChangeAvatar(data, conn) {
+  const player = PlayerManager.getInstance().getPlayer(data.userId);
+  if (player !== undefined) {
+    PlayerManager.getInstance().getPlayer(data.userId).changeSprite(data.avatarId);
+    NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('change-avatar-echo', data), conn.peer);
+  }
+}
+
 const handlers = {
   'handshake': handleHandshake,
   'spawn-request': handleSpawnRequest,
@@ -179,6 +187,7 @@ const handlers = {
   'register-lobby': handleRegisterLobby,
   'join-lobby': handleJoinLobby,
   'leave-lobby': handleLeaveLobby,
+  'change-avatar': handleChangeAvatar,
 };
 
 // Conn can be used to uniquely identify the peer

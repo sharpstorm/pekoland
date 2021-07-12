@@ -267,9 +267,6 @@ Promise.all([netSetupPromise, assetSetupPromise])
     GameManager.getInstance().getBoardGameManager().registerGameOverlayUI(gameOverlay);
     gameOverlay.registerLeaveListener(() => { boardGameManager.leaveGame(); });
 
-    const rabbitAvatar = SpriteManager.getInstance().getSprite('rabbit-avatar');
-    const rabbitBrownAvatar = SpriteManager.getInstance().getSprite('rabbit-brown-avatar');
-    const chickAvatar = SpriteManager.getInstance().getSprite('chick-avatar');
     const avatarArr = [];
     avatarArr.push('rabbit-avatar');
     avatarArr.push('rabbit-brown-avatar');
@@ -284,6 +281,18 @@ Promise.all([netSetupPromise, assetSetupPromise])
     changeAvatarBtn.node.style.marginRight = '125px';
     changeAvatarBtn.addEventListener('click', () => {
       avatarMenu.show();
+    });
+
+    avatarMenu.on('changeAvatar', () => {
+      const data = {
+        userId: playerManager.getSelfId(),
+        avatarId: avatarMenu.avatarArr[avatarMenu.currentIndex],
+      };
+      if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {
+        NetworkManager.getInstance().send(buildClientGamePacket('change-avatar', data));
+      } else if (networkManager.getOperationMode() === NetworkManager.Mode.SERVER) {
+        NetworkManager.getInstance().send(buildServerGamePacket('change-avatar-echo', data));
+      }
     });
 
     uiRenderer.addElement(gameMenu);
