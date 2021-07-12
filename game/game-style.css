@@ -192,6 +192,10 @@
   transform: translateX(0);
 }
 
+#admit-prompt > div > .message::-webkit-scrollbar { width: 4px; }
+#admit-prompt > div > .message::-webkit-scrollbar-track { background: #e0a466; border-radius: 4px }
+#admit-prompt > div > .message::-webkit-scrollbar-thumb { background: #772108; border-radius: 4px; }
+
 #drawer-menu {
   overflow: hidden;
 }
