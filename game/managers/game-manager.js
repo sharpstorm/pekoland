@@ -402,11 +402,70 @@ class BoardGameManager {
   }
 }
 
+class WhiteboardManager {
+  constructor() {
+    this.boardUI = undefined;
+    this.currentBoard = undefined;
+  }
+
+  registerUI(boardUI) {
+    this.boardUI = boardUI;
+  }
+
+  openBoard(x, y) {
+    const boardId = `${x}-${y}`; // Follows Table Convention
+    const worldManager = WorldManager.getInstance();
+
+    if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.SERVER) {
+      worldManager.registerWhiteboard(boardId, (userId, state) => {
+        // Notifier
+        if (userId === PlayerManager.getInstance().getSelfId()) {
+          this.updateBoardState(boardId, state);
+        } else {
+          NetworkManager.getInstance().getConnection().sendTo(buildServerGamePacket('whiteboard-state-echo', { id: boardId, state }), worldManager.getPeerId(userId));
+        }
+      });
+      worldManager.addWhiteboardPlayer(boardId, PlayerManager.getInstance().getSelfId());
+    } else {
+      // Register to receive updates
+      NetworkManager.getInstance().send(buildClientGamePacket('join-whiteboard', { id: boardId }));
+    }
+
+    this.currentBoard = boardId;
+    this.boardUI.show();
+    this.boardUI.setCloseListener(() => {
+      this.currentBoard = undefined;
+      if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.SERVER) {
+        worldManager.removeWhiteboardPlayer(boardId, PlayerManager.getInstance().getSelfId());
+      } else {
+        NetworkManager.getInstance().send(buildClientGamePacket('leave-whiteboard', { id: boardId }));
+      }
+    });
+    this.boardUI.setUpdateListener((data) => {
+      if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.SERVER) {
+        worldManager.updateWhiteboardState(this.currentBoard, data,
+          PlayerManager.getInstance().getSelfId());
+      } else {
+        NetworkManager.getInstance().send(buildClientGamePacket('update-whiteboard', { id: boardId, state: data }));
+      }
+    });
+  }
+
+  updateBoardState(boardId, state) {
+    if (this.currentBoard !== boardId) {
+      return;
+    }
+
+    this.boardUI.setCanvasState(state);
+  }
+}
+
 export default class GameManager {
   constructor() {
     this.voiceChannelManager = new VoiceChannelManager();
     this.textChannelManager = new TextChannelManager();
     this.boardGameManager = new BoardGameManager();
+    this.whiteboardManager = new WhiteboardManager();
   }
 
   getVoiceChannelManager() {
@@ -419,6 +478,10 @@ export default class GameManager {
 
   getBoardGameManager() {
     return this.boardGameManager;
+  }
+
+  getWhiteboardManager() {
+    return this.whiteboardManager;
   }
 
   static getInstance() {

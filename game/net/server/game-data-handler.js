@@ -167,6 +167,44 @@ function handleLeaveLobby(data) {
   }
 }
 
+function handleJoinWhiteboard(data, conn) {
+  const worldManager = WorldManager.getInstance();
+  const playerId = worldManager.getPlayerId(conn.peer);
+
+  const state = worldManager.registerWhiteboard(data.boardId, (userId, newState) => {
+    console.log(userId, PlayerManager.getInstance().getSelfId());
+    if (userId === PlayerManager.getInstance().getSelfId()) {
+      console.log('update myself');
+      GameManager.getInstance().getWhiteboardManager().updateBoardState(data.boardId, newState);
+    } else {
+      NetworkManager.getInstance().getConnection().sendTo(buildGamePacket('whiteboard-state-echo', { id: data.boardId, state: newState }), worldManager.getPeerId(userId));
+    }
+  });
+  worldManager.addWhiteboardPlayer(data.boardId, playerId);
+  if (state !== undefined) {
+    conn.send(buildGamePacket('whiteboard-state-echo', {
+      state,
+      id: data.boardId,
+    }));
+  }
+}
+
+function handleLeaveWhiteboard(data, conn) {
+  const worldManager = WorldManager.getInstance();
+  const playerId = worldManager.getPlayerId(conn.peer);
+
+  worldManager.removeWhiteboardPlayer(data.boardId, playerId);
+}
+
+function handleUpdateWhiteboard(data, conn) {
+  console.log('got update wb');
+  console.log(data);
+  const worldManager = WorldManager.getInstance();
+  const playerId = worldManager.getPlayerId(conn.peer);
+
+  worldManager.updateWhiteboardState(data.boardId, data.state, playerId);
+}
+
 const handlers = {
   'handshake': handleHandshake,
   'spawn-request': handleSpawnRequest,
@@ -179,6 +217,9 @@ const handlers = {
   'register-lobby': handleRegisterLobby,
   'join-lobby': handleJoinLobby,
   'leave-lobby': handleLeaveLobby,
+  'join-whiteboard': handleJoinWhiteboard,
+  'leave-whiteboard': handleLeaveWhiteboard,
+  'update-whiteboard': handleUpdateWhiteboard,
 };
 
 // Conn can be used to uniquely identify the peer

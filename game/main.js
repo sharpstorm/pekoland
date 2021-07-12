@@ -187,6 +187,7 @@ Promise.all([netSetupPromise, assetSetupPromise])
     const playerManager = PlayerManager.getInstance();
     const chatManager = GameManager.getInstance().getTextChannelManager();
     const boardGameManager = GameManager.getInstance().getBoardGameManager();
+    const whiteboardManager = GameManager.getInstance().getWhiteboardManager();
 
     Renderer.getMapRenderer().registerFurnitureHandler('furniture-game-table', boardGameManager.handleEvent.bind(boardGameManager));
 
@@ -319,14 +320,18 @@ Promise.all([netSetupPromise, assetSetupPromise])
     GameManager.getInstance().getBoardGameManager().registerGameOverlayUI(gameOverlay);
     gameOverlay.registerLeaveListener(() => { boardGameManager.leaveGame(); });
 
-    const whiteboard = new Whiteboard();
-    uiRenderer.addElement(whiteboard);
-
     uiRenderer.addElement(gameMenu);
     uiRenderer.addElement(gameOverlay);
     uiRenderer.addElement(menuBtn);
     uiRenderer.addElement(connectBtn);
     uiRenderer.addElement(micBtn);
+
+    const whiteboard = new Whiteboard();
+    uiRenderer.addElement(whiteboard);
+    whiteboardManager.registerUI(whiteboard);
+    Renderer.getMapRenderer().registerFurnitureHandler('furniture-whiteboard', (unitX, unitY) => {
+      whiteboardManager.openBoard(unitX, unitY);
+    });
 
     Renderer.init();
     window.requestAnimationFrame(Renderer.render.bind(Renderer));

@@ -117,6 +117,10 @@ function handleFurnitureSync(data) {
   MapManager.getInstance().getCurrentMap().setFurnitureToState(data.furniture);
 }
 
+function handleWhiteboardEcho(data) {
+  GameManager.getInstance().getWhiteboardManager().updateBoardState(data.boardId, data.state);
+}
+
 const handlers = {
   'handshake': handleHandshake,
   'spawn-reply': handleSpawnReply,
@@ -131,6 +135,7 @@ const handlers = {
   'start-game': handleStartGame,
   'end-game': handleEndGame,
   'furniture-sync': handleFurnitureSync,
+  'whiteboard-state-echo': handleWhiteboardEcho,
 };
 
 // Conn will always be the server

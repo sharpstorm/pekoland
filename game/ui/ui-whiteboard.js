@@ -27,6 +27,10 @@ export default class Whiteboard extends UIElement {
     this.lastState = undefined;
     this.showing = false;
 
+    this.updateTimer = undefined;
+    this.closeListener = undefined;
+    this.updateListener = undefined;
+
     this.initObject();
   }
 
@@ -136,6 +140,10 @@ export default class Whiteboard extends UIElement {
     this.fromPt = to;
     this.toPt = undefined;
 
+    if (this.updateTimer === undefined) {
+      this.triggerUpdateEvent();
+    }
+
     requestAnimationFrame(this.refreshCanvas.bind(this));
   }
 
@@ -147,10 +155,46 @@ export default class Whiteboard extends UIElement {
     this.brushTiles[this.selectedBrush].classList.add('selected');
   }
 
+  setCanvasState(data) {
+    const image = new Image();
+    image.onload = () => {
+      this.drawingContext.drawImage(image, 0, 0, SIZE, SIZE);
+    };
+    image.src = data;
+  }
+
+  triggerUpdateEvent() {
+    if (this.updateListener === undefined) {
+      this.updateTimer = undefined;
+      return;
+    }
+
+    this.updateListener(this.drawingCanvas.toDataURL('image/png'));
+
+    if (this.drawing) {
+      this.updateTimer = setTimeout(this.triggerUpdateEvent.bind(this), 500);
+    } else {
+      this.updateTimer = undefined;
+    }
+  }
+
+  setUpdateListener(listener) {
+    this.updateListener = listener;
+  }
+
+  setCloseListener(listener) {
+    this.closeListener = listener;
+  }
+
   close() {
     if (this.showing) {
       this.node.style.display = 'none';
       this.showing = false;
+      if (this.closeListener) {
+        this.closeListener();
+        this.closeListener = undefined;
+        this.updateListener = undefined;
+      }
     }
   }
 

@@ -108,6 +108,14 @@ function buildFurnitureSync(opCode, data) {
   };
 }
 
+function buildWhiteboardEcho(opCode, data) {
+  return {
+    opCode,
+    boardId: data.id,
+    state: data.state,
+  };
+}
+
 const handlers = {
   'handshake': buildEmptyPacket,
   'spawn-reply': buildSpawnReply,
@@ -122,6 +130,7 @@ const handlers = {
   'start-game': buildStartGame,
   'end-game': buildLobbyReply,
   'furniture-sync': buildFurnitureSync,
+  'whiteboard-state-echo': buildWhiteboardEcho,
 };
 
 export default function buildGamePacket(opCode, data) {
