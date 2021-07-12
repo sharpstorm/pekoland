@@ -52,8 +52,6 @@ function joystickWorker(e) {
       self.moveTo(self.x + deltaX, self.y + deltaY);
     }
 
-    console.log(self.x, self.y);
-
     joystickEventHandlers.forEach((x) => x({
       id: direction,
       deltaX,

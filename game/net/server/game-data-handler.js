@@ -9,8 +9,6 @@ import GameManager from '../../managers/game-manager.js';
 
 const chatManager = GameManager.getInstance().getTextChannelManager();
 
-// const spawnLocation = [0, 0];
-
 function handleHandshake(data, conn) {
   conn.send(buildGamePacket('handshake'));
 }
