@@ -73,7 +73,7 @@ networkManager.on('initialized', () => {
     });
 
     const playerManager = PlayerManager.getInstance();
-    playerManager.addPlayer(new Player(networkManager.configStore.userId, networkManager.configStore.name, SpriteManager.getInstance().getSprite('fox-avatar')));
+    playerManager.addPlayer(new Player(networkManager.configStore.userId, networkManager.configStore.name, SpriteManager.getInstance().getSprite('rabbit-avatar')));
     playerManager.setSelf(networkManager.configStore.userId);
     Renderer.getCameraContext().centerOn(playerManager.getSelf().x, playerManager.getSelf().y);
   }
@@ -274,9 +274,17 @@ Promise.all([netSetupPromise, assetSetupPromise])
     avatarArr.push('rabbit-avatar');
     avatarArr.push('rabbit-brown-avatar');
     avatarArr.push('chick-avatar');
-    avatarArr.push('fox-avatar');
+    avatarArr.push('cat-avatar');
+    avatarArr.push('red-panda-avatar');
+    avatarArr.push('worm-avatar');
 
     const avatarMenu = new AvatarMenu(avatarArr);
+
+    const changeAvatarBtn = new LongButton(64, 10, 200, 36, new UIAnchor(false, true, true, false), 'Change Avatar');
+    changeAvatarBtn.node.style.marginRight = '125px';
+    changeAvatarBtn.addEventListener('click', () => {
+      avatarMenu.show();
+    });
 
     uiRenderer.addElement(gameMenu);
     uiRenderer.addElement(gameOverlay);
@@ -284,6 +292,7 @@ Promise.all([netSetupPromise, assetSetupPromise])
     uiRenderer.addElement(connectBtn);
     uiRenderer.addElement(micBtn);
     uiRenderer.addElement(avatarMenu);
+    uiRenderer.addElement(changeAvatarBtn);
 
     Renderer.init();
     window.requestAnimationFrame(Renderer.render.bind(Renderer));

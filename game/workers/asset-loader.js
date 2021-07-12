@@ -30,26 +30,49 @@ export default function loadAssets() {
       });
 
     const load8 = loadAsset('Images/avatars/chick.png')
-      .then((rabbitSheet) => {
+      .then((chickSheet) => {
         const chickSprite = new AvatarSprite(
-          AnimatableSprite.generateFromTiledFrames(rabbitSheet, 1, 81, 25, 25, 25, 0, 7),
-          AnimatableSprite.generateFromTiledFrames(rabbitSheet, 4, 108, 25, 25, 33, 0, 7),
-          AnimatableSprite.generateFromTiledFrames(rabbitSheet, 1, 28, 25, 25, 25, 0, 7),
-          AnimatableSprite.generateFromTiledFrames(rabbitSheet, 4, 55, 25, 25, 33, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(chickSheet, 1, 81, 25, 25, 25, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(chickSheet, 4, 108, 25, 25, 33, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(chickSheet, 1, 28, 25, 25, 25, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(chickSheet, 4, 55, 25, 25, 33, 0, 7),
         );
         SpriteManager.getInstance().registerSprite('chick-avatar', chickSprite);
       });
 
-    const load9 = loadAsset('Images/avatars/fox.png')
-      .then((rabbitSheet) => {
-        const chickSprite = new AvatarSprite(
-          AnimatableSprite.generateFromTiledFrames(rabbitSheet, 1, 106, 35, 35, 33, 0, 7),
-          AnimatableSprite.generateFromTiledFrames(rabbitSheet, 1, 143, 35, 35, 49, 0, 7),
-          AnimatableSprite.generateFromTiledFrames(rabbitSheet, 1, 37, 35, 35, 33, 0, 7),
-          AnimatableSprite.generateFromTiledFrames(rabbitSheet, 1, 72, 35, 35, 49, 0, 7),
+    const load9 = loadAsset('Images/avatars/cat.png')
+      .then((catSheet) => {
+        const catSprite = new AvatarSprite(
+          AnimatableSprite.generateFromTiledFrames(catSheet, 1, 105, 31, 33, 33, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(catSheet, 1, 140, 34, 33, 36, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(catSheet, 1, 35, 31, 33, 33, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(catSheet, 1, 70, 34, 33, 36, 0, 7),
         );
-        SpriteManager.getInstance().registerSprite('fox-avatar', chickSprite);
+        SpriteManager.getInstance().registerSprite('cat-avatar', catSprite);
       });
+
+    const load10 = loadAsset('Images/avatars/red-panda.png')
+      .then((redPandaSheet) => {
+        const redPandaSprite = new AvatarSprite(
+          AnimatableSprite.generateFromTiledFrames(redPandaSheet, 1, 108, 31, 41, 33, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(redPandaSheet, 1, 149, 39, 31, 41, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(redPandaSheet, 1, 40, 31, 41, 33, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(redPandaSheet, 1, 75, 39, 31, 41, 0, 7),
+        );
+        SpriteManager.getInstance().registerSprite('red-panda-avatar', redPandaSprite);
+      });
+
+    const load11 = loadAsset('Images/avatars/worm.png')
+      .then((wormSheet) => {
+        const wormSprite = new AvatarSprite(
+          AnimatableSprite.generateFromTiledFrames(wormSheet, 1, 78, 31, 27, 25, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(wormSheet, 1, 104, 31, 23, 33, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(wormSheet, 1, 26, 31, 27, 26, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(wormSheet, 1, 53, 31, 23, 33, 0, 7),
+        );
+        SpriteManager.getInstance().registerSprite('worm-avatar', wormSprite);
+      });
+
 
     const load2 = loadAsset('Images/chat-bubble.png')
       .then((x) => {
@@ -160,6 +183,7 @@ export default function loadAssets() {
         spriteManager.registerSprite('checkers-piece-black-king', new Sprite(x, 210, 383, 187, 187));
       });
 
-    Promise.all([load1, load2, load3, load4, load5, load6, load7, load8, load9]).then(resolve);
+    Promise.all([load1, load2, load3, load4, load5, load6, load7, load8, load9, load10, load11])
+      .then(resolve);
   });
 }

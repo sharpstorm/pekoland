@@ -17,9 +17,9 @@ class AvatarMenu extends UIElement {
     this.titleWindow = createElement('div', { id: 'game-menu-title' });
     this.avatarMenu = createElement('div', { id: 'avatar-menu' });
     const leftBtn = new Button(10, 10, 36, 36, new UIAnchor(false, false, false, true),
-      SpriteManager.getInstance().getSprite('icon-cross'));
+      '<');
     const rightBtn = new Button(10, 10, 36, 36, new UIAnchor(false, true, false, false),
-      SpriteManager.getInstance().getSprite('icon-cross'));
+      '>');
     rightBtn.node.style.marginTop = '200px';
     leftBtn.node.style.marginTop = '200px';
     rightBtn.node.style.marginRight = '50px';
@@ -54,7 +54,10 @@ class AvatarMenu extends UIElement {
       console.log(this.currentIndex);
     });
 
-    this.avatarWindow.addEventListener('click', () => {
+    const confirmBtn = new LongButton(10, 10, 100, 36, new UIAnchor(false, false, true, false), 'Confirm');
+    confirmBtn.node.style.marginLeft = 'calc(50% - 50px)';
+
+    confirmBtn.addEventListener('click', () => {
       PlayerManager.getInstance().getSelf().playerSprite = SpriteManager.getInstance()
         .getSprite(this.avatarArr[this.currentIndex]);
       this.node.style.display = 'none';
@@ -66,10 +69,13 @@ class AvatarMenu extends UIElement {
     this.avatarWindow.style.color = 'black';
     this.avatarMenu.appendChild(leftBtn.node);
     this.avatarMenu.appendChild(rightBtn.node);
+    this.avatarMenu.appendChild(confirmBtn.node);
     this.avatarMenu.appendChild(this.titleWindow);
     this.node.appendChild(this.avatarMenu);
     this.avatarMenu.appendChild(this.avatarWindow);
     console.log(this.avatarArr[this.currentIndex]);
+
+
     const panelBack = super.drawImage((ctx) => {
       SpriteManager.getInstance().getSprite('panel').drawAt(ctx, 0, 0, this.width, this.height);
     });
@@ -83,6 +89,10 @@ class AvatarMenu extends UIElement {
 
     console.log(this.avatarArr);
     this.node.style.display = 'none';
+  }
+
+  show() {
+    this.node.style.display = 'block';
   }
 }
 
