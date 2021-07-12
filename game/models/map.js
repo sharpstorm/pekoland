@@ -93,7 +93,7 @@ export default class Map {
     ctx.strokeStyle = 'black';
     for (let x = 0; x * unit < this.mapWidth; x += 1) {
       for (let y = 0; y * unit < this.mapHeight; y += 1) {
-        if (!this.checkCollision(x * GameConstants.UNIT, y * GameConstants.UNIT)) {
+        if (this.collisionMatrix[x][y] !== 1) {
           ctx.strokeRect(x * unit, y * unit, unit, unit);
         }
       }
@@ -173,8 +173,11 @@ export default class Map {
   }
 
   getFurniture(worldX, worldY) {
-    const { x, y } = this.normaliseCoordinates(worldX, worldY);
-    return this.furnitureMatrix[x][y];
+    const coords = this.normaliseCoordinates(worldX, worldY);
+    if (coords === undefined) {
+      return undefined;
+    }
+    return this.furnitureMatrix[coords.x][coords.y];
   }
 
   getFurnitureList() {
@@ -187,11 +190,14 @@ export default class Map {
   }
 
   setFurnitureAt(worldX, worldY, furnitureId) {
-    const { x, y } = this.normaliseCoordinates(worldX, worldY);
-    if (this.collisionMatrix[x][y] === 1) {
+    const coords = this.normaliseCoordinates(worldX, worldY);
+    if (coords === undefined) {
+      return;
+    }
+    if (this.collisionMatrix[coords.x][coords.y] === 1) {
       return; // Not allowed to place on colliders
     }
-    this.furnitureMatrix[x][y] = furnitureId;
+    this.furnitureMatrix[coords.x][coords.y] = furnitureId;
     this.refreshComposite();
   }
 

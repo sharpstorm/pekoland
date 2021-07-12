@@ -99,7 +99,6 @@ function setupServerHooks() {
   uiRenderer.addElement(admissionPrompt);
 
   roomController.on('playerRequestJoin', (playerInfo) => {
-    // eslint-disable-next-line no-restricted-globals
     admissionPrompt.prompt(`${playerInfo.name} is requesting to join. Admit?`,
       () => { roomController.admitIntoWorld(playerInfo.peerId); },
       () => { roomController.rejectAdmit(playerInfo.peerId); });
@@ -189,18 +188,21 @@ Promise.all([netSetupPromise, assetSetupPromise])
     const boardGameManager = GameManager.getInstance().getBoardGameManager();
     const whiteboardManager = GameManager.getInstance().getWhiteboardManager();
 
-    Renderer.getMapRenderer().registerFurnitureHandler('furniture-game-table', boardGameManager.handleEvent.bind(boardGameManager));
+    /* ----------------------- Board Games ----------------------- */
 
+    Renderer.getMapRenderer().registerFurnitureHandler('furniture-game-table', boardGameManager.handleEvent.bind(boardGameManager));
     const checkersGame = new CheckersGame();
     const drawSomething = new DrawSomething();
+    const battleshipGame = new BattleshipGame();
+
     boardGameManager.register(checkersGame);
     boardGameManager.register(drawSomething);
+    boardGameManager.register(battleshipGame);
     gameRenderer.register(checkersGame);
     gameRenderer.register(drawSomething);
-
-    const battleshipGame = new BattleshipGame();
-    boardGameManager.register(battleshipGame);
     gameRenderer.register(battleshipGame);
+
+    /* ----------------------- Chat box ----------------------- */
 
     const chatbox = new Chatbox();
     chatbox.addSubmitListener((msg) => {
@@ -215,6 +217,8 @@ Promise.all([netSetupPromise, assetSetupPromise])
     });
     chatManager.addChangeListener(() => chatbox.update());
     uiRenderer.addElement(chatbox);
+
+    /* ----------------------- Furniture system ----------------------- */
 
     const customizeWorldMenu = new CustomizeWorldMenu();
     MapManager.getInstance().getFurnitureFactory().forEachType((furniture) => {
@@ -232,7 +236,13 @@ Promise.all([netSetupPromise, assetSetupPromise])
         .then(() => alert('Saved Furniture'));
       NetworkManager.getInstance().send(buildServerGamePacket('furniture-sync', newArrangement));
     });
+    customizeWorldMenu.setCancelHandler(() => {
+      customizeWorldMenu.setVisible(false);
+      Renderer.getMapRenderer().setFurniturePlacementMode(false);
+    });
     uiRenderer.addElement(customizeWorldMenu);
+
+    /* ----------------------- Hamburger Menu ----------------------- */
 
     const drawerMenu = new DrawerMenu(networkManager.getOperationMode()
       === NetworkManager.Mode.SERVER);
@@ -252,6 +262,8 @@ Promise.all([netSetupPromise, assetSetupPromise])
     });
     uiRenderer.addElement(menuBtn);
 
+    /* ----------------------- Voice Chat Controls ----------------------- */
+
     const micBtn = new Button(174, 10, 36, 36, new UIAnchor(false, true, true, false),
       SpriteManager.getInstance().getSprite('icon-mic-muted'));
     micBtn.setVisible(false);
@@ -266,19 +278,41 @@ Promise.all([netSetupPromise, assetSetupPromise])
       }
     });
 
+    const muteBtn = new Button(220, 10, 36, 36, new UIAnchor(false, true, true, false),
+      SpriteManager.getInstance().getSprite('icon-speaker'));
+    muteBtn.setVisible(false);
+    muteBtn.addEventListener('click', () => {
+      if (!voiceChannelManager.isOutputMuted()) {
+        voiceChannelManager.muteOutputs();
+        muteBtn.setContent(SpriteManager.getInstance().getSprite('icon-speaker-muted'));
+      } else {
+        voiceChannelManager.unmuteOutputs();
+        muteBtn.setContent(SpriteManager.getInstance().getSprite('icon-speaker'));
+      }
+    });
+
     const connectBtn = new LongButton(64, 10, 100, 36, new UIAnchor(false, true, true, false), 'Connect');
     connectBtn.addEventListener('click', () => {
       if (!voiceChannelManager.isConnected()) {
         voiceChannelManager.joinVoice();
         micBtn.setVisible(true);
+        muteBtn.setVisible(true);
         connectBtn.setContent('Disconnect');
       } else {
         voiceChannelManager.disconnectVoice();
         connectBtn.setContent('Connect');
         micBtn.setVisible(false);
         micBtn.setContent(SpriteManager.getInstance().getSprite('icon-mic-muted'));
+        muteBtn.setVisible(false);
+        muteBtn.setContent(SpriteManager.getInstance().getSprite('icon-speaker'));
       }
     });
+
+    uiRenderer.addElement(connectBtn);
+    uiRenderer.addElement(micBtn);
+    uiRenderer.addElement(muteBtn);
+
+    /* ----------------------- Game UI ----------------------- */
 
     const gameMenu = new GameMenu(boardGameManager.gameList);
     GameManager.getInstance().getBoardGameManager().registerGameMenuUI(gameMenu);
@@ -322,9 +356,6 @@ Promise.all([netSetupPromise, assetSetupPromise])
 
     uiRenderer.addElement(gameMenu);
     uiRenderer.addElement(gameOverlay);
-    uiRenderer.addElement(menuBtn);
-    uiRenderer.addElement(connectBtn);
-    uiRenderer.addElement(micBtn);
 
     const whiteboard = new Whiteboard();
     uiRenderer.addElement(whiteboard);

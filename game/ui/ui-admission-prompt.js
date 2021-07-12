@@ -26,19 +26,21 @@ export default class AdmissionPrompt extends UIElement {
     this.panelContainer.style.background = panelBack;
 
     this.textArea = createElement('div', {
+      className: 'message',
       style: {
         position: 'absolute',
         top: '10px',
         left: '10px',
         width: this.width - 20,
         height: this.height - 50,
-        overflow: 'hidden',
+        overflowX: 'hidden',
+        overflowY: 'scroll',
         textAlign: 'center',
         color: '#000',
         fontSize: '1.1rem',
       },
     });
-    this.textArea.textContent = 'Sharpie is requesting to join!';
+    this.textArea.textContent = '';
     this.panelContainer.appendChild(this.textArea);
 
     this.acceptButton = new Button(-40, 8, 36, 36, new UIAnchor(false, true, true, true),
