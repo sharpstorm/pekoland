@@ -76,7 +76,9 @@ export default class CustomizeWorldMenu extends UIElement {
     });
     node.style.background = sprite;
 
-    const container = createElement('div', {}, node);
+    const container = createElement('div', {},
+      node,
+      createElement('div', { className: 'furniture-name' }, furniture.name));
     if (this.furnitures.length === 1) {
       container.classList.add('selected');
       this.selectedFurniture = furniture.id;

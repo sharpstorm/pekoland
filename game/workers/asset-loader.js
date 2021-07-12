@@ -133,7 +133,7 @@ export default function loadAssets() {
         furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-sofa3', 'Sofa 3', new Sprite(furniture, 72, 72, 72, 72)));
         furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-plant1', 'Plant A', new Sprite(furniture, 144, 72, 72, 72)));
         furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-plant2', 'Plant B', new Sprite(furniture, 0, 144, 72, 72)));
-        furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-deco1', 'Bird Statue', new Sprite(furniture, 72, 144, 72, 72)));
+        furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-deco1', 'Bird Statue that looks like some cunt but whatever', new Sprite(furniture, 72, 144, 72, 72)));
         furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-plant3', 'Plant C', new Sprite(furniture, 144, 144, 72, 72)));
 
         // Init Map
