@@ -63,7 +63,6 @@ function joystickWorker(e) {
 }
 
 function joystickUpWorker(evt) {
-  // const event = window.event ? window.event : e;
   return evt;
 }
 

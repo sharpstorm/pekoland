@@ -4,9 +4,7 @@ import buildClientGamePacket from '../net/client/game-data-sender.js';
 import buildServerGamePacket from '../net/server/game-data-sender.js';
 import { timeout } from '../utils.js';
 
-// import Player from '../models/player.js';
 import PlayerManager from './player-manager.js';
-// import PlayerManager from './player-manager.js';
 
 let instance;
 

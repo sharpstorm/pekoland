@@ -63,19 +63,6 @@ class CameraContext {
   }
 }
 
-/* function drawGrids(height, width, gridLength) {
-  let ctx = document.getElementById('game').getContext('2d');
-  for (let i = 0; i < height; i += gridLength) {
-    for (let ii = 0; ii < width; ii += gridLength) {
-      ctx.beginPath();
-      ctx.strokeStyle = 'red';
-      ctx.lineWidth = '1';
-      ctx.rect(i, ii, gridLength, gridLength);
-      ctx.stroke();
-    }
-  }
-} */
-
 class UILayer {
   constructor() {
     this.domElement = document.getElementById('ui-overlay');
@@ -101,7 +88,6 @@ class GameLayer {
     this.drawables.forEach((x) => x.draw(ctx, cam, majorUpdate));
   }
 
-  // eslint-disable-next-line class-methods-use-this
   propagateEvent(eventID, event, camContext) {
     this.drawables.forEach((x) => {
       if (x.handleEvent) {
@@ -209,7 +195,6 @@ class Renderer {
     }));
   }
 
-  // eslint-disable-next-line class-methods-use-this
   propagateEvent(eventID, event) {
     this.mapRenderer.propagateEvent(eventID, event, this.cameraContext);
     this.gameLayer.propagateEvent(eventID, event, this.cameraContext);

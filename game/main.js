@@ -98,7 +98,6 @@ function setupServerHooks() {
   uiRenderer.addElement(admissionPrompt);
 
   roomController.on('playerRequestJoin', (playerInfo) => {
-    // eslint-disable-next-line no-restricted-globals
     admissionPrompt.prompt(`${playerInfo.name} is requesting to join. Admit?`,
       () => { roomController.admitIntoWorld(playerInfo.peerId); },
       () => { roomController.rejectAdmit(playerInfo.peerId); });
@@ -187,18 +186,21 @@ Promise.all([netSetupPromise, assetSetupPromise])
     const chatManager = GameManager.getInstance().getTextChannelManager();
     const boardGameManager = GameManager.getInstance().getBoardGameManager();
 
-    Renderer.getMapRenderer().registerFurnitureHandler('furniture-game-table', boardGameManager.handleEvent.bind(boardGameManager));
+    /* ----------------------- Board Games ----------------------- */
 
+    Renderer.getMapRenderer().registerFurnitureHandler('furniture-game-table', boardGameManager.handleEvent.bind(boardGameManager));
     const checkersGame = new CheckersGame();
     const drawSomething = new DrawSomething();
+    const battleshipGame = new BattleshipGame();
+
     boardGameManager.register(checkersGame);
     boardGameManager.register(drawSomething);
+    boardGameManager.register(battleshipGame);
     gameRenderer.register(checkersGame);
     gameRenderer.register(drawSomething);
-
-    const battleshipGame = new BattleshipGame();
-    boardGameManager.register(battleshipGame);
     gameRenderer.register(battleshipGame);
+
+    /* ----------------------- Chat box ----------------------- */
 
     const chatbox = new Chatbox();
     chatbox.addSubmitListener((msg) => {
@@ -213,6 +215,8 @@ Promise.all([netSetupPromise, assetSetupPromise])
     });
     chatManager.addChangeListener(() => chatbox.update());
     uiRenderer.addElement(chatbox);
+
+    /* ----------------------- Furniture system ----------------------- */
 
     const customizeWorldMenu = new CustomizeWorldMenu();
     MapManager.getInstance().getFurnitureFactory().forEachType((furniture) => {
@@ -236,6 +240,8 @@ Promise.all([netSetupPromise, assetSetupPromise])
     });
     uiRenderer.addElement(customizeWorldMenu);
 
+    /* ----------------------- Hamburger Menu ----------------------- */
+
     const drawerMenu = new DrawerMenu(networkManager.getOperationMode()
       === NetworkManager.Mode.SERVER);
     // eslint-disable-next-line no-restricted-globals
@@ -253,6 +259,8 @@ Promise.all([netSetupPromise, assetSetupPromise])
       drawerMenu.toggleVisible();
     });
     uiRenderer.addElement(menuBtn);
+
+    /* ----------------------- Voice Chat Controls ----------------------- */
 
     const micBtn = new Button(174, 10, 36, 36, new UIAnchor(false, true, true, false),
       SpriteManager.getInstance().getSprite('icon-mic-muted'));
@@ -298,6 +306,12 @@ Promise.all([netSetupPromise, assetSetupPromise])
       }
     });
 
+    uiRenderer.addElement(connectBtn);
+    uiRenderer.addElement(micBtn);
+    uiRenderer.addElement(muteBtn);
+
+    /* ----------------------- Game UI ----------------------- */
+
     const gameMenu = new GameMenu(boardGameManager.gameList);
     GameManager.getInstance().getBoardGameManager().registerGameMenuUI(gameMenu);
 
@@ -340,10 +354,6 @@ Promise.all([netSetupPromise, assetSetupPromise])
 
     uiRenderer.addElement(gameMenu);
     uiRenderer.addElement(gameOverlay);
-    uiRenderer.addElement(menuBtn);
-    uiRenderer.addElement(connectBtn);
-    uiRenderer.addElement(micBtn);
-    uiRenderer.addElement(muteBtn);
 
     Renderer.init();
     window.requestAnimationFrame(Renderer.render.bind(Renderer));
