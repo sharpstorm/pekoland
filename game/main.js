@@ -230,6 +230,10 @@ Promise.all([netSetupPromise, assetSetupPromise])
         .then(() => alert('Saved Furniture'));
       NetworkManager.getInstance().send(buildServerGamePacket('furniture-sync', newArrangement));
     });
+    customizeWorldMenu.setCancelHandler(() => {
+      customizeWorldMenu.setVisible(false);
+      Renderer.getMapRenderer().setFurniturePlacementMode(false);
+    });
     uiRenderer.addElement(customizeWorldMenu);
 
     const drawerMenu = new DrawerMenu(networkManager.getOperationMode()

@@ -1,7 +1,7 @@
 import UIElement, { UIAnchor } from './ui-element.js';
 import { createElement } from './ui-utils.js';
 import SpriteManager from '../managers/sprite-manager.js';
-import { LongButton } from './ui-button.js';
+import Button, { LongButton } from './ui-button.js';
 
 export default class CustomizeWorldMenu extends UIElement {
   constructor() {
@@ -11,6 +11,7 @@ export default class CustomizeWorldMenu extends UIElement {
     this.furnitures = [];
     this.selectedFurniture = undefined;
     this.saveHandler = undefined;
+    this.cancelHandler = undefined;
     this.initObject();
   }
 
@@ -43,6 +44,7 @@ export default class CustomizeWorldMenu extends UIElement {
       },
     });
     this.panelContainer.appendChild(this.furnitureList);
+    this.panelContainer.addEventListener('click', (evt) => evt.stopPropagation());
 
     this.addFurniture({
       sprite: SpriteManager.getInstance().getSprite('icon-cross'),
@@ -60,6 +62,17 @@ export default class CustomizeWorldMenu extends UIElement {
       }
     });
     this.panelContainer.appendChild(this.saveBtn.node);
+
+    const closeBtn = new Button(4, 4, 36, 36, new UIAnchor(true, true, false, false),
+      SpriteManager.getInstance().getSprite('icon-cross'));
+    closeBtn.addEventListener('click', (evt) => {
+      evt.stopPropagation();
+      if (this.cancelHandler) {
+        this.cancelHandler();
+      }
+      this.setVisible(false);
+    });
+    this.panelContainer.appendChild(closeBtn.node);
   }
 
   addFurniture(furniture) {
@@ -99,6 +112,10 @@ export default class CustomizeWorldMenu extends UIElement {
 
   setSaveHandler(handler) {
     this.saveHandler = handler;
+  }
+
+  setCancelHandler(handler) {
+    this.cancelHandler = handler;
   }
 
   setVisible(show) {
