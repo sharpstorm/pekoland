@@ -9,6 +9,7 @@ import buildClientGamePacket from './game-data-sender.js';
 import Renderer from '../../managers/animation-manager.js';
 import GameManager from '../../managers/game-manager.js';
 import { GameOverlay } from '../../ui/ui-game.js';
+import MapManager from '../../managers/map-manager.js';
 
 const chatManager = GameManager.getInstance().getTextChannelManager();
 
@@ -35,6 +36,7 @@ function handleSpawnReply(data, conn) {
   data.others.forEach((x) => {
     PlayerManager.getInstance().addPlayer(inflatePlayer(x));
   });
+  MapManager.getInstance().getCurrentMap().setFurnitureToState(data.furniture);
 }
 
 function handleSpawnReject(data, conn) {
@@ -118,6 +120,15 @@ function handleChangeAvatarEcho(data, conn) {
   }
 }
 
+function handleFurnitureSync(data) {
+  MapManager.getInstance().getCurrentMap().setFurnitureToState(data.furniture);
+}
+
+function handleWhiteboardEcho(data) {
+  GameManager.getInstance().getWhiteboardManager()
+    .updateBoardState(data.boardId, data.state, data.delta);
+}
+
 const handlers = {
   'handshake': handleHandshake,
   'spawn-reply': handleSpawnReply,
@@ -132,6 +143,8 @@ const handlers = {
   'start-game': handleStartGame,
   'end-game': handleEndGame,
   'change-avatar-echo': handleChangeAvatarEcho,
+  'furniture-sync': handleFurnitureSync,
+  'whiteboard-state-echo': handleWhiteboardEcho,
 };
 
 // Conn will always be the server

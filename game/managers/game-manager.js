@@ -2,18 +2,16 @@ import WorldManager from './world-manager.js';
 import NetworkManager from '../net/network-manager.js';
 import buildClientGamePacket from '../net/client/game-data-sender.js';
 import buildServerGamePacket from '../net/server/game-data-sender.js';
-import MapManager from './map-manager.js';
 import { timeout } from '../utils.js';
 
-// import Player from '../models/player.js';
 import PlayerManager from './player-manager.js';
-// import PlayerManager from './player-manager.js';
 
 let instance;
 
 class VoiceChannelManager {
   constructor() {
     this.connected = false;
+    this.outputMuted = false;
     this.microphoneStream = undefined;
     this.outputObjects = {};
   }
@@ -23,6 +21,7 @@ class VoiceChannelManager {
       return;
     }
 
+    this.outputsMuted = false;
     const networkManager = NetworkManager.getInstance();
     if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {
       networkManager.send(buildClientGamePacket('join-voice'));
@@ -87,18 +86,25 @@ class VoiceChannelManager {
   }
 
   addOutputStream(peerId, stream) {
+    let audio;
     if (peerId in this.outputObjects) {
-      const audio = this.outputObjects[peerId];
+      audio = this.outputObjects[peerId];
       audio.pause();
       audio.srcObject = stream;
       audio.load();
       audio.play();
     } else {
-      const audio = new Audio();
+      audio = new Audio();
       audio.srcObject = stream;
       audio.autoplay = true;
       audio.play();
       this.outputObjects[peerId] = audio;
+    }
+
+    if (this.outputMuted) {
+      audio.volume = 0;
+    } else {
+      audio.volume = 1;
     }
   }
 
@@ -114,6 +120,26 @@ class VoiceChannelManager {
     Object.keys(this.outputObjects).forEach((x) => {
       this.removeOutputStream(x);
     });
+  }
+
+  muteOutputs() {
+    if (this.outputMuted) return;
+
+    Object.keys(this.outputObjects).forEach((peerId) => {
+      const audio = this.outputObjects[peerId];
+      audio.volume = 0;
+    });
+    this.outputMuted = true;
+  }
+
+  unmuteOutputs() {
+    if (!this.outputMuted) return;
+
+    Object.keys(this.outputObjects).forEach((peerId) => {
+      const audio = this.outputObjects[peerId];
+      audio.volume = 1;
+    });
+    this.outputMuted = false;
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -144,6 +170,10 @@ class VoiceChannelManager {
 
   isMicConnected() {
     return this.microphoneStream !== undefined;
+  }
+
+  isOutputMuted() {
+    return this.outputMuted;
   }
 }
 
@@ -209,36 +239,24 @@ class BoardGameManager {
     return false;
   }
 
-  handleEvent(eventId, event, camContext) {
-    if (event.type === 'click') {
-      // console.log(event);
-      const worldX = camContext.x + event.clientX;
-      const worldY = camContext.y + event.clientY;
-
-      // Round to nearest 100
-      const floorX = Math.floor(worldX / 100) * 100;
-      const floorY = Math.floor(worldY / 100) * 100;
-
-      const clickedData = MapManager.getInstance().getCurrentMap().getFurniture(worldX, worldY);
-
-      if (clickedData === 'BoardGame' && this.gameState === undefined && this.checkPlayerProximity(floorX, floorY)) {
-        this.tableId = `${floorX}-${floorY}`;
-        if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.CLIENT) {
-          NetworkManager.getInstance().send(buildClientGamePacket('check-lobby-state-request', { tableId: this.tableId }));
-          this.gameState = 'waitingCheck';
-        } else if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.SERVER) {
-          if (WorldManager.getInstance().lobbyExist(this.tableId)) {
-            if (WorldManager.getInstance().getJoiner(this.tableId) === undefined) {
-              if (WorldManager.getInstance().getHost(this.tableId) !== PlayerManager
-                .getInstance().getSelfId()) {
-                this.displayPage(1);
-              }
-            } else {
-              this.displayPage(2);
+  handleEvent(unitX, unitY) {
+    if (this.gameState === undefined && this.checkPlayerProximity(unitX, unitY)) {
+      this.tableId = `${unitX}-${unitY}`;
+      if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.CLIENT) {
+        NetworkManager.getInstance().send(buildClientGamePacket('check-lobby-state-request', { tableId: this.tableId }));
+        this.gameState = 'waitingCheck';
+      } else if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.SERVER) {
+        if (WorldManager.getInstance().lobbyExist(this.tableId)) {
+          if (WorldManager.getInstance().getJoiner(this.tableId) === undefined) {
+            if (WorldManager.getInstance().getHost(this.tableId) !== PlayerManager
+              .getInstance().getSelfId()) {
+              this.displayPage(1);
             }
           } else {
-            this.displayPage(0);
+            this.displayPage(2);
           }
+        } else {
+          this.displayPage(0);
         }
       }
     }
@@ -415,11 +433,88 @@ class BoardGameManager {
   }
 }
 
+class WhiteboardManager {
+  constructor() {
+    this.boardUI = undefined;
+    this.currentBoard = undefined;
+  }
+
+  registerUI(boardUI) {
+    this.boardUI = boardUI;
+  }
+
+  openBoard(x, y) {
+    const boardId = `${x}-${y}`; // Follows Table Convention
+    const worldManager = WorldManager.getInstance();
+
+    this.currentBoard = boardId;
+
+    if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.SERVER) {
+      const openState = worldManager.registerWhiteboard(boardId, (userId, state, delta) => {
+        // Notifier
+        if (userId === PlayerManager.getInstance().getSelfId()) {
+          this.updateBoardState(boardId, state, delta);
+        } else {
+          const update = { id: boardId };
+          if (delta !== undefined) {
+            update.delta = delta;
+          } else {
+            update.state = state;
+          }
+          NetworkManager.getInstance().getConnection().sendTo(buildServerGamePacket('whiteboard-state-echo', update), worldManager.getPeerId(userId));
+        }
+      });
+      worldManager.addWhiteboardPlayer(boardId, PlayerManager.getInstance().getSelfId());
+      if (openState !== undefined) {
+        this.updateBoardState(boardId, openState);
+      }
+    } else {
+      // Register to receive updates
+      NetworkManager.getInstance().send(buildClientGamePacket('join-whiteboard', { id: boardId }));
+    }
+
+    this.boardUI.show();
+    this.boardUI.setCloseListener(() => {
+      this.currentBoard = undefined;
+      if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.SERVER) {
+        worldManager.removeWhiteboardPlayer(boardId, PlayerManager.getInstance().getSelfId());
+      } else {
+        NetworkManager.getInstance().send(buildClientGamePacket('leave-whiteboard', { id: boardId }));
+      }
+    });
+    this.boardUI.setUpdateListener((state, delta) => {
+      if (NetworkManager.getInstance().getOperationMode() === NetworkManager.Mode.SERVER) {
+        worldManager.updateWhiteboardState(this.currentBoard, state, delta,
+          PlayerManager.getInstance().getSelfId());
+      } else {
+        NetworkManager.getInstance().send(buildClientGamePacket('update-whiteboard', { id: boardId, state, delta }));
+      }
+    });
+  }
+
+  updateBoardState(boardId, state, delta) {
+    if (this.currentBoard !== boardId) {
+      return;
+    }
+
+    if (delta) {
+      // Perform delta update
+      console.debug('delta update');
+      this.boardUI.deltaCanvasUpdate(delta);
+    } else {
+      // Stateful update
+      console.debug('state update');
+      this.boardUI.setCanvasState(state);
+    }
+  }
+}
+
 export default class GameManager {
   constructor() {
     this.voiceChannelManager = new VoiceChannelManager();
     this.textChannelManager = new TextChannelManager();
     this.boardGameManager = new BoardGameManager();
+    this.whiteboardManager = new WhiteboardManager();
   }
 
   getVoiceChannelManager() {
@@ -432,6 +527,10 @@ export default class GameManager {
 
   getBoardGameManager() {
     return this.boardGameManager;
+  }
+
+  getWhiteboardManager() {
+    return this.whiteboardManager;
   }
 
   static getInstance() {

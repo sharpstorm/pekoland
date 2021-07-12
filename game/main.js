@@ -31,6 +31,10 @@ import DrawSomething from './games/draw-something/draw-something.js';
 import BattleshipGame from './games/battleship/battleship.js';
 
 import AdmissionPrompt from './ui/ui-admission-prompt.js';
+import DrawerMenu from './ui/ui-drawer-menu.js';
+import CustomizeWorldMenu from './ui/ui-world-customize.js';
+import MapManager from './managers/map-manager.js';
+import Whiteboard from './ui/ui-whiteboard.js';
 
 const networkManager = NetworkManager.getInstance();
 const inputSystem = new InputSystem(document.getElementById('ui-overlay'), document);
@@ -96,7 +100,6 @@ function setupServerHooks() {
   uiRenderer.addElement(admissionPrompt);
 
   roomController.on('playerRequestJoin', (playerInfo) => {
-    // eslint-disable-next-line no-restricted-globals
     admissionPrompt.prompt(`${playerInfo.name} is requesting to join. Admit?`,
       () => { roomController.admitIntoWorld(playerInfo.peerId); },
       () => { roomController.rejectAdmit(playerInfo.peerId); });
@@ -113,6 +116,7 @@ function setupServerHooks() {
     NetworkManager.getInstance().getConnection().sendTo(buildServerGamePacket('spawn-reply', {
       self: player,
       others: PlayerManager.getInstance().getPlayers(),
+      furniture: MapManager.getInstance().getCurrentMap().getFurnitureList(),
     }), playerInfo.peerId);
 
     // Broadcast to everyone else
@@ -124,6 +128,20 @@ function setupServerHooks() {
 
   roomController.on('playerReject', (playerInfo) => {
     NetworkManager.getInstance().getConnection().sendTo(buildServerGamePacket('spawn-reject', 'Host Rejected Your Admission'), playerInfo.peerId);
+  });
+
+  // Issue World Load
+  return new Promise((resolve) => {
+    NetworkManager.getInstance().sendServer('furniture-get')
+      .then((reply) => {
+        const furnitureList = reply.data;
+        if (furnitureList === undefined || furnitureList === null) {
+          resolve();
+          return;
+        }
+        MapManager.getInstance().getCurrentMap().setFurnitureToState(furnitureList);
+        resolve();
+      });
   });
 }
 
@@ -145,10 +163,13 @@ Promise.all([netSetupPromise, assetSetupPromise])
     return spawnPromise;
   })
   .then(() => {
-    console.log('setup successful');
     if (networkManager.getOperationMode() === NetworkManager.Mode.SERVER) {
-      setupServerHooks();
+      return setupServerHooks();
     }
+    return '';
+  })
+  .then(() => {
+    console.log('setup successful');
 
     document.getElementById('loading-panel').style.display = 'none';
     document.getElementById('game-container').style.display = 'block';
@@ -164,22 +185,25 @@ Promise.all([netSetupPromise, assetSetupPromise])
     const uiRenderer = Renderer.getUILayer();
     const gameRenderer = Renderer.getGameLayer();
     const playerManager = PlayerManager.getInstance();
-    const worldManager = WorldManager.getInstance();
     const chatManager = GameManager.getInstance().getTextChannelManager();
     const boardGameManager = GameManager.getInstance().getBoardGameManager();
+    const whiteboardManager = GameManager.getInstance().getWhiteboardManager();
 
-    inputSystem.addListener('click', (evt) => boardGameManager.handleEvent('click', evt, Renderer.getCameraContext()));
+    /* ----------------------- Board Games ----------------------- */
 
+    Renderer.getMapRenderer().registerFurnitureHandler('furniture-game-table', boardGameManager.handleEvent.bind(boardGameManager));
     const checkersGame = new CheckersGame();
     const drawSomething = new DrawSomething();
+    const battleshipGame = new BattleshipGame();
+
     boardGameManager.register(checkersGame);
     boardGameManager.register(drawSomething);
+    boardGameManager.register(battleshipGame);
     gameRenderer.register(checkersGame);
     gameRenderer.register(drawSomething);
-
-    const battleshipGame = new BattleshipGame();
-    boardGameManager.register(battleshipGame);
     gameRenderer.register(battleshipGame);
+
+    /* ----------------------- Chat box ----------------------- */
 
     const chatbox = new Chatbox();
     chatbox.addSubmitListener((msg) => {
@@ -195,10 +219,52 @@ Promise.all([netSetupPromise, assetSetupPromise])
     chatManager.addChangeListener(() => chatbox.update());
     uiRenderer.addElement(chatbox);
 
+    /* ----------------------- Furniture system ----------------------- */
+
+    const customizeWorldMenu = new CustomizeWorldMenu();
+    MapManager.getInstance().getFurnitureFactory().forEachType((furniture) => {
+      customizeWorldMenu.addFurniture(furniture);
+    });
+    Renderer.getMapRenderer().registerFurnitureHandler('place', (unitX, unitY) => {
+      MapManager.getInstance().getCurrentMap()
+        .setFurnitureAt(unitX, unitY, customizeWorldMenu.getSelectedFurniture());
+    });
+    customizeWorldMenu.setSaveHandler(() => {
+      Renderer.getMapRenderer().setFurniturePlacementMode(false);
+      customizeWorldMenu.setVisible(false);
+      const newArrangement = MapManager.getInstance().getCurrentMap().getFurnitureList();
+      NetworkManager.getInstance().sendServer('furniture-save', newArrangement)
+        .then(() => alert('Saved Furniture'));
+      NetworkManager.getInstance().send(buildServerGamePacket('furniture-sync', newArrangement));
+    });
+    customizeWorldMenu.setCancelHandler(() => {
+      customizeWorldMenu.setVisible(false);
+      Renderer.getMapRenderer().setFurniturePlacementMode(false);
+    });
+    uiRenderer.addElement(customizeWorldMenu);
+
+    /* ----------------------- Hamburger Menu ----------------------- */
+
+    const drawerMenu = new DrawerMenu(networkManager.getOperationMode()
+      === NetworkManager.Mode.SERVER);
+    // eslint-disable-next-line no-restricted-globals
+    drawerMenu.setQuitHandler(() => (confirm('Are you sure you want to leave?') ? window.close() : ''));
+    drawerMenu.setCustomizeWorldHandler(() => {
+      Renderer.getMapRenderer().setFurniturePlacementMode(true);
+      customizeWorldMenu.setVisible(true);
+      drawerMenu.setVisible(false);
+    });
+    uiRenderer.addElement(drawerMenu);
+
     const menuBtn = new Button(10, 10, 36, 36, new UIAnchor(false, true, true, false),
       SpriteManager.getInstance().getSprite('icon-hamburger'));
-
+    menuBtn.addEventListener('click', () => {
+      drawerMenu.toggleVisible();
+    });
     uiRenderer.addElement(menuBtn);
+
+    /* ----------------------- Voice Chat Controls ----------------------- */
+
     const micBtn = new Button(174, 10, 36, 36, new UIAnchor(false, true, true, false),
       SpriteManager.getInstance().getSprite('icon-mic-muted'));
     micBtn.setVisible(false);
@@ -213,19 +279,41 @@ Promise.all([netSetupPromise, assetSetupPromise])
       }
     });
 
+    const muteBtn = new Button(220, 10, 36, 36, new UIAnchor(false, true, true, false),
+      SpriteManager.getInstance().getSprite('icon-speaker'));
+    muteBtn.setVisible(false);
+    muteBtn.addEventListener('click', () => {
+      if (!voiceChannelManager.isOutputMuted()) {
+        voiceChannelManager.muteOutputs();
+        muteBtn.setContent(SpriteManager.getInstance().getSprite('icon-speaker-muted'));
+      } else {
+        voiceChannelManager.unmuteOutputs();
+        muteBtn.setContent(SpriteManager.getInstance().getSprite('icon-speaker'));
+      }
+    });
+
     const connectBtn = new LongButton(64, 10, 100, 36, new UIAnchor(false, true, true, false), 'Connect');
     connectBtn.addEventListener('click', () => {
       if (!voiceChannelManager.isConnected()) {
         voiceChannelManager.joinVoice();
         micBtn.setVisible(true);
+        muteBtn.setVisible(true);
         connectBtn.setContent('Disconnect');
       } else {
         voiceChannelManager.disconnectVoice();
         connectBtn.setContent('Connect');
         micBtn.setVisible(false);
         micBtn.setContent(SpriteManager.getInstance().getSprite('icon-mic-muted'));
+        muteBtn.setVisible(false);
+        muteBtn.setContent(SpriteManager.getInstance().getSprite('icon-speaker'));
       }
     });
+
+    uiRenderer.addElement(connectBtn);
+    uiRenderer.addElement(micBtn);
+    uiRenderer.addElement(muteBtn);
+
+    /* ----------------------- Game UI ----------------------- */
 
     const gameMenu = new GameMenu(boardGameManager.gameList);
     GameManager.getInstance().getBoardGameManager().registerGameMenuUI(gameMenu);
@@ -245,7 +333,7 @@ Promise.all([netSetupPromise, assetSetupPromise])
         };
         NetworkManager.getInstance().send(buildClientGamePacket('register-lobby', data));
       } else if (networkManager.getOperationMode() === NetworkManager.Mode.SERVER) {
-        worldManager.createLobby(boardGameManager.tableId,
+        WorldManager.getInstance().createLobby(boardGameManager.tableId,
           playerManager.getSelfId(), gameName);
         boardGameManager.gameState = 'hosting';
         boardGameManager.displayPage(3);
@@ -267,6 +355,10 @@ Promise.all([netSetupPromise, assetSetupPromise])
     GameManager.getInstance().getBoardGameManager().registerGameOverlayUI(gameOverlay);
     gameOverlay.registerLeaveListener(() => { boardGameManager.leaveGame(); });
 
+    uiRenderer.addElement(gameMenu);
+    uiRenderer.addElement(gameOverlay);
+
+    /* ----------------------- Avatar UI ----------------------- */
     const avatarArr = [];
     avatarArr.push('rabbit-avatar');
     avatarArr.push('rabbit-brown-avatar');
@@ -295,14 +387,18 @@ Promise.all([netSetupPromise, assetSetupPromise])
       }
     });
 
-    uiRenderer.addElement(gameMenu);
-    uiRenderer.addElement(gameOverlay);
-    uiRenderer.addElement(menuBtn);
-    uiRenderer.addElement(connectBtn);
-    uiRenderer.addElement(micBtn);
     uiRenderer.addElement(avatarMenu);
     uiRenderer.addElement(changeAvatarBtn);
 
+    /* ----------------------- Whiteboard ----------------------- */
+    const whiteboard = new Whiteboard();
+    uiRenderer.addElement(whiteboard);
+    whiteboardManager.registerUI(whiteboard);
+    Renderer.getMapRenderer().registerFurnitureHandler('furniture-whiteboard', (unitX, unitY) => {
+      whiteboardManager.openBoard(unitX, unitY);
+    });
+
+    /* ----------------------- End ----------------------- */
     Renderer.init();
     window.requestAnimationFrame(Renderer.render.bind(Renderer));
   })

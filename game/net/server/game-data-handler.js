@@ -9,8 +9,6 @@ import GameManager from '../../managers/game-manager.js';
 
 const chatManager = GameManager.getInstance().getTextChannelManager();
 
-// const spawnLocation = [0, 0];
-
 function handleHandshake(data, conn) {
   conn.send(buildGamePacket('handshake'));
 }
@@ -175,6 +173,49 @@ function handleChangeAvatar(data, conn) {
   }
 }
 
+function handleJoinWhiteboard(data, conn) {
+  const worldManager = WorldManager.getInstance();
+  const playerId = worldManager.getPlayerId(conn.peer);
+
+  const state = worldManager.registerWhiteboard(data.boardId, (userId, newState, delta) => {
+    console.log(userId, PlayerManager.getInstance().getSelfId());
+    if (userId === PlayerManager.getInstance().getSelfId()) {
+      GameManager.getInstance().getWhiteboardManager()
+        .updateBoardState(data.boardId, newState, delta);
+    } else {
+      const update = { id: data.boardId };
+      if (delta !== undefined) {
+        update.delta = delta;
+      } else {
+        update.state = state;
+      }
+      NetworkManager.getInstance().getConnection().sendTo(buildGamePacket('whiteboard-state-echo', update), worldManager.getPeerId(userId));
+    }
+  });
+  worldManager.addWhiteboardPlayer(data.boardId, playerId);
+  if (state !== undefined) {
+    conn.send(buildGamePacket('whiteboard-state-echo', {
+      state,
+      delta: undefined,
+      id: data.boardId,
+    }));
+  }
+}
+
+function handleLeaveWhiteboard(data, conn) {
+  const worldManager = WorldManager.getInstance();
+  const playerId = worldManager.getPlayerId(conn.peer);
+
+  worldManager.removeWhiteboardPlayer(data.boardId, playerId);
+}
+
+function handleUpdateWhiteboard(data, conn) {
+  const worldManager = WorldManager.getInstance();
+  const playerId = worldManager.getPlayerId(conn.peer);
+
+  worldManager.updateWhiteboardState(data.boardId, data.state, data.delta, playerId);
+}
+
 const handlers = {
   'handshake': handleHandshake,
   'spawn-request': handleSpawnRequest,
@@ -188,6 +229,9 @@ const handlers = {
   'join-lobby': handleJoinLobby,
   'leave-lobby': handleLeaveLobby,
   'change-avatar': handleChangeAvatar,
+  'join-whiteboard': handleJoinWhiteboard,
+  'leave-whiteboard': handleLeaveWhiteboard,
+  'update-whiteboard': handleUpdateWhiteboard,
 };
 
 // Conn can be used to uniquely identify the peer

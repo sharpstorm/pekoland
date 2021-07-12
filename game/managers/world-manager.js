@@ -98,6 +98,7 @@ export default class WorldManager {
     this.voiceChannelUsers = new Set();
     this.roomController = new RoomController();
     this.gameLobbies = {};
+    this.whiteboards = {};
   }
 
   registerPlayer(peerId, userId) {
@@ -254,6 +255,56 @@ export default class WorldManager {
       }
       action(this.getJoiner(lobbyId));
       action(this.getHost(lobbyId));
+    }
+  }
+
+  registerWhiteboard(boardId, notifier) {
+    if (!(boardId in this.whiteboards)) {
+      this.whiteboards[boardId] = {
+        state: undefined,
+        users: [],
+        notifier,
+      };
+    }
+    return this.whiteboards[boardId].state;
+  }
+
+  disposeWhiteboard(boardId) {
+    if (boardId in this.whiteboards) {
+      delete this.whiteboards[boardId];
+    }
+  }
+
+  addWhiteboardPlayer(boardId, playerId) {
+    console.debug(`[WorldManager] Player ${playerId} joined whiteboard`);
+    const board = this.whiteboards[boardId];
+    if (board !== undefined) {
+      board.users.push(playerId);
+      return true;
+    }
+    return false;
+  }
+
+  removeWhiteboardPlayer(boardId, playerId) {
+    console.debug(`[WorldManager] Player ${playerId} left whiteboard`);
+    const board = this.whiteboards[boardId];
+    if (board !== undefined) {
+      const idx = board.users.findIndex((x) => x === playerId);
+      if (idx >= 0) {
+        board.users.splice(idx, 1);
+      }
+    }
+  }
+
+  updateWhiteboardState(boardId, state, delta, sender) {
+    const board = this.whiteboards[boardId];
+    if (board !== undefined) {
+      board.state = state;
+      board.users.forEach((x) => {
+        if (x !== sender) {
+          board.notifier(x, state, delta);
+        }
+      });
     }
   }
 
