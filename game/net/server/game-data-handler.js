@@ -160,12 +160,14 @@ function handleLeaveLobby(data) {
     if (data.mode === 'playing') {
       // Send opponent
       const opponent = lobby.getOpponent(data.userId);
+      const opponentName = PlayerManager.getInstance().getPlayer(data.userId).name;
+
       if (PlayerManager.getInstance().getSelfId() === opponent) {
         GameManager.getInstance().getBoardGameManager().endGame();
-        alert(`${data.userId} has left the game`);
+        alert(`${opponentName} has left the game`);
       } else {
         NetworkManager.getInstance().getConnection()
-          .sendTo(buildGamePacket('end-game', data.userId),
+          .sendTo(buildGamePacket('end-game', opponentName),
             worldManager.getPeerId(opponent));
       }
 
@@ -173,10 +175,10 @@ function handleLeaveLobby(data) {
       lobby.spectators.forEach((userId) => {
         if (userId === PlayerManager.getInstance().getSelfId()) {
           GameManager.getInstance().getBoardGameManager().endGame();
-          alert(`${data.userId} has left the game`);
+          alert(`${opponentName} has left the game`);
         } else {
           NetworkManager.getInstance().getConnection().sendTo(
-            buildGamePacket('end-game', data.userId),
+            buildGamePacket('end-game', opponentName),
             worldManager.getPeerId(userId),
           );
         }
