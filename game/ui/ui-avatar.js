@@ -41,12 +41,7 @@ class AvatarMenu extends UIElement {
       if (this.currentIndex === this.avatarArr.length) {
         this.currentIndex = 0;
       }
-      this.currentA = super.drawImage((ctx) => {
-        SpriteManager.getInstance().getSprite(this.avatarArr[this.currentIndex])
-          .getSpriteByDirection(2).getSpriteAtFrame(1)
-          .drawAt(ctx, 0, 0, 50, 50);
-      });
-      this.avatarWindow.style.background = this.currentA;
+      this.refreshAvatarWindow();
     });
 
     leftBtn.addEventListener('click', () => {
@@ -54,12 +49,7 @@ class AvatarMenu extends UIElement {
       if (this.currentIndex === -1) {
         this.currentIndex = this.avatarArr.length - 1;
       }
-      this.currentA = super.drawImage((ctx) => {
-        SpriteManager.getInstance().getSprite(this.avatarArr[this.currentIndex])
-          .getSpriteByDirection(2).getSpriteAtFrame(1)
-          .drawAt(ctx, 0, 0, 50, 50);
-      });
-      this.avatarWindow.style.background = this.currentA;
+      this.refreshAvatarWindow();
     });
 
     confirmBtn.addEventListener('click', () => {
@@ -81,19 +71,30 @@ class AvatarMenu extends UIElement {
     const panelBack = super.drawImage((ctx) => {
       SpriteManager.getInstance().getSprite('panel').drawAt(ctx, 0, 0, this.width, this.height);
     });
-    this.currentA = super.drawImage((ctx) => {
-      SpriteManager.getInstance().getSprite(this.avatarArr[this.currentIndex])
-        .getSpriteByDirection(2).getSpriteAtFrame(1)
-        .drawAt(ctx, 0, 0, 50, 50);
-    });
 
     this.avatarMenu.style.background = panelBack;
-    this.avatarWindow.style.background = this.currentA;
+
     this.node.style.display = 'none';
   }
 
   show() {
+    this.refreshAvatarWindow();
     this.node.style.display = 'block';
+  }
+
+  refreshAvatarWindow() {
+    this.currentA = super.drawImage((ctx) => {
+      const width = SpriteManager.getInstance().getSprite(this.avatarArr[this.currentIndex])
+        .getSpriteByDirection(2).getSpriteAtFrame(1).width * 2;
+      const height = SpriteManager.getInstance().getSprite(this.avatarArr[this.currentIndex])
+        .getSpriteByDirection(2).getSpriteAtFrame(1).height * 2;
+      console.log(width, height);
+
+      SpriteManager.getInstance().getSprite(this.avatarArr[this.currentIndex])
+        .getSpriteByDirection(2).getSpriteAtFrame(1)
+        .drawAt(ctx, 0, 0, width, height);
+    });
+    this.avatarWindow.style.background = this.currentA;
   }
 
   emitEvent(evtId, data) {

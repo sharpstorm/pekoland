@@ -26,9 +26,17 @@ export default class Player {
   }
 
   drawAt(ctx, x, y, width, height, cameraContext) {
-    ctx.strokeStyle = 'black';
-    ctx.font = '12px Arial';
-    ctx.strokeText(`   ${this.name}`, this.x - cameraContext.x, this.y - cameraContext.y);
+    ctx.fillStyle = 'black';
+    ctx.globalAlpha = 0.7;
+    ctx.fillRect(this.x - cameraContext.x, this.y - cameraContext.y + 85, 100, 23);
+    ctx.globalAlpha = 1;
+
+    ctx.strokeStyle = 'white';
+    ctx.strokeRect(this.x - cameraContext.x, this.y - cameraContext.y + 85, 100, 23);
+
+    ctx.fillStyle = 'white';
+    ctx.font = '15px Arial';
+    ctx.fillText(this.name.padStart(12, ' '), this.x - cameraContext.x, this.y - cameraContext.y + 100);
 
     const sprite = this.playerSprite.getSpriteByDirection(Player.DirectionToIntMap[this.direction])
       .getSpriteAtFrame(this.currentFrame);

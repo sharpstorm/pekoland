@@ -207,7 +207,7 @@
 
 #avatar-window {
   position: relative;
-  display: flex;
+  background-size: cover;
   flex-direction: column;
   margin-left: 47.5%;
   margin-top: 20%;
