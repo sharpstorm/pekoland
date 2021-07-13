@@ -125,8 +125,11 @@ test('[Renderer] Test Render Path', () => {
   expect(playerDraw2).toHaveBeenCalled();
 
   const drawerMap = jest.fn();
+  const refreshComposite = jest.fn();
   MapManager.getInstance().registerMap('map1', {
+    hookFurnitureFactory: () => {},
     draw: drawerMap,
+    refreshComposite,
   });
   Renderer.render(0);
   expect(drawerMap).toHaveBeenCalled();

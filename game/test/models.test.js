@@ -74,7 +74,7 @@ test('[Model] Test Player Movement', () => {
   const p = new Player();
 
   expect(p.x).toBe(400);
-  expect(p.y).toBe(1000);
+  expect(p.y).toBe(1400);
 
   // Animated Move
   p.moveTo(100, 100);
@@ -107,7 +107,7 @@ test('[Model] Test Player Draw', () => {
   const p = new Player('id', 'name', SpriteManager.getInstance().getSprite('rabbit-avatar'));
 
   expect(p.x).toBe(400);
-  expect(p.y).toBe(1000);
+  expect(p.y).toBe(1400);
 
   const ctx = getDummyContext();
   p.drawAt(ctx, 0, 0, 50, 50, { x: 0, y: 0 });
@@ -135,7 +135,7 @@ test('[Model] Test Player Draw with chat', () => {
   p.chat.updateMessage('Test');
 
   expect(p.x).toBe(400);
-  expect(p.y).toBe(1000);
+  expect(p.y).toBe(1400);
 
   const ctx = getDummyContext();
   p.drawAt(ctx, 0, 0, 50, 50, { x: 0, y: 0 });
@@ -201,7 +201,7 @@ test('[Model] Test Map Initialization', () => {
 
   expect(map.getFurniture(0, 0)).toBeUndefined();
   expect(map.getFurniture(0, GameConstants.UNIT)).toBeUndefined();
-  expect(map.getFurniture(GameConstants.UNIT, 0)).toBe('BoardGame');
+  expect(map.getFurniture(GameConstants.UNIT, 0)).toBe('furniture-game-table');
   expect(map.getFurniture(GameConstants.UNIT, GameConstants.UNIT)).toBeUndefined();
 });
 
@@ -225,7 +225,7 @@ test('[Model] Test Map Draw', () => {
   const sprite = ctx.history.find((x) => x.object === 'drawImage');
   expect(sprite).toBeDefined();
 
-  expect(sprite.image).toBe('map');
+  expect(sprite.image).toBe(map.mapCache);
   expect(sprite.params[4]).toBe(0);
   expect(sprite.params[5]).toBe(0);
   expect(sprite.params[6]).toBe(100);

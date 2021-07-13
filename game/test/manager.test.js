@@ -11,8 +11,14 @@ test('[Manager] Test Map Manager', () => {
   expect(mapManager.getCurrentMap()).toBeUndefined();
 
   // Add Test
-  const map1 = {};
-  const map2 = {};
+  const map1 = {
+    hookFurnitureFactory: jest.fn(),
+    refreshComposite: jest.fn(),
+  };
+  const map2 = {
+    hookFurnitureFactory: jest.fn(),
+    refreshComposite: jest.fn(),
+  };
   mapManager.registerMap('m1', map1);
   expect(Object.keys(mapManager.maps).length).toBe(1);
   expect(mapManager.getMap('m1')).toBe(map1);
@@ -170,46 +176,54 @@ test('[Manager] Test World Manager Lobby Control', () => {
   const worldManager = new WorldManager();
 
   // Creation
-  expect(worldManager.lobbyExist('lobby1')).toBe(false);
+  expect(worldManager.lobbyExists('lobby1')).toBe(false);
   worldManager.createLobby('lobby1', 'host1', 'game1');
 
   // Lobby properties
-  expect(worldManager.lobbyExist('lobby1')).toBe(true);
-  expect(worldManager.getGameName('lobby1')).toBe('game1');
+  expect(worldManager.lobbyExists('lobby1')).toBe(true);
+  const lobby = worldManager.getLobby('lobby1');
+  expect(lobby).toBeDefined();
+  expect(lobby.gameName).toBe('game1');
+  expect(lobby.id).toBe('lobby1');
 
   // Lobby Users
-  expect(worldManager.getHost('lobby1')).toBe('host1');
-  expect(worldManager.getLobbyFromPlayer('host1')).toBeDefined();
-  expect(worldManager.getOpponent('host1')).toBeUndefined();
-  expect(worldManager.getJoiner('lobby1')).toBeUndefined();
+  expect(lobby.host).toBe('host1');
+  expect(lobby.joiner).toBeUndefined();
+  expect(lobby.getOpponent('host1')).toBeUndefined();
+  expect(worldManager.isLobbyFull('lobby1')).toBeFalsy();
 
   // Join
-  worldManager.joinLobby('lobby1', 'join1');
-  expect(worldManager.getJoiner('lobby1')).toBe('join1');
-  expect(worldManager.getOpponent('host1')).toBe('join1');
-  expect(worldManager.getOpponent('join1')).toBe('host1');
-  expect(worldManager.getLobbyFromPlayer('join1')).toBeDefined();
+  expect(worldManager.joinLobby('lobby1', 'join1')).toBe(lobby);
+  expect(lobby.joiner).toBe('join1');
+  expect(lobby.getOpponent('host1')).toBe('join1');
+  expect(lobby.getOpponent('join1')).toBe('host1');
+  expect(worldManager.isLobbyFull('lobby1')).toBeTruthy();
 
   // Error Checking
-  expect(worldManager.getHost('lobby2')).toBeUndefined();
-  expect(worldManager.getJoiner('lobby2')).toBeUndefined();
-  expect(worldManager.getGameName('lobby2')).toBeUndefined();
-  expect(worldManager.getLobbyFromPlayer('join2')).toBeUndefined();
-  expect(worldManager.getOpponent('join2')).toBeUndefined();
+  expect(lobby.getOpponent('host2')).toBeUndefined();
+  expect(worldManager.getLobby('lobby2')).toBeUndefined();
+  expect(worldManager.joinLobby('lobby2')).toBeUndefined();
+  expect(worldManager.isLobbyFull('lobby2')).toBeUndefined();
 
   // Spectate
-  expect(worldManager.getSpectators('lobby1').length).toBe(0);
-  expect(worldManager.getSpectators('lobby2')).toBeUndefined();
-  worldManager.addSpectator('lobby1', 'spectate1');
-  expect(worldManager.getSpectators('lobby1').length).toBe(1);
-  worldManager.addSpectator('lobby1', 'spectate2');
-  expect(worldManager.getSpectators('lobby1').length).toBe(2);
-  expect(worldManager.getSpectators('lobby1').indexOf('spectate1')).toBeGreaterThanOrEqual(0);
-  expect(worldManager.getSpectators('lobby1').indexOf('spectate2')).toBeGreaterThanOrEqual(0);
-  expect(worldManager.getSpectators('lobby1').indexOf('spectate3')).toBe(-1);
+  const { spectators } = lobby;
+  expect(spectators.length).toBe(0);
+  lobby.addSpectator('spectate1');
+  expect(spectators.length).toBe(1);
+  lobby.addSpectator('spectate2');
+  expect(spectators.length).toBe(2);
+  // No Duplicate check
+  lobby.addSpectator('spectate2');
+  expect(spectators.length).toBe(2);
+  expect(spectators.indexOf('spectate1')).toBeGreaterThanOrEqual(0);
+  expect(spectators.indexOf('spectate2')).toBeGreaterThanOrEqual(0);
+  expect(spectators.indexOf('spectate3')).toBe(-1);
 
-  worldManager.removeSpectator('lobby1', 'spectate2');
-  expect(worldManager.getSpectators('lobby1').indexOf('spectate2')).toBe(-1);
+  lobby.removeSpectator('spectate2');
+  expect(spectators.indexOf('spectate2')).toBe(-1);
+  expect(spectators.length).toBe(1);
+  lobby.removeSpectator('spectate3');
+  expect(spectators.length).toBe(1);
 
   // Lobby State
   expect(worldManager.getLobbyGameState('lobby1')).toBeUndefined();
@@ -218,6 +232,9 @@ test('[Manager] Test World Manager Lobby Control', () => {
   worldManager.updateLobbyGameState('lobby1', 'state2');
   expect(worldManager.getLobbyGameState('lobby1')).toBe('state2');
 
+  // Error Checking
+  expect(worldManager.getLobbyGameState('lobby2')).toBeUndefined();
+
   // For All in Lobby
   const handler = jest.fn();
   worldManager.lobbyForAll('lobby1', handler);
@@ -225,9 +242,9 @@ test('[Manager] Test World Manager Lobby Control', () => {
 
   // Lobby Remove
   worldManager.closeLobby('lobby2');
-  expect(worldManager.lobbyExist('lobby1')).toBe(true);
+  expect(worldManager.lobbyExists('lobby1')).toBe(true);
   worldManager.closeLobby('lobby1');
-  expect(worldManager.lobbyExist('lobby1')).toBe(false);
+  expect(worldManager.lobbyExists('lobby1')).toBe(false);
 });
 
 test('[Manager] Test World Manager Singleton', () => {
