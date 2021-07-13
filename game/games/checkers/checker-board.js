@@ -345,23 +345,35 @@ export default class CheckerBoard {
   }
 
   getState() {
-    return this.gridArray.map((grid) => {
-      const ret = { state: grid.getState() };
-      if (grid.hasPiece()) {
-        ret.p = {
-          k: grid.getPiece().isKing(),
-          p: grid.getPiece().getPlayer(),
-        };
-      }
-      return ret;
-    });
+    return {
+      board: this.gridArray.map((grid) => {
+        const ret = { state: grid.getState() };
+        if (grid.hasPiece()) {
+          ret.p = {
+            k: grid.getPiece().isKing(),
+            p: grid.getPiece().getPlayer(),
+          };
+        } else if (this.isAnimating()) {
+          const gridCoord = grid.getCoordinates();
+          if (gridCoord.x === this.animation.to.x
+            && gridCoord.y === this.animation.to.y) {
+            ret.p = {
+              k: this.animation.piece.isKing(),
+              p: this.animation.piece.getPlayer(),
+            };
+          }
+        }
+        return ret;
+      }),
+      turn: this.currentTurn,
+    };
   }
 
   inflateState(data) {
     if (data === undefined || data === null) {
       return;
     }
-    data.forEach((x, idx) => {
+    data.board.forEach((x, idx) => {
       const grid = this.gridArray[idx];
       grid.setState(x.state);
       if (x.p) {
@@ -372,5 +384,6 @@ export default class CheckerBoard {
         grid.removePiece();
       }
     });
+    this.currentTurn = data.turn;
   }
 }
