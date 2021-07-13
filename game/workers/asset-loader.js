@@ -22,9 +22,9 @@ export default function loadAssets() {
     const load2 = loadAsset('Images/avatars/rabbit-brown.png')
       .then((rabbitSheet) => {
         const rabbitSprite = new AvatarSprite(
-          AnimatableSprite.generateFromTiledFrames(rabbitSheet, 7, 118, 24, 36, 33, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(rabbitSheet, 5, 118, 24, 36, 33, 0, 7),
           AnimatableSprite.generateFromTiledFrames(rabbitSheet, 0, 159, 36, 36, 40, 0, 7),
-          AnimatableSprite.generateFromTiledFrames(rabbitSheet, 7, 38, 24, 36, 33, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(rabbitSheet, 5, 38, 24, 36, 33, 0, 7),
           AnimatableSprite.generateFromTiledFrames(rabbitSheet, 0, 79, 36, 36, 40, 0, 7),
         );
         SpriteManager.getInstance().registerSprite('rabbit-brown-avatar', rabbitSprite);
@@ -66,10 +66,10 @@ export default function loadAssets() {
     const load6 = loadAsset('Images/avatars/worm.png')
       .then((wormSheet) => {
         const wormSprite = new AvatarSprite(
-          AnimatableSprite.generateFromTiledFrames(wormSheet, 1, 78, 31, 27, 25, 0, 7),
-          AnimatableSprite.generateFromTiledFrames(wormSheet, 1, 104, 31, 23, 33, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(wormSheet, 0.5, 77.5, 31, 27, 25, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(wormSheet, 1, 105, 31, 23, 33, 0, 7),
           AnimatableSprite.generateFromTiledFrames(wormSheet, 1, 26, 31, 27, 26, 0, 7),
-          AnimatableSprite.generateFromTiledFrames(wormSheet, 1, 53, 31, 23, 33, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(wormSheet, 1, 54, 31, 23, 33, 0, 7),
         );
         SpriteManager.getInstance().registerSprite('worm-avatar', wormSprite);
       });

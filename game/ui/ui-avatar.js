@@ -34,6 +34,8 @@ class AvatarMenu extends UIElement {
     leftBtn.node.style.marginLeft = '50px';
     confirmBtn.node.style.marginLeft = 'calc(50% - 50px)';
 
+    this.node.addEventListener('click', (evt) => evt.stopPropagation());
+
     rightBtn.addEventListener('click', () => {
       this.currentIndex += 1;
       if (this.currentIndex === this.avatarArr.length) {
