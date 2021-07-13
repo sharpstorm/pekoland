@@ -93,6 +93,48 @@ RoomController.Events = {
   PLAYER_LEAVE: 'playerLeave',
 };
 
+class Lobby {
+  constructor(id, host, gameName) {
+    this.id = id;
+    this.host = host;
+    this.joiner = undefined;
+    this.spectators = [];
+    this.gameName = gameName;
+
+    // States
+    this.gameState = undefined;
+  }
+
+  getOpponent(playerId) {
+    if (this.host === playerId) {
+      return this.joiner;
+    }
+    if (this.joiner === playerId) {
+      return this.host;
+    }
+    return undefined;
+  }
+
+  addSpectator(player) {
+    if (this.spectators.indexOf(player) < 0) {
+      this.spectators.push(player);
+    }
+  }
+
+  removeSpectator(player) {
+    if (this.spectators.length > 0) {
+      const idx = this.spectators.indexOf(player);
+      if (idx >= 0) {
+        this.spectators.splice(idx, 1);
+      }
+    }
+  }
+
+  isFull() {
+    return this.joiner !== undefined;
+  }
+}
+
 export default class WorldManager {
   constructor() {
     this.voiceChannelUsers = new Set();
@@ -134,69 +176,13 @@ export default class WorldManager {
   }
 
   createLobby(key, host, gameName) {
-    this.gameLobbies[key] = {
-      host,
-      joiner: undefined,
-      lobbyState: 0,
-      gameName,
-      spectators: [],
-      gameState: undefined,
-    };
+    this.gameLobbies[key] = new Lobby(key, host, gameName);
   }
 
   joinLobby(key, player) {
     if (key in this.gameLobbies) {
       this.gameLobbies[key].joiner = player;
-      this.gameLobbies[key].lobbyState = 1;
-    }
-  }
-
-  addSpectator(key, player) {
-    if (key in this.gameLobbies) {
-      this.gameLobbies[key].spectators.push(player);
-    }
-  }
-
-  removeSpectator(key, player) {
-    if (key in this.gameLobbies) {
-      if (this.gameLobbies[key].spectators.length !== 0) {
-        this.gameLobbies[key].spectators.splice(this.gameLobbies[key]
-          .spectators.indexOf(player), 1);
-      }
-    }
-  }
-
-  getSpectators(key) {
-    if (key in this.gameLobbies) {
-      return this.gameLobbies[key].spectators;
-    }
-    return undefined;
-  }
-
-  getHost(key) {
-    if (key in this.gameLobbies) {
-      return this.gameLobbies[key].host;
-    }
-    return undefined;
-  }
-
-  getJoiner(key) {
-    if (key in this.gameLobbies) {
-      return this.gameLobbies[key].joiner;
-    }
-    return undefined;
-  }
-
-  getOpponent(player) {
-    const lobby = Object.values(this.gameLobbies)
-      .find((x) => x.host === player || x.joiner === player);
-    if (lobby !== undefined) {
-      if (lobby.host === player) {
-        return lobby.joiner;
-      }
-      if (lobby.joiner === player) {
-        return lobby.host;
-      }
+      return this.gameLobbies[key];
     }
     return undefined;
   }
@@ -207,18 +193,9 @@ export default class WorldManager {
     }
   }
 
-  getLobbyState(key) {
+  isLobbyFull(key) {
     if (key in this.gameLobbies) {
-      return this.gameLobbies[key].lobbyState;
-    }
-    return undefined;
-  }
-
-  getLobbyFromPlayer(player) {
-    const lobby = Object.values(this.gameLobbies)
-      .find((x) => x.host === player || x.joiner === player);
-    if (lobby !== undefined) {
-      return lobby;
+      return this.gameLobbies[key].isFull();
     }
     return undefined;
   }
@@ -230,31 +207,30 @@ export default class WorldManager {
     return undefined;
   }
 
-  getGameName(key) {
-    if (key in this.gameLobbies) {
-      return this.gameLobbies[key].gameName;
-    }
-    return undefined;
-  }
-
   updateLobbyGameState(key, newGameState) {
     if (key in this.gameLobbies) {
       this.gameLobbies[key].gameState = newGameState;
     }
   }
 
-  lobbyExist(key) {
+  lobbyExists(key) {
     return key in this.gameLobbies;
+  }
+
+  getLobby(key) {
+    return this.gameLobbies[key];
   }
 
   lobbyForAll(lobbyId, action) {
     if (lobbyId in this.gameLobbies) {
-      const { spectators } = this.gameLobbies[lobbyId];
+      const { spectators, host, joiner } = this.gameLobbies[lobbyId];
       if (spectators !== undefined) {
         spectators.forEach((userId) => action(userId));
       }
-      action(this.getJoiner(lobbyId));
-      action(this.getHost(lobbyId));
+      action(host);
+      if (joiner !== undefined) {
+        action(joiner);
+      }
     }
   }
 
