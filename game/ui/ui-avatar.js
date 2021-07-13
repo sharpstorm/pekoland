@@ -25,6 +25,7 @@ class AvatarMenu extends UIElement {
     const rightBtn = new Button(10, 10, 36, 36, new UIAnchor(false, true, false, false),
       '>');
     const confirmBtn = new LongButton(10, 10, 100, 36, new UIAnchor(false, false, true, false), 'Confirm');
+    const closeBtn = new Button(10, 10, 36, 36, new UIAnchor(true, true, false, false), SpriteManager.getInstance().getSprite('icon-cross'));
 
     this.titleWindow.style.color = 'black';
     this.avatarWindow.style.color = 'black';
@@ -59,11 +60,16 @@ class AvatarMenu extends UIElement {
       this.emitEvent('changeAvatar');
     });
 
+    closeBtn.addEventListener('click', () => {
+      this.close();
+    });
+
     this.titleWindow.innerHTML = 'Choose Your Avatar';
 
     this.avatarMenu.appendChild(leftBtn.node);
     this.avatarMenu.appendChild(rightBtn.node);
     this.avatarMenu.appendChild(confirmBtn.node);
+    this.avatarMenu.appendChild(closeBtn.node);
     this.avatarMenu.appendChild(this.titleWindow);
     this.node.appendChild(this.avatarMenu);
     this.avatarMenu.appendChild(this.avatarWindow);
@@ -88,8 +94,6 @@ class AvatarMenu extends UIElement {
         .getSpriteByDirection(2).getSpriteAtFrame(1).width * 2;
       const height = SpriteManager.getInstance().getSprite(this.avatarArr[this.currentIndex])
         .getSpriteByDirection(2).getSpriteAtFrame(1).height * 2;
-      console.log(width, height);
-
       SpriteManager.getInstance().getSprite(this.avatarArr[this.currentIndex])
         .getSpriteByDirection(2).getSpriteAtFrame(1)
         .drawAt(ctx, 0, 0, width, height);
@@ -101,6 +105,10 @@ class AvatarMenu extends UIElement {
     if (evtId in this.eventListeners) {
       this.eventListeners[evtId](data);
     }
+  }
+
+  close() {
+    this.node.style.display = 'none';
   }
 
   on(evtId, handler) {
