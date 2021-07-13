@@ -47,7 +47,6 @@ class AvatarMenu extends UIElement {
           .drawAt(ctx, 0, 0, 50, 50);
       });
       this.avatarWindow.style.background = this.currentA;
-      console.log(this.currentIndex);
     });
 
     leftBtn.addEventListener('click', () => {
@@ -61,7 +60,6 @@ class AvatarMenu extends UIElement {
           .drawAt(ctx, 0, 0, 50, 50);
       });
       this.avatarWindow.style.background = this.currentA;
-      console.log(this.currentIndex);
     });
 
     confirmBtn.addEventListener('click', () => {
