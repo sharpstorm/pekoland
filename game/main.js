@@ -243,6 +243,31 @@ Promise.all([netSetupPromise, assetSetupPromise])
     });
     uiRenderer.addElement(customizeWorldMenu);
 
+    /* ----------------------- Avatar UI ----------------------- */
+    const avatarArr = [];
+    avatarArr.push('rabbit-avatar');
+    avatarArr.push('rabbit-brown-avatar');
+    avatarArr.push('chick-avatar');
+    avatarArr.push('cat-avatar');
+    avatarArr.push('red-panda-avatar');
+    avatarArr.push('worm-avatar');
+
+    const avatarMenu = new AvatarMenu(avatarArr);
+
+    avatarMenu.on('changeAvatar', () => {
+      const data = {
+        userId: playerManager.getSelfId(),
+        avatarId: avatarMenu.avatarArr[avatarMenu.currentIndex],
+      };
+      if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {
+        NetworkManager.getInstance().send(buildClientGamePacket('change-avatar', data));
+      } else if (networkManager.getOperationMode() === NetworkManager.Mode.SERVER) {
+        NetworkManager.getInstance().send(buildServerGamePacket('change-avatar-echo', data));
+      }
+    });
+
+    uiRenderer.addElement(avatarMenu);
+
     /* ----------------------- Hamburger Menu ----------------------- */
 
     const drawerMenu = new DrawerMenu(networkManager.getOperationMode()
@@ -254,6 +279,7 @@ Promise.all([netSetupPromise, assetSetupPromise])
       customizeWorldMenu.setVisible(true);
       drawerMenu.setVisible(false);
     });
+    drawerMenu.setAvatarHandler(() => avatarMenu.show());
     uiRenderer.addElement(drawerMenu);
 
     const menuBtn = new Button(10, 10, 36, 36, new UIAnchor(false, true, true, false),
@@ -357,38 +383,6 @@ Promise.all([netSetupPromise, assetSetupPromise])
 
     uiRenderer.addElement(gameMenu);
     uiRenderer.addElement(gameOverlay);
-
-    /* ----------------------- Avatar UI ----------------------- */
-    const avatarArr = [];
-    avatarArr.push('rabbit-avatar');
-    avatarArr.push('rabbit-brown-avatar');
-    avatarArr.push('chick-avatar');
-    avatarArr.push('cat-avatar');
-    avatarArr.push('red-panda-avatar');
-    avatarArr.push('worm-avatar');
-
-    const avatarMenu = new AvatarMenu(avatarArr);
-
-    const changeAvatarBtn = new LongButton(64, 10, 200, 36, new UIAnchor(false, true, true, false), 'Change Avatar');
-    changeAvatarBtn.node.style.marginRight = '125px';
-    changeAvatarBtn.addEventListener('click', () => {
-      avatarMenu.show();
-    });
-
-    avatarMenu.on('changeAvatar', () => {
-      const data = {
-        userId: playerManager.getSelfId(),
-        avatarId: avatarMenu.avatarArr[avatarMenu.currentIndex],
-      };
-      if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {
-        NetworkManager.getInstance().send(buildClientGamePacket('change-avatar', data));
-      } else if (networkManager.getOperationMode() === NetworkManager.Mode.SERVER) {
-        NetworkManager.getInstance().send(buildServerGamePacket('change-avatar-echo', data));
-      }
-    });
-
-    uiRenderer.addElement(avatarMenu);
-    uiRenderer.addElement(changeAvatarBtn);
 
     /* ----------------------- Whiteboard ----------------------- */
     const whiteboard = new Whiteboard();
