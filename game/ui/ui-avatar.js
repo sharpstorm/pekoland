@@ -18,15 +18,21 @@ class AvatarMenu extends UIElement {
   initObject() {
     this.titleWindow = createElement('div', { id: 'game-menu-title' });
     this.avatarMenu = createElement('div', { id: 'avatar-menu' });
+    this.avatarWindow = createElement('div', { id: 'avatar-window' });
+
     const leftBtn = new Button(10, 10, 36, 36, new UIAnchor(false, false, false, true),
       '<');
     const rightBtn = new Button(10, 10, 36, 36, new UIAnchor(false, true, false, false),
       '>');
+    const confirmBtn = new LongButton(10, 10, 100, 36, new UIAnchor(false, false, true, false), 'Confirm');
+
+    this.titleWindow.style.color = 'black';
+    this.avatarWindow.style.color = 'black';
     rightBtn.node.style.marginTop = '200px';
     leftBtn.node.style.marginTop = '200px';
     rightBtn.node.style.marginRight = '50px';
     leftBtn.node.style.marginLeft = '50px';
-    this.avatarWindow = createElement('div', { id: 'avatar-window' });
+    confirmBtn.node.style.marginLeft = 'calc(50% - 50px)';
 
     rightBtn.addEventListener('click', () => {
       this.currentIndex += 1;
@@ -56,9 +62,6 @@ class AvatarMenu extends UIElement {
       console.log(this.currentIndex);
     });
 
-    const confirmBtn = new LongButton(10, 10, 100, 36, new UIAnchor(false, false, true, false), 'Confirm');
-    confirmBtn.node.style.marginLeft = 'calc(50% - 50px)';
-
     confirmBtn.addEventListener('click', () => {
       PlayerManager.getInstance().getSelf().playerSprite = SpriteManager.getInstance()
         .getSprite(this.avatarArr[this.currentIndex]);
@@ -68,8 +71,6 @@ class AvatarMenu extends UIElement {
 
     this.titleWindow.innerHTML = 'Choose Your Avatar';
 
-    this.titleWindow.style.color = 'black';
-    this.avatarWindow.style.color = 'black';
     this.avatarMenu.appendChild(leftBtn.node);
     this.avatarMenu.appendChild(rightBtn.node);
     this.avatarMenu.appendChild(confirmBtn.node);
@@ -85,9 +86,9 @@ class AvatarMenu extends UIElement {
         .getSpriteByDirection(2).getSpriteAtFrame(1)
         .drawAt(ctx, 0, 0, 50, 50);
     });
+
     this.avatarMenu.style.background = panelBack;
     this.avatarWindow.style.background = this.currentA;
-
     this.node.style.display = 'none';
   }
 
