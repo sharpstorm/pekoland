@@ -254,10 +254,13 @@ Promise.all([netSetupPromise, assetSetupPromise])
     ];
     const avatarMenu = new AvatarMenu(avatarArr);
 
-    avatarMenu.on('changeAvatar', () => {
+    avatarMenu.on('changeAvatar', (spriteId) => {
+      PlayerManager.getInstance().getSelf().playerSprite = SpriteManager.getInstance()
+        .getSprite(spriteId);
+
       const data = {
         userId: playerManager.getSelfId(),
-        avatarId: avatarMenu.avatarArr[avatarMenu.currentIndex],
+        avatarId: spriteId,
       };
       if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {
         NetworkManager.getInstance().send(buildClientGamePacket('change-avatar', data));
