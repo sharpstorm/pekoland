@@ -36,8 +36,16 @@ export default class DrawerMenu extends UIElement {
     });
     this.panelContainer.appendChild(quitBtn.node);
 
+    const avatarBtn = new LongButton(0, 54, 180, 36, new UIAnchor(false, true, true, true), 'Change Avatar');
+    avatarBtn.addEventListener('click', (evt) => {
+      evt.stopPropagation();
+      if (this.avatarHandler !== undefined) {
+        this.avatarHandler();
+      }
+    });
+
     if (furnitureBtnEnabled) {
-      const furnitureBtn = new LongButton(0, 54, 180, 36, new UIAnchor(false, true, true, true), 'Customize World');
+      const furnitureBtn = new LongButton(0, 96, 180, 36, new UIAnchor(false, true, true, true), 'Customize World');
       furnitureBtn.addEventListener('click', (evt) => {
         evt.stopPropagation();
         if (this.furnitureHandler !== undefined) this.furnitureHandler();
@@ -45,13 +53,6 @@ export default class DrawerMenu extends UIElement {
       this.panelContainer.appendChild(furnitureBtn.node);
     }
 
-    const avatarBtn = new LongButton(0, 96, 180, 36, new UIAnchor(false, true, true, true), 'Change Avatar');
-    avatarBtn.addEventListener('click', (evt) => {
-      evt.stopPropagation();
-      if (this.avatarHandler !== undefined) {
-        this.avatarHandler();
-      }
-    });
     this.panelContainer.appendChild(avatarBtn.node);
 
     this.node.appendChild(this.panelContainer);
