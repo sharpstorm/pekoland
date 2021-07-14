@@ -4,6 +4,7 @@ import SpriteManager from '../managers/sprite-manager';
 import Chat from '../models/chat';
 import Player from '../models/player';
 import Map from '../models/map';
+import Furniture from '../models/furniture';
 import { loadAsset } from '../utils';
 import loadAssets from '../workers/asset-loader';
 import { getDummyContext } from './mock-canvas';
@@ -230,4 +231,74 @@ test('[Model] Test Map Draw', () => {
   expect(sprite.params[5]).toBe(0);
   expect(sprite.params[6]).toBe(100);
   expect(sprite.params[7]).toBe(100);
+
+  // Grid
+  const gridCtx = getDummyContext();
+  map.drawGrid(gridCtx, {
+    x: 0,
+    y: 0,
+    viewportWidth: 100,
+    viewportHeight: 100,
+  });
+  expect(gridCtx.history.length).toBe(1);
+  const sprite2 = gridCtx.history.find((x) => x.object === 'drawImage');
+  expect(sprite2).toBeDefined();
+});
+
+test('[Model] Test Map Furniture', async () => {
+  const map = new Map('map', [
+    [0, 0, 0, 255],
+    [255, 255, 255, 255],
+    [255, 0, 0, 255],
+    [0, 0, 0, 255],
+  ], 10, 10, 2, 2);
+
+  const factory = {
+    getFurniture: jest.fn(),
+  };
+  factory.getFurniture.mockImplementation(() => ({ drawAt: () => {} }));
+  expect(map.furnitureFactory).toBeUndefined();
+  map.hookFurnitureFactory(factory);
+  expect(map.furnitureFactory).toBe(factory);
+
+  expect(map.getFurniture(GameConstants.UNIT, 0)).toBe('furniture-game-table');
+  expect(map.getFurnitureList().length).toBe(1);
+  expect(map.getFurnitureList()[0].id).toBe('furniture-game-table');
+
+  // Setting Furniture
+  factory.getFurniture.mockClear();
+  expect(map.getFurniture(0, GameConstants.UNIT)).toBeUndefined();
+  map.setFurnitureAt(0, GameConstants.UNIT, 'furniture-2');
+  expect(map.getFurniture(0, GameConstants.UNIT)).toBe('furniture-2');
+
+  // Compositing
+  expect(factory.getFurniture).toHaveBeenCalledWith('furniture-game-table');
+  expect(factory.getFurniture).toHaveBeenCalledWith('furniture-2');
+
+  // Disallowed placement
+  expect(map.getFurniture(0, 0)).toBeUndefined();
+  map.setFurnitureAt(0, 0, 'furniture-2');
+  expect(map.getFurniture(0, 0)).toBeUndefined();
+
+  // Furniture bulk set
+  map.setFurnitureToState([
+    {
+      x: 1,
+      y: 0,
+      id: 'furniture-3',
+    },
+  ]);
+  expect(map.getFurniture(GameConstants.UNIT, 0)).toBe('furniture-3');
+  expect(map.getFurniture(0, GameConstants.UNIT)).toBeUndefined();
+});
+
+test('[Model] Test Furniture', async () => {
+  const sprite = {
+    drawAt: jest.fn(),
+  };
+
+  const furniture = new Furniture('id', 'name', sprite);
+  furniture.drawAt(1, 2, 3, 4, 5);
+
+  expect(sprite.drawAt).toHaveBeenCalledWith(1, 2, 3, 4, 5);
 });

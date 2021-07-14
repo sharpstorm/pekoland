@@ -1,4 +1,4 @@
-import { expect, jest, test } from '@jest/globals';
+import { expect, test } from '@jest/globals';
 import InputSystem from '../workers/input-system';
 
 test('[Input System] Test InputSystem Attach Targets', () => {
@@ -6,12 +6,12 @@ test('[Input System] Test InputSystem Attach Targets', () => {
   const attachedHandlersB = [];
 
   const eventTargetA = {
-    addEventListener: (eventId, handler) => {
+    addEventListener: (eventId) => {
       attachedHandlersA.push(eventId);
     },
   };
   const eventTargetB = {
-    addEventListener: (eventId, handler) => {
+    addEventListener: (eventId) => {
       attachedHandlersB.push(eventId);
     },
   };
@@ -56,7 +56,7 @@ test('[Input System] Test InputSystem Add Listeners', () => {
       handlers[eventId] = handler;
     },
   };
-  const fireEvent = (evtId) => handlers[evtId](); 
+  const fireEvent = (evtId) => handlers[evtId]();
 
   const inputSystem = new InputSystem(eventTarget, eventTarget);
   expect(() => inputSystem.addListener('abc', () => {})).toThrow(new Error('Invalid Event'));

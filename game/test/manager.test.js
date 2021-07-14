@@ -54,6 +54,21 @@ test('[Manager] Test Map Manager', () => {
   expect(Object.keys(mapManager.maps).length).toBe(0);
   expect(mapManager.getCurrentMap()).toBeUndefined();
 
+  // Test Furniture Factory
+  const factory = mapManager.getFurnitureFactory();
+  const f1 = {
+    id: 'f1',
+  };
+
+  expect(factory.getFurniture('f1')).toBeUndefined();
+  factory.registerFurnitureTemplate(f1);
+  expect(factory.getFurniture('f1')).toBe(f1);
+
+  const handler = jest.fn();
+  factory.forEachType(handler);
+  expect(handler).toHaveBeenCalledTimes(1);
+  expect(handler.mock.calls[0][0]).toBe(f1);
+
   // Singleton Check
   const inst1 = MapManager.getInstance();
   const inst2 = MapManager.getInstance();
@@ -245,6 +260,39 @@ test('[Manager] Test World Manager Lobby Control', () => {
   expect(worldManager.lobbyExists('lobby1')).toBe(true);
   worldManager.closeLobby('lobby1');
   expect(worldManager.lobbyExists('lobby1')).toBe(false);
+});
+
+test('[Manager] Test World Manager Whiteboard Control', () => {
+  const worldManager = new WorldManager();
+
+  // Creation
+  expect('board1' in worldManager.whiteboards).toBeFalsy();
+  const notifier = jest.fn();
+  worldManager.registerWhiteboard('board1', notifier);
+  expect('board1' in worldManager.whiteboards).toBeTruthy();
+
+  // Add User
+  expect(worldManager.whiteboards.board1.users.length).toBe(0);
+  worldManager.addWhiteboardPlayer('board1', 'aaa');
+  expect(worldManager.whiteboards.board1.users.length).toBe(1);
+  expect(worldManager.whiteboards.board1.users.indexOf('aaa')).toBeGreaterThanOrEqual(0);
+  worldManager.addWhiteboardPlayer('board1', 'bbb');
+  expect(worldManager.whiteboards.board1.users.length).toBe(2);
+  expect(worldManager.whiteboards.board1.users.indexOf('bbb')).toBeGreaterThanOrEqual(0);
+
+  // Test Duplicated User
+  worldManager.addWhiteboardPlayer('board1', 'bbb');
+  expect(worldManager.whiteboards.board1.users.length).toBe(2);
+
+  // Remove User
+  worldManager.removeWhiteboardPlayer('board1', 'bbb');
+  expect(worldManager.whiteboards.board1.users.length).toBe(1);
+  expect(worldManager.whiteboards.board1.users.indexOf('bbb')).toBe(-1);
+  expect(worldManager.whiteboards.board1.users.indexOf('aaa')).toBeGreaterThanOrEqual(0);
+
+  // Update State
+  worldManager.updateWhiteboardState('board1', 'state', 'delta', 'bbb');
+  expect(notifier).toHaveBeenCalledWith('aaa', 'state', 'delta');
 });
 
 test('[Manager] Test World Manager Singleton', () => {
