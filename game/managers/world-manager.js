@@ -255,7 +255,10 @@ export default class WorldManager {
     console.debug(`[WorldManager] Player ${playerId} joined whiteboard`);
     const board = this.whiteboards[boardId];
     if (board !== undefined) {
-      board.users.push(playerId);
+      const idx = board.users.findIndex((x) => x === playerId);
+      if (idx < 0) {
+        board.users.push(playerId);
+      }
       return true;
     }
     return false;
