@@ -168,7 +168,7 @@ function handleLeaveLobby(data) {
 function handleChangeAvatar(data, conn) {
   const player = PlayerManager.getInstance().getPlayer(data.userId);
   if (player !== undefined) {
-    PlayerManager.getInstance().getPlayer(data.userId).changeSprite(data.avatarId);
+    player.changeSprite(data.avatarId);
     NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('change-avatar-echo', data), conn.peer);
   }
 }

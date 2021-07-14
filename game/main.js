@@ -244,14 +244,14 @@ Promise.all([netSetupPromise, assetSetupPromise])
     uiRenderer.addElement(customizeWorldMenu);
 
     /* ----------------------- Avatar UI ----------------------- */
-    const avatarArr = [];
-    avatarArr.push('rabbit-avatar');
-    avatarArr.push('rabbit-brown-avatar');
-    avatarArr.push('chick-avatar');
-    avatarArr.push('cat-avatar');
-    avatarArr.push('red-panda-avatar');
-    avatarArr.push('worm-avatar');
-
+    const avatarArr = [
+      'rabbit-avatar',
+      'rabbit-brown-avatar',
+      'chick-avatar',
+      'cat-avatar',
+      'red-panda-avatar',
+      'worm-avatar',
+    ];
     const avatarMenu = new AvatarMenu(avatarArr);
 
     avatarMenu.on('changeAvatar', () => {

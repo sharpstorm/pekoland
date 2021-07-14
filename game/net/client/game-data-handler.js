@@ -116,7 +116,7 @@ function handleEndGame(data, conn) {
 function handleChangeAvatarEcho(data, conn) {
   const player = PlayerManager.getInstance().getPlayer(data.userId);
   if (player !== undefined) {
-    PlayerManager.getInstance().getPlayer(data.userId).changeSprite(data.avatarId);
+    player.changeSprite(data.avatarId);
   }
 }
 
