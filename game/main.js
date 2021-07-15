@@ -80,6 +80,7 @@ networkManager.on('initialized', () => {
     playerManager.addPlayer(new Player(networkManager.configStore.userId, networkManager.configStore.name, SpriteManager.getInstance().getSprite('rabbit-avatar')));
     playerManager.setSelf(networkManager.configStore.userId);
     Renderer.getCameraContext().centerOn(playerManager.getSelf().x, playerManager.getSelf().y);
+    playerManager.getSelf().avatarId = 'rabbit-avatar';
   }
 });
 
@@ -255,9 +256,7 @@ Promise.all([netSetupPromise, assetSetupPromise])
     const avatarMenu = new AvatarMenu(avatarArr);
 
     avatarMenu.on('changeAvatar', (spriteId) => {
-      PlayerManager.getInstance().getSelf().playerSprite = SpriteManager.getInstance()
-        .getSprite(spriteId);
-
+      PlayerManager.getInstance().getSelf().changeSprite(spriteId);
       const data = {
         userId: playerManager.getSelfId(),
         avatarId: spriteId,

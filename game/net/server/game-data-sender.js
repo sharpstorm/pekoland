@@ -7,6 +7,7 @@ function flattenPlayer(playerObj) {
     x: playerObj.x,
     y: playerObj.y,
     direction: playerObj.direction,
+    avatarId: playerObj.avatarId,
   };
 }
 

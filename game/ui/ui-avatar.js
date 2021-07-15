@@ -10,7 +10,6 @@ class AvatarMenu extends UIElement {
     this.avatarArr = avatarArr;
     this.initObject();
     this.currentA = undefined;
-
     this.eventListeners = {};
   }
 

@@ -10,7 +10,7 @@ export default class Player {
     this.userId = userId;
     this.name = name;
     this.playerSprite = playerSprite;
-
+    this.avatarId = undefined;
     this.x = SPAWN_X;
     this.y = SPAWN_Y;
     this.newX = SPAWN_X;
@@ -109,6 +109,7 @@ export default class Player {
   }
 
   changeSprite(spriteId) {
+    this.avatarId = spriteId;
     this.playerSprite = SpriteManager.getInstance().getSprite(spriteId);
   }
 }

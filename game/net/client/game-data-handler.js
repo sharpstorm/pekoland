@@ -18,6 +18,10 @@ function inflatePlayer(data) {
   player.x = data.x;
   player.y = data.y;
   player.direction = data.direction;
+  if (data.avatarId !== null) {
+    player.changeSprite(data.avatarId);
+    console.log(data);
+  }
   return player;
 }
 
