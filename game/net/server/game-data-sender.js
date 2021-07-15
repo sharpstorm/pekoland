@@ -7,6 +7,7 @@ function flattenPlayer(playerObj) {
     x: playerObj.x,
     y: playerObj.y,
     direction: playerObj.direction,
+    avatarId: playerObj.avatarId,
   };
 }
 
@@ -101,6 +102,14 @@ function buildStartGame(opCode, data) {
   };
 }
 
+function buildAvatarUpdateEcho(opCode, data) {
+  return {
+    opCode,
+    userId: data.userId,
+    avatarId: data.avatarId,
+  };
+}
+
 function buildFurnitureSync(opCode, data) {
   return {
     opCode,
@@ -130,6 +139,7 @@ const handlers = {
   'lobby-reply': buildLobbyReply,
   'start-game': buildStartGame,
   'end-game': buildLobbyReply,
+  'change-avatar-echo': buildAvatarUpdateEcho,
   'furniture-sync': buildFurnitureSync,
   'whiteboard-state-echo': buildWhiteboardEcho,
 };
