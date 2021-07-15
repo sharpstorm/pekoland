@@ -48,7 +48,7 @@ exports.handler = async function handle(event, context) {
     const obj = users.find((x) => x.email.toLowerCase() === data.email.toLowerCase());
     if (obj === undefined) {
       return {
-        statusCode: 400,
+        statusCode: 404,
         body: JSON.stringify({ message: 'User not Found' }),
       };
     }

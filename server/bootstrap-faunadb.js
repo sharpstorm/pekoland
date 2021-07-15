@@ -70,7 +70,7 @@ function createFaunaDB(key) {
         { field: ['ref'] },
       ],
     })))
-    .then(client.query(q.CreateCollection({ name: 'reports' })))
+    .then(() => client.query(q.CreateCollection({ name: 'reports' })))
     .then(() => client.query(q.CreateIndex({
       name: 'reports_by_time',
       source: q.Collection('reports'),
