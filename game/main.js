@@ -23,6 +23,7 @@ import {
 import Chatbox from './ui/ui-chatbox.js';
 import Button, { LongButton } from './ui/ui-button.js';
 import GameMenu, { GameOverlay } from './ui/ui-game.js';
+import AvatarMenu from './ui/ui-avatar.js';
 import { UIAnchor } from './ui/ui-element.js';
 
 import CheckersGame from './games/checkers/checkers.js';
@@ -79,6 +80,7 @@ networkManager.on('initialized', () => {
     playerManager.addPlayer(new Player(networkManager.configStore.userId, networkManager.configStore.name, SpriteManager.getInstance().getSprite('rabbit-avatar')));
     playerManager.setSelf(networkManager.configStore.userId);
     Renderer.getCameraContext().centerOn(playerManager.getSelf().x, playerManager.getSelf().y);
+    playerManager.getSelf().avatarId = 'rabbit-avatar';
   }
 });
 
@@ -242,6 +244,32 @@ Promise.all([netSetupPromise, assetSetupPromise])
     });
     uiRenderer.addElement(customizeWorldMenu);
 
+    /* ----------------------- Avatar UI ----------------------- */
+    const avatarArr = [
+      'rabbit-avatar',
+      'rabbit-brown-avatar',
+      'chick-avatar',
+      'cat-avatar',
+      'red-panda-avatar',
+      'worm-avatar',
+    ];
+    const avatarMenu = new AvatarMenu(avatarArr);
+
+    avatarMenu.on('changeAvatar', (spriteId) => {
+      PlayerManager.getInstance().getSelf().changeSprite(spriteId);
+      const data = {
+        userId: playerManager.getSelfId(),
+        avatarId: spriteId,
+      };
+      if (networkManager.getOperationMode() === NetworkManager.Mode.CLIENT) {
+        NetworkManager.getInstance().send(buildClientGamePacket('change-avatar', data));
+      } else if (networkManager.getOperationMode() === NetworkManager.Mode.SERVER) {
+        NetworkManager.getInstance().send(buildServerGamePacket('change-avatar-echo', data));
+      }
+    });
+
+    uiRenderer.addElement(avatarMenu);
+
     /* ----------------------- Hamburger Menu ----------------------- */
 
     const drawerMenu = new DrawerMenu(networkManager.getOperationMode()
@@ -253,6 +281,7 @@ Promise.all([netSetupPromise, assetSetupPromise])
       customizeWorldMenu.setVisible(true);
       drawerMenu.setVisible(false);
     });
+    drawerMenu.setAvatarHandler(() => avatarMenu.show());
     uiRenderer.addElement(drawerMenu);
 
     const menuBtn = new Button(10, 10, 36, 36, new UIAnchor(false, true, true, false),
@@ -357,6 +386,7 @@ Promise.all([netSetupPromise, assetSetupPromise])
     uiRenderer.addElement(gameMenu);
     uiRenderer.addElement(gameOverlay);
 
+    /* ----------------------- Whiteboard ----------------------- */
     const whiteboard = new Whiteboard();
     uiRenderer.addElement(whiteboard);
     whiteboardManager.registerUI(whiteboard);
@@ -364,6 +394,7 @@ Promise.all([netSetupPromise, assetSetupPromise])
       whiteboardManager.openBoard(unitX, unitY);
     });
 
+    /* ----------------------- End ----------------------- */
     Renderer.init();
     window.requestAnimationFrame(Renderer.render.bind(Renderer));
   })

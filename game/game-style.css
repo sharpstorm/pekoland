@@ -196,6 +196,25 @@
 #admit-prompt > div > .message::-webkit-scrollbar-track { background: #e0a466; border-radius: 4px }
 #admit-prompt > div > .message::-webkit-scrollbar-thumb { background: #772108; border-radius: 4px; }
 
+#avatar-menu {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.9);;
+}
+
+#avatar-window {
+  position: relative;
+  background-size: cover;
+  flex-direction: column;
+  margin-left: 47.5%;
+  margin-top: 20%;
+  width: 20%;
+  height: 20%;
+}
+
 #drawer-menu {
   overflow: hidden;
 }

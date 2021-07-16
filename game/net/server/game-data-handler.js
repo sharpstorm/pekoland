@@ -193,6 +193,14 @@ function handleLeaveLobby(data) {
   }
 }
 
+function handleChangeAvatar(data, conn) {
+  const player = PlayerManager.getInstance().getPlayer(data.userId);
+  if (player !== undefined) {
+    player.changeSprite(data.avatarId);
+    NetworkManager.getInstance().getConnection().sendAllExcept(buildGamePacket('change-avatar-echo', data), conn.peer);
+  }
+}
+
 function handleJoinWhiteboard(data, conn) {
   const worldManager = WorldManager.getInstance();
   const playerId = worldManager.getPlayerId(conn.peer);
@@ -247,6 +255,7 @@ const handlers = {
   'register-lobby': handleRegisterLobby,
   'join-lobby': handleJoinLobby,
   'leave-lobby': handleLeaveLobby,
+  'change-avatar': handleChangeAvatar,
   'join-whiteboard': handleJoinWhiteboard,
   'leave-whiteboard': handleLeaveWhiteboard,
   'update-whiteboard': handleUpdateWhiteboard,

@@ -62,6 +62,14 @@ function buildLobbyUpdate(opCode, data) {
   };
 }
 
+function buildAvatarUpdate(opCode, data) {
+  return {
+    opCode,
+    userId: data.userId,
+    avatarId: data.avatarId,
+  };
+}
+
 function buildWhiteboardAccess(opCode, data) {
   return {
     opCode,
@@ -90,6 +98,7 @@ const handlers = {
   'register-lobby': buildLobbyUpdate,
   'join-lobby': buildLobbyUpdate,
   'leave-lobby': buildLobbyUpdate,
+  'change-avatar': buildAvatarUpdate,
   'join-whiteboard': buildWhiteboardAccess,
   'leave-whiteboard': buildWhiteboardAccess,
   'update-whiteboard': buildUpdateWhiteboard,

@@ -18,6 +18,10 @@ function inflatePlayer(data) {
   player.x = data.x;
   player.y = data.y;
   player.direction = data.direction;
+  if (data.avatarId !== null) {
+    player.changeSprite(data.avatarId);
+    console.log(data);
+  }
   return player;
 }
 
@@ -119,6 +123,13 @@ function handleEndGame(data, conn) {
   alert(`${data.msg} has left the game`);
 }
 
+function handleChangeAvatarEcho(data, conn) {
+  const player = PlayerManager.getInstance().getPlayer(data.userId);
+  if (player !== undefined) {
+    player.changeSprite(data.avatarId);
+  }
+}
+
 function handleFurnitureSync(data) {
   MapManager.getInstance().getCurrentMap().setFurnitureToState(data.furniture);
 }
@@ -141,6 +152,7 @@ const handlers = {
   'lobby-reply': handleLobbyReply,
   'start-game': handleStartGame,
   'end-game': handleEndGame,
+  'change-avatar-echo': handleChangeAvatarEcho,
   'furniture-sync': handleFurnitureSync,
   'whiteboard-state-echo': handleWhiteboardEcho,
 };
