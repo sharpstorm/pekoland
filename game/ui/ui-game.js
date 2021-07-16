@@ -27,6 +27,7 @@ class GameMenu extends UIElement {
       SpriteManager.getInstance().getSprite('icon-cross'));
     closeBtn.addEventListener('click', (evt) => {
       evt.stopPropagation();
+      this.emitEvent('close');
       this.close();
     });
 
@@ -53,7 +54,6 @@ class GameMenu extends UIElement {
 
   close() {
     this.node.style.display = 'none';
-    this.emitEvent('close');
   }
 
   emitEvent(evtId, data) {

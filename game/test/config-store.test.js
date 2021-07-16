@@ -71,6 +71,28 @@ test('[ConfigStore] Test Configuration Transfer', async () => {
   remoteReceiver({ op: 'pekoconn-config-request' });
   expect(configStore.name).toBe(name);
 
+  // Test sending Game Op
+  configStore.subchannelId = 'abcdef';
+  remoteReceiver.mockReset();
+  remoteReceiver.mockImplementationOnce((msg) => {
+    expect(msg.op).toBe('pekoconn-game-op');
+    expect(msg.payload.op).toBe('test-op');
+    expect(msg.payload.data).toBe('testdata');
+    configStore.broadcastChannel.onmessage({
+      data: {
+        op: 'pekoconn-game-reply',
+        channel: 'abcdef',
+        reply: 'reply',
+      },
+    });
+  });
+
+  const after = jest.fn();
+  await configStore.fetchGameOperation('test-op', 'testdata')
+    .then(after);
+  expect(after).toHaveBeenCalled();
+  expect(after).toHaveBeenCalledWith('reply');
+
   // Test Busy Rejection
   remoteReceiver.mockReset();
   remoteReceiver.mockImplementation((msg) => {
@@ -79,6 +101,5 @@ test('[ConfigStore] Test Configuration Transfer', async () => {
 
   configStore.updateConfig();
   expect(configStore.updateConfig()).rejects.toThrow('[NetworkConfig] Config Worker is Busy');
-
   global.BroadcastChannel = undefined;
 });
