@@ -48,6 +48,52 @@ const UserListStore = () => {
       setLastUpdate(Date.now());
     });
 
+  const banUser = (targetId, fetchAgent) => fetchAgent('/functions/users-ban', {
+    method: 'POST',
+    body: JSON.stringify({ user_id: targetId, ban: true }),
+  })
+    .then((resp) => {
+      if (resp.status > 399) {
+        throw new Error('Failed to Contact Server');
+      }
+      return resp.json();
+    })
+    .then(() => {
+      if (users !== undefined) {
+        setUsers(users.map((user) => {
+          if (user.id === targetId) {
+            const newUser = user;
+            newUser.banned = true;
+            return newUser;
+          }
+          return user;
+        }));
+      }
+    });
+
+  const unbanUser = (targetId, fetchAgent) => fetchAgent('/functions/users-ban', {
+    method: 'POST',
+    body: JSON.stringify({ user_id: targetId, ban: false }),
+  })
+    .then((resp) => {
+      if (resp.status > 399) {
+        throw new Error('Failed to Contact Server');
+      }
+      return resp.json();
+    })
+    .then(() => {
+      if (users !== undefined) {
+        setUsers(users.map((user) => {
+          if (user.id === targetId) {
+            const newUser = user;
+            newUser.banned = false;
+            return newUser;
+          }
+          return user;
+        }));
+      }
+    });
+
   const changeUserIGN = (targetId, ign, fetchAgent) => fetchAgent('/functions/users-ign-change', {
     method: 'POST',
     body: JSON.stringify({ user_id: targetId, ign }),
@@ -78,6 +124,8 @@ const UserListStore = () => {
     deleteUser,
     getUsers,
     changeUserIGN,
+    banUser,
+    unbanUser,
   };
 };
 
@@ -117,6 +165,24 @@ export default function AdminUsersView() {
                 }}
               >
                 Change IGN
+              </Button>
+              <Button
+                className="btn-accent"
+                style={{ marginLeft: '8px' }}
+                disabled={user.isAdmin}
+                onClick={() => {
+                  if (user.banned) {
+                    // eslint-disable-next-line no-restricted-globals
+                    if (confirm(`Confirm Unban ${user.email}?`)) {
+                      userListStore.unbanUser(user.id, identity.authorizedFetch);
+                    }
+                    // eslint-disable-next-line no-restricted-globals
+                  } else if (confirm(`Confirm Ban ${user.email}?`)) {
+                    userListStore.banUser(user.id, identity.authorizedFetch);
+                  }
+                }}
+              >
+                {user.banned ? 'Unban' : 'Ban'}
               </Button>
               <Button
                 className="btn-danger"

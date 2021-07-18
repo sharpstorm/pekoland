@@ -14,6 +14,13 @@ exports.handler = async function handle(event, context) {
     };
   }
 
+  if (user.app_metadata && user.app_metadata.roles && user.app_metadata.roles.includes('banned')) {
+    return {
+      statusCode: 401,
+      body: JSON.stringify({ message: 'Unauthorized' }),
+    };
+  }
+
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 400,

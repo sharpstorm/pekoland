@@ -42,6 +42,7 @@ exports.handler = async function handle(event, context) {
         email: x.email.toLowerCase(),
         id: x.id,
         isAdmin: (x.app_metadata.roles && x.app_metadata.roles.includes('admin')),
+        banned: (x.app_metadata.roles && x.app_metadata.roles.includes('banned')),
         ign: x.user_metadata.ign,
       }));
 
