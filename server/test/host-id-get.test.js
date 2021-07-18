@@ -15,6 +15,12 @@ test('[Functions-Server host-id-get] Test Rejection', async () => {
   }, { clientContext: { identity: {} } });
   expect(resp.statusCode).toBe(401);
 
+  // Banned Check
+  resp = await handler({
+    httpMethod: 'POST',
+  }, { clientContext: { identity: {}, user: { app_metadata: { roles: ['banned'] } } } });
+  expect(resp.statusCode).toBe(401);
+
   // Wrong Method
   resp = await handler({
     httpMethod: 'GET',

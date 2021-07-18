@@ -214,6 +214,14 @@ const useNetlifyIdentity = ({ url: _url }) => {
     }
   };
 
+  const parseJwt = (token) => {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map((c) => `%${(`00${c.charCodeAt(0).toString(16)}`).slice(-2)}`).join(''));
+
+    return JSON.parse(jsonPayload);
+  };
+
   // API: Log in user
   const login = async ({ email, password }) => {
     const token = await fetch(`${url}/token`, {
@@ -227,6 +235,7 @@ const useNetlifyIdentity = ({ url: _url }) => {
       throw new Error(token.error_description);
     }
     setGoTrueToken(token);
+    return parseJwt(token.access_token);
   };
 
   // API: Sign up as a new user - email, password, data: { full_name: }, etc.

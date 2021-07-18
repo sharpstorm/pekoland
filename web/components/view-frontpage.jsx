@@ -33,9 +33,16 @@ export default function FrontPageView() {
         email: loginEmail,
         password: loginPassword,
       })
-        .then(() => {
-          setIsHidden(true);
-          history.replace('/home');
+        .then((response) => {
+          if (response.app_metadata && response.app_metadata.roles && response.app_metadata.roles.includes('banned')) {
+            identity.logout();
+            setLoginErr('You are currently banned');
+            setFormState(0);
+            setTimeout(() => setLoginErr(''), 4000);
+          } else {
+            setIsHidden(true);
+            history.replace('/home');
+          }
         })
         .catch((err) => {
           setLoginErr(err.message);
