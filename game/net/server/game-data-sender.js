@@ -7,6 +7,7 @@ function flattenPlayer(playerObj) {
     x: playerObj.x,
     y: playerObj.y,
     direction: playerObj.direction,
+    avatarId: playerObj.avatarId,
   };
 }
 
@@ -19,6 +20,7 @@ function buildSpawnReply(opCode, data) {
     opCode,
     self: flattenPlayer(data.self),
     others: data.others.map((x) => flattenPlayer(x)),
+    furniture: data.furniture,
   };
 }
 
@@ -100,6 +102,30 @@ function buildStartGame(opCode, data) {
   };
 }
 
+function buildAvatarUpdateEcho(opCode, data) {
+  return {
+    opCode,
+    userId: data.userId,
+    avatarId: data.avatarId,
+  };
+}
+
+function buildFurnitureSync(opCode, data) {
+  return {
+    opCode,
+    furniture: data,
+  };
+}
+
+function buildWhiteboardEcho(opCode, data) {
+  return {
+    opCode,
+    boardId: data.id,
+    state: data.state,
+    delta: data.delta,
+  };
+}
+
 const handlers = {
   'handshake': buildEmptyPacket,
   'spawn-reply': buildSpawnReply,
@@ -113,6 +139,9 @@ const handlers = {
   'lobby-reply': buildLobbyReply,
   'start-game': buildStartGame,
   'end-game': buildLobbyReply,
+  'change-avatar-echo': buildAvatarUpdateEcho,
+  'furniture-sync': buildFurnitureSync,
+  'whiteboard-state-echo': buildWhiteboardEcho,
 };
 
 export default function buildGamePacket(opCode, data) {

@@ -1,18 +1,22 @@
 import Chat from './chat.js';
 import GameConstants from '../game-constants.js';
+import SpriteManager from '../managers/sprite-manager.js';
+
+const SPAWN_X = 400;
+const SPAWN_Y = 1400;
 
 export default class Player {
   constructor(userId, name, playerSprite) {
     this.userId = userId;
     this.name = name;
     this.playerSprite = playerSprite;
-
-    this.x = 400;
-    this.y = 1000;
-    this.newX = 400;
-    this.newY = 1000;
-    this.oldX = 400;
-    this.oldY = 1000;
+    this.avatarId = undefined;
+    this.x = SPAWN_X;
+    this.y = SPAWN_Y;
+    this.newX = SPAWN_X;
+    this.newY = SPAWN_Y;
+    this.oldX = SPAWN_X;
+    this.oldY = SPAWN_Y;
     this.moveX = 0;
     this.moveY = 0;
     this.direction = Player.Direction.DOWN;
@@ -22,9 +26,17 @@ export default class Player {
   }
 
   drawAt(ctx, x, y, width, height, cameraContext) {
-    ctx.strokeStyle = 'black';
-    ctx.font = '12px Arial';
-    ctx.strokeText(`   ${this.name}`, this.x - cameraContext.x, this.y - cameraContext.y);
+    ctx.fillStyle = 'black';
+    ctx.globalAlpha = 0.7;
+    ctx.fillRect(this.x - cameraContext.x, this.y - cameraContext.y + 85, 100, 23);
+    ctx.globalAlpha = 1;
+
+    ctx.strokeStyle = 'white';
+    ctx.strokeRect(this.x - cameraContext.x, this.y - cameraContext.y + 85, 100, 23);
+
+    ctx.fillStyle = 'white';
+    ctx.font = '15px Arial';
+    ctx.fillText(this.name.padStart(12, ' '), this.x - cameraContext.x, this.y - cameraContext.y + 100);
 
     const sprite = this.playerSprite.getSpriteByDirection(Player.DirectionToIntMap[this.direction])
       .getSpriteAtFrame(this.currentFrame);
@@ -94,6 +106,11 @@ export default class Player {
     this.oldX = this.x;
     this.oldY = this.y;
     this.isAnimating = false;
+  }
+
+  changeSprite(spriteId) {
+    this.avatarId = spriteId;
+    this.playerSprite = SpriteManager.getInstance().getSprite(spriteId);
   }
 }
 

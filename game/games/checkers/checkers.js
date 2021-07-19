@@ -15,7 +15,7 @@ export default class CheckersGame {
   }
 
   handleEvent(evtId, e, camContext) {
-    if (evtId === 'click' && this.checkersBoard !== undefined) {
+    if (evtId === 'click' && this.checkersBoard !== undefined && !this.checkersBoard.isAnimating()) {
       const checkerBoard = this.checkersBoard;
       const selfId = PlayerManager.getInstance().getSelfId();
       if (checkerBoard.isPlaying(selfId) && checkerBoard.isTurn(selfId)) {
@@ -24,7 +24,7 @@ export default class CheckersGame {
 
         if (clickedGrid !== undefined) {
           if (clickedGrid.getState() === GridBox.State.SELECTABLE) {
-            const move = checkerBoard.move(clickedGrid);
+            const move = checkerBoard.move(clickedGrid, () => checkerBoard.checkWin());
             const data = {
               from: PlayerManager.getInstance().getSelfId(),
               player1: checkerBoard.player1,
@@ -33,7 +33,6 @@ export default class CheckersGame {
             };
 
             this.sendNetworkUpdate(data);
-            checkerBoard.checkWin();
           } else {
             checkerBoard.unsetBoard();
             if (clickedGrid.hasPiece()) {
@@ -110,23 +109,26 @@ export default class CheckersGame {
     const checkerBoard = this.checkersBoard;
     if (this.gameOn && checkerBoard !== undefined && this.lobbyId === data.lobbyId) {
       if (checkerBoard.isTurn(data.from)) {
-        checkerBoard.getGridAtIndex(data.action.from)
-          .movePieceTo(this.checkersBoard.getGridAtIndex(data.action.to));
+        const fromCell = checkerBoard.getGridAtIndex(data.action.from);
+        const toCell = checkerBoard.getGridAtIndex(data.action.to);
+        checkerBoard.animatedMove(fromCell, toCell, () => {
+          if (data.action.k) {
+            this.checkersBoard.getGridAtIndex(data.action.to).getPiece().setKing(true);
+          }
+          checkerBoard.checkWin();
+        });
         this.checkersBoard.nextTurn();
+
         if (data.action.remove) {
           this.checkersBoard.getGridAtIndex(data.action.remove).removePiece();
         }
-        if (data.action.k) {
-          this.checkersBoard.getGridAtIndex(data.action.to).getPiece().setKing(true);
-        }
       }
-      checkerBoard.checkWin();
     }
   }
 
-  draw(ctx, camContext) {
+  draw(ctx, camContext, majorUpdate) {
     if (this.gameOn) {
-      this.checkersBoard.drawBoard(ctx, camContext);
+      this.checkersBoard.drawBoard(ctx, camContext, majorUpdate);
     }
   }
 }

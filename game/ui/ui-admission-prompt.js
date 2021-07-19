@@ -20,25 +20,27 @@ export default class AdmissionPrompt extends UIElement {
   initObject() {
     this.node.id = 'admit-prompt';
     this.panelContainer = createElement('div', { style: { position: 'relative', width: '100%', height: '100%' } });
-    const panelBack = this.drawImage((ctx) => {
+    const panelBack = super.drawImage((ctx) => {
       SpriteManager.getInstance().getSprite('panel').drawAt(ctx, 0, 0, 220, 100);
     });
     this.panelContainer.style.background = panelBack;
 
     this.textArea = createElement('div', {
+      className: 'message',
       style: {
         position: 'absolute',
         top: '10px',
         left: '10px',
         width: this.width - 20,
         height: this.height - 50,
-        overflow: 'hidden',
+        overflowX: 'hidden',
+        overflowY: 'scroll',
         textAlign: 'center',
         color: '#000',
         fontSize: '1.1rem',
       },
     });
-    this.textArea.textContent = 'Sharpie is requesting to join!';
+    this.textArea.textContent = '';
     this.panelContainer.appendChild(this.textArea);
 
     this.acceptButton = new Button(-40, 8, 36, 36, new UIAnchor(false, true, true, true),
@@ -92,16 +94,5 @@ export default class AdmissionPrompt extends UIElement {
     } else {
       this.waitingQueue.push({ text, accept, reject });
     }
-  }
-
-  drawImage(drawFunc) {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    const { width, height } = this;
-    canvas.width = width;
-    canvas.height = height;
-
-    drawFunc(ctx);
-    return `url('${canvas.toDataURL()}')`;
   }
 }

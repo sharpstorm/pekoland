@@ -2,6 +2,9 @@ import UIElement, { UIAnchor } from './ui-element.js';
 import GameManager from '../managers/game-manager.js';
 import { createElement } from './ui-utils.js';
 
+const MINIMIZE_TEXT = '-';
+const MAXIMIZE_TEXT = '+';
+
 const chatManager = GameManager.getInstance().getTextChannelManager();
 
 export default class Chatbox extends UIElement {
@@ -12,17 +15,21 @@ export default class Chatbox extends UIElement {
     this.lastState = undefined;
     this.submitListeners = [];
     this.historyObjects = [];
+    this.expanded = true;
   }
 
   initObject() {
     this.node.id = 'chatbox';
+    this.node.classList.add('expanded');
     this.inputBox = createElement('input', { id: 'chatbox-input', type: 'text' });
+    this.minMaxButton = createElement('div', { id: 'chatbox-expand', eventListener: { click: this.toggleExpand.bind(this) } }, MINIMIZE_TEXT);
     this.historyBox = createElement('div', { id: 'chatbox-history' });
 
     this.node.appendChild(this.historyBox);
     this.node.appendChild(
       createElement('div', { id: 'chatbox-input-row' },
         this.inputBox,
+        this.minMaxButton,
         createElement('button', { id: 'chatbox-btn-send', eventListener: { click: this.triggerListeners.bind(this) } }, 'Send')),
     );
 
@@ -44,6 +51,17 @@ export default class Chatbox extends UIElement {
       this.submitListeners.forEach((x) => x(text));
       this.inputBox.value = '';
     }
+  }
+
+  toggleExpand() {
+    if (this.expanded) {
+      this.node.classList.remove('expanded');
+      this.minMaxButton.textContent = MAXIMIZE_TEXT;
+    } else {
+      this.node.classList.add('expanded');
+      this.minMaxButton.textContent = MINIMIZE_TEXT;
+    }
+    this.expanded = !this.expanded;
   }
 
   update() {

@@ -107,8 +107,9 @@ class SlicedSprite {
           this.sliceE.drawAt(ctxX, cX, 0);
         }
 
-        // eslint-disable-next-line max-len
-        for (let cY = y + this.sliceA.height; cY < y + this.sliceA.height + heightDiff; cY += this.sliceE.height) {
+        for (let cY = y + this.sliceA.height;
+          cY < y + this.sliceA.height + heightDiff;
+          cY += this.sliceE.height) {
           let drawHeight = this.sliceE.height;
           if (cY + this.sliceE.height > y + this.sliceA.height + heightDiff) {
             drawHeight = y + this.sliceA.height + heightDiff - cY;

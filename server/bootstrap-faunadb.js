@@ -117,6 +117,12 @@ function createFaunaDB(key) {
         { field: ['ref'] },
       ],
     })))
+    .then(() => client.query(q.CreateCollection({ name: 'userfurniture' })))
+    .then(() => client.query(q.CreateIndex({
+      name: 'users_to_furniture',
+      source: q.Collection('userfurniture'),
+      terms: [{ field: ['data', 'email'] }],
+    })))
     .catch((e) => {
       // Database already exists
       if (e.requestResult.statusCode === 400 && e.message === 'instance not unique') {
