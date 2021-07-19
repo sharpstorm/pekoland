@@ -113,7 +113,7 @@ export default class DrawSomething {
     if (data.state.word !== undefined && data.state.word !== null) {
       this.currentWord = data.state.word;
       this.wordList.splice(this.wordList.indexOf(this.currentWord), 1);
-      this.prompt.set(`${data.from} is drawing`);
+      this.prompt.set('Someone Else is Drawing');
       if (data.state.timeUp && this.players.includes(PlayerManager.getInstance().getSelfId())) {
         this.prompt.set(`Draw ${data.state.word}`);
       }
@@ -184,11 +184,11 @@ export default class DrawSomething {
 
   checkWin() {
     if (this.wordList.length === 0 && !this.gameFin) {
-      this.prompt.set(`Final Score: ${this.players[0]}: ${this.scoreTable[this.players[0]]}, ${this.players[1]}: ${this.scoreTable[this.players[1]]}`);
+      this.prompt.set(`Final Score: Player 1: ${this.scoreTable[this.players[0]]}, Player 2: ${this.scoreTable[this.players[1]]}`);
       if (this.scoreTable[this.players[0]] > this.scoreTable[this.players[1]]) {
-        alert(`${this.players[0]} wins`);
+        alert('Player 1 wins');
       } else if (this.scoreTable[this.players[0]] < this.scoreTable[this.players[1]]) {
-        alert(`${this.players[1]} wins`);
+        alert('Player 2 wins');
       } else {
         alert('Its a draw');
       }
@@ -216,7 +216,7 @@ export default class DrawSomething {
           data.state.timeUp = true;
 
           this.sendNetworkUpdate(data);
-          this.prompt.set(`${this.currentTurn} is drawing`);
+          this.prompt.set('Someone else is drawing');
           this.timer.start(this.timerEnd.bind(this));
         }, 1000);
         this.whiteBoard.reset();
