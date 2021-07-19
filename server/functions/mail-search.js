@@ -1,5 +1,3 @@
-const fetch = require('node-fetch');
-
 class Mail {
   constructor(from, subject, content) {
     this.from = from;
@@ -14,7 +12,7 @@ mailArray.push(new Mail('Mary', 'Test Mail 2', 'this email is for testing 2'));
 mailArray.push(new Mail('Tom', 'Test Mail 3', 'this email is for testing 3'));
 mailArray.push(new Mail('Kelly', 'Test Mail 4', 'this email is for testing 4'));
 
-exports.handler = async function handle(event, context) {
+exports.handler = async function handle() {
   return {
     statusCode: 200,
     body: JSON.stringify({

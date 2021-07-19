@@ -1,7 +1,5 @@
 const faunadb = require('faunadb');
 
-const fetch = require('node-fetch');
-
 const q = faunadb.query;
 
 exports.handler = async function handle(event, context) {
