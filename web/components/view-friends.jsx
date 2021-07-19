@@ -10,7 +10,8 @@ const friendDataStore = () => {
 
   const [lastUpdate, setLastUpdate] = useState(0);
 
-  const getFriends = () => friends;
+  const getFriends = () => friends.filter((x) => !x.waiting || x.waiting === 0);
+  const getFriendRequests = () => friends.filter((x) => x.waiting && x.waiting > 0);
 
   const refreshFriends = (fetchAgent) => fetchAgent('/functions/friends-get', {
     method: 'POST',
@@ -43,10 +44,12 @@ const friendDataStore = () => {
       }
       return resp.json();
     })
-    .then(() => {
-      const newFriends = friends;
-      newFriends.push(userObject);
-      setFriends(newFriends);
+    .then((resp) => {
+      if (!resp.pending) {
+        const newFriends = friends;
+        newFriends.push(userObject);
+        setFriends(newFriends);
+      }
     });
 
   const removeFriend = (email, fetchAgent) => fetchAgent('/functions/friends-remove', {
@@ -78,14 +81,62 @@ const friendDataStore = () => {
       return resp.json();
     });
 
+  const acceptFriend = (email, fetchAgent) => fetchAgent('/functions/friends-confirm', {
+    method: 'POST',
+    body: JSON.stringify({
+      email,
+      accept: true,
+    }),
+  })
+    .then((resp) => {
+      if (resp.status > 399) {
+        throw new Error('Failed to Contact Server');
+      }
+      return resp.json();
+    })
+    .then(() => {
+      if (friends) {
+        setFriends(friends.map((x) => {
+          if (x.email === email) {
+            const newX = x;
+            newX.waiting = 0;
+            return newX;
+          }
+          return x;
+        }));
+      }
+    });
+
+  const rejectFriend = (email, fetchAgent) => fetchAgent('/functions/friends-confirm', {
+    method: 'POST',
+    body: JSON.stringify({
+      email,
+      accept: false,
+    }),
+  })
+    .then((resp) => {
+      if (resp.status > 399) {
+        throw new Error('Failed to Contact Server');
+      }
+      return resp.json();
+    })
+    .then(() => {
+      if (friends) {
+        setFriends(friends.filter((x) => x.email !== email));
+      }
+    });
+
   return {
     friends,
     lastUpdate,
     getFriends,
+    getFriendRequests,
     refreshFriends,
     addFriend,
     removeFriend,
     searchFriend,
+    acceptFriend,
+    rejectFriend,
   };
 };
 
@@ -126,7 +177,8 @@ export default function FriendsView() {
     <>
       <h1 style={{ margin: 0 }}>Your Friends</h1>
       <div>
-        <div style={{ float: 'right' }}>
+        <div style={{ float: 'right', display: 'flex' }}>
+          <Button className="btn-accent" onClick={() => setCurrentPage(2)} style={{ marginRight: '8px', display: (friendDataStoreInstance.getFriendRequests().length > 0) ? '' : 'none' }}>View Friend Requests</Button>
           <Button className="btn-accent" onClick={() => setCurrentPage(1)}>Manage Friend List</Button>
         </div>
       </div>
@@ -135,6 +187,62 @@ export default function FriendsView() {
       </div>
     </>
   );
+
+  const ViewFriendRequests = () => {
+    const [formState, setFormState] = useState(0);
+    return (
+      <>
+        <h1 style={{ margin: 0 }}>Your Friend Requests</h1>
+        <div className="flexbox flex-col" style={{ textAlign: 'left', margin: '8px' }}>
+          {
+            friendDataStoreInstance.getFriendRequests()
+              .map((x) => renderFriendRow(x.email, x.ign,
+                (
+                  <div className="flexbox">
+                    <Button
+                      style={{ marginRight: '8px' }}
+                      disabled={formState !== 0}
+                      onClick={() => {
+                        setFormState(1);
+                        friendDataStoreInstance.acceptFriend(x.email, identity.authorizedFetch)
+                          .then(() => {
+                            setFormState(0);
+                            alert('Successfully Accepted Friend');
+                          })
+                          .catch(() => {
+                            setFormState(0);
+                            alert('Failed to Accept Friend');
+                          });
+                      }}
+                      className={`btn-accent${formState !== 0 ? ' loading' : ''}`}
+                    >
+                      Accept
+                    </Button>
+                    <Button
+                      disabled={formState !== 0}
+                      onClick={() => {
+                        setFormState(1);
+                        friendDataStoreInstance.rejectFriend(x.email, identity.authorizedFetch)
+                          .then(() => {
+                            setFormState(0);
+                            alert('Successfully Deleted Friend Request');
+                          })
+                          .catch(() => {
+                            setFormState(0);
+                            alert('Failed to Delete Friend Request');
+                          });
+                      }}
+                      className={`btn-danger${formState !== 0 ? ' loading' : ''}`}
+                    >
+                      Reject
+                    </Button>
+                  </div>
+                )))
+          }
+        </div>
+      </>
+    );
+  };
 
   const ViewManageFriends = (props) => {
     const [targetEmail, setTargetEmail] = useState('');
@@ -165,7 +273,7 @@ export default function FriendsView() {
         .then(() => {
           setSearchResult(undefined);
           setTargetEmail('');
-          alert('successfully added friend');
+          alert('successfully sent friend request');
         })
         .catch(() => {
           alert('Failed to add friend!');
@@ -239,6 +347,8 @@ export default function FriendsView() {
     view = <ViewFriendList friendContext={friendDataStoreInstance} />;
   } else if (currentPage === 1) {
     view = <ViewManageFriends friendContext={friendDataStoreInstance} />;
+  } else if (currentPage === 2) {
+    view = <ViewFriendRequests friendContext={friendDataStoreInstance} />;
   }
 
   const back = () => {

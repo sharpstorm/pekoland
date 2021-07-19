@@ -74,16 +74,20 @@ test('[Functions-Server friends-remove] Test Logic', async () => {
 
   // Friend not in list
   const update = jest.fn();
-  query.mockImplementationOnce(async () => ({ data: [''] }))
-    .mockImplementationOnce(async () => ({
-      data: {
-        friends: [
-          { email: 'email1' },
-          { email: 'email2' },
-        ],
+  query.mockImplementationOnce(async () => ({
+    data: [
+      {
+        data: {
+          friends: [
+            { email: 'email1' },
+            { email: 'email2' },
+          ],
+        },
       },
-    }))
-    .mockImplementationOnce(update);
+    ],
+  })).mockImplementationOnce(async () => ({
+    data: [],
+  }));
 
   resp = await handler({
     httpMethod: 'POST',
@@ -92,18 +96,54 @@ test('[Functions-Server friends-remove] Test Logic', async () => {
     }),
   }, context);
   expect(resp.statusCode).toBe(200);
-  expect(update).not.toHaveBeenCalled();
+  expect(faunadb.query.Update).not.toHaveBeenCalled();
 
   // Update Record
-  query.mockReset();
-  query.mockImplementationOnce(async () => ({ data: [''] }))
-    .mockImplementationOnce(async () => ({
-      data: {
-        friends: [
-          { email: 'email1' },
-          { email: 'email2' },
-        ],
+  faunadb.query.Update.mockClear();
+  query.mockImplementationOnce(async () => ({
+    data: [
+      {
+        data: {
+          friends: [
+            { email: 'email1' },
+            { email: 'email2' },
+          ],
+        },
       },
+    ],
+  }))
+    .mockImplementationOnce(update)
+    .mockImplementationOnce(async () => ({
+      data: [],
+    }));
+
+  resp = await handler({
+    httpMethod: 'POST',
+    body: JSON.stringify({
+      email: 'email1',
+    }),
+  }, context);
+  expect(resp.statusCode).toBe(200);
+  expect(update).toHaveBeenCalled();
+  expect(faunadb.query.Update).toHaveBeenCalledTimes(1);
+
+  // Update Other Only
+  update.mockClear();
+  faunadb.query.Update.mockClear();
+  query.mockImplementationOnce(async () => ({
+    data: [],
+  }))
+    .mockImplementationOnce(async () => ({
+      data: [
+        {
+          data: {
+            friends: [
+              { email: 'test@email.com' },
+              { email: 'email2' },
+            ],
+          },
+        },
+      ],
     }))
     .mockImplementationOnce(update);
 
@@ -115,5 +155,45 @@ test('[Functions-Server friends-remove] Test Logic', async () => {
   }, context);
   expect(resp.statusCode).toBe(200);
   expect(update).toHaveBeenCalled();
-  expect(faunadb.query.Update).toHaveBeenCalled();
+  expect(faunadb.query.Update).toHaveBeenCalledTimes(1);
+
+  // Update Both
+  update.mockClear();
+  faunadb.query.Update.mockClear();
+  query.mockImplementationOnce(async () => ({
+    data: [
+      {
+        data: {
+          friends: [
+            { email: 'email1' },
+            { email: 'email2' },
+          ],
+        },
+      },
+    ],
+  }))
+    .mockImplementationOnce(update)
+    .mockImplementationOnce(async () => ({
+      data: [
+        {
+          data: {
+            friends: [
+              { email: 'test@email.com' },
+              { email: 'email2' },
+            ],
+          },
+        },
+      ],
+    }))
+    .mockImplementationOnce(update);
+
+  resp = await handler({
+    httpMethod: 'POST',
+    body: JSON.stringify({
+      email: 'email1',
+    }),
+  }, context);
+  expect(resp.statusCode).toBe(200);
+  expect(update).toHaveBeenCalledTimes(2);
+  expect(faunadb.query.Update).toHaveBeenCalledTimes(2);
 });
