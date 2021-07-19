@@ -49,17 +49,43 @@ exports.handler = async function handle(event, context) {
     secret: process.env.FAUNADB_SECRET,
   });
 
+  const fetchUser = async (email) => {
+    try {
+      const userData = await client.query(q.Map(q.Paginate(q.Match(q.Index('users_to_ref'), email.toLowerCase())), q.Lambda('user', q.Get(q.Var('user')))));
+      if (userData.data.length === 0) {
+        return undefined;
+      }
+      return userData.data[0];
+    } catch {
+      return undefined;
+    }
+  };
+
   try {
-    const myData = await client.query(q.Paginate(q.Match(q.Index('users_to_ref'), user.email.toLowerCase())));
-    if (myData.data.length > 0) {
-      const ref = myData.data[0];
-      const userData = await client.query(q.Get(ref));
-      const { friends } = userData.data;
+    const myData = await fetchUser(user.email.toLowerCase());
+    if (myData !== undefined) {
+      const { friends } = myData.data;
 
       if (friends !== undefined && friends !== null) {
         const newFriends = friends.filter((x) => x.email !== data.email.toLowerCase());
         if (friends.length !== newFriends.length) {
-          await client.query(q.Update(ref, {
+          await client.query(q.Update(myData.ref, {
+            data: {
+              friends: newFriends,
+            },
+          }));
+        }
+      }
+    }
+
+    const otherUser = await fetchUser(data.email.toLowerCase());
+    if (otherUser !== undefined) {
+      const { friends } = otherUser.data;
+
+      if (friends !== undefined && friends !== null) {
+        const newFriends = friends.filter((x) => x.email !== user.email.toLowerCase());
+        if (friends.length !== newFriends.length) {
+          await client.query(q.Update(otherUser.ref, {
             data: {
               friends: newFriends,
             },

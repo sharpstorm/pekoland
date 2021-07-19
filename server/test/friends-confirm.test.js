@@ -6,9 +6,9 @@ const fetch = require('node-fetch');
 jest.mock('faunadb');
 jest.mock('node-fetch');
 
-const { handler } = require('../functions/friends-add');
+const { handler } = require('../functions/friends-confirm');
 
-test('[Functions-Server friends-add] Test Rejection', async () => {
+test('[Functions-Server friends-confirm] Test Rejection', async () => {
   const context = { clientContext: { identity: {}, user: {} } };
 
   // Not Logged In
@@ -50,7 +50,7 @@ test('[Functions-Server friends-add] Test Rejection', async () => {
   expect(resp.statusCode).toBe(400);
 });
 
-test('[Functions-Server friends-add] Test Logic', async () => {
+test('[Functions-Server friends-confirm] Test Logic', async () => {
   const context = {
     clientContext: {
       identity: {},
@@ -72,136 +72,133 @@ test('[Functions-Server friends-add] Test Logic', async () => {
     httpMethod: 'POST',
     body: JSON.stringify({
       email: 'test@email.com',
+      accept: true,
     }),
   }, context);
   expect(resp.statusCode).toBe(404);
 
-  // Create Record
-  const creation = jest.fn();
+  // Invalid User
   query.mockImplementationOnce(async () => ({
     data: [],
-  })).mockImplementationOnce(creation);
+  }));
   fetch.mockImplementationOnce(async () => ({
     json: () => ({ users: [{ email: 'test@email.com' }] }),
   }));
-
   resp = await handler({
     httpMethod: 'POST',
     body: JSON.stringify({
       email: 'test@email.com',
+      accept: true,
     }),
   }, context);
-  expect(resp.statusCode).toBe(200);
-  expect(JSON.parse(resp.body).pending).toBeTruthy();
-  expect(creation).toHaveBeenCalled();
-  expect(faunadb.query.Create).toHaveBeenCalled();
+  expect(resp.statusCode).toBe(404);
 
-  // Set Array
+  // No Friend list
+  query.mockImplementationOnce(async () => ({
+    data: [
+      {
+        data: { friends: undefined },
+      },
+    ],
+  }));
+  fetch.mockImplementationOnce(async () => ({
+    json: () => ({ users: [{ email: 'test@email.com' }] }),
+  }));
+  resp = await handler({
+    httpMethod: 'POST',
+    body: JSON.stringify({
+      email: 'test@email.com',
+      accept: true,
+    }),
+  }, context);
+  expect(resp.statusCode).toBe(404);
+
+  // Accept, other user not found
+  query.mockImplementationOnce(async () => ({
+    data: [
+      {
+        data: {
+          friends: [
+            { email: 'test@email.com', waiting: 1 },
+          ],
+        },
+      },
+    ],
+  })).mockImplementationOnce(async () => ({
+    data: [],
+  }));
+  fetch.mockImplementationOnce(async () => ({
+    json: () => ({ users: [{ email: 'test@email.com' }] }),
+  }));
+  resp = await handler({
+    httpMethod: 'POST',
+    body: JSON.stringify({
+      email: 'test@email.com',
+      accept: true,
+    }),
+  }, context);
+  expect(resp.statusCode).toBe(404);
+
+  // Accept
   const update = jest.fn();
   query.mockImplementationOnce(async () => ({
-    data: [{
-      data: {
-        friends: null,
+    data: [
+      {
+        data: {
+          friends: [
+            { email: 'test@email.com', waiting: 1 },
+          ],
+        },
       },
-    }],
-  })).mockImplementationOnce(update);
-  fetch.mockImplementationOnce(async () => ({
-    json: () => ({ users: [{ email: 'test@email.com' }] }),
-  }));
-
-  resp = await handler({
-    httpMethod: 'POST',
-    body: JSON.stringify({
-      email: 'test@email.com',
-    }),
-  }, context);
-  expect(resp.statusCode).toBe(200);
-  expect(JSON.parse(resp.body).pending).toBeTruthy();
-  expect(update).toHaveBeenCalled();
-  expect(faunadb.query.Update).toHaveBeenCalled();
-
-  // Update Array
-  update.mockClear();
-  faunadb.query.Update.mockClear();
-  query.mockImplementationOnce(async () => ({
-    data: [{
-      data: {
-        friends: [],
-      },
-    }],
-  })).mockImplementationOnce(update);
-  fetch.mockImplementationOnce(async () => ({
-    json: () => ({ users: [{ email: 'test@email.com' }] }),
-  }));
-
-  resp = await handler({
-    httpMethod: 'POST',
-    body: JSON.stringify({
-      email: 'test@email.com',
-    }),
-  }, context);
-  expect(resp.statusCode).toBe(200);
-  expect(JSON.parse(resp.body).pending).toBeTruthy();
-  expect(update).toHaveBeenCalled();
-  expect(faunadb.query.Update).toHaveBeenCalled();
-
-  // Already a friend, no self record, no pending
-  creation.mockClear();
-  faunadb.query.Create.mockClear();
-  query.mockImplementationOnce(async () => ({
-    data: [{
-      data: {
-        friends: [
-          { email: 'test2@email.com' },
-        ],
-      },
-    }],
-  })).mockImplementationOnce(async () => undefined).mockImplementationOnce(creation);
-  fetch.mockImplementationOnce(async () => ({
-    json: () => ({ users: [{ email: 'test@email.com' }] }),
-  }));
-
-  resp = await handler({
-    httpMethod: 'POST',
-    body: JSON.stringify({
-      email: 'test@email.com',
-    }),
-  }, context);
-  expect(resp.statusCode).toBe(200);
-  expect(JSON.parse(resp.body).pending).toBeFalsy();
-  expect(creation).toHaveBeenCalled();
-  expect(faunadb.query.Create).toHaveBeenCalled();
-
-  // Already a friend, no pending
-  update.mockClear();
-  faunadb.query.Update.mockClear();
-  query.mockImplementationOnce(async () => ({
-    data: [{
-      data: {
-        friends: [
-          { email: 'test2@email.com' },
-        ],
-      },
-    }],
+    ],
   })).mockImplementationOnce(async () => ({
-    data: [{
-      data: {
-        friends: [],
+    data: [
+      {
+        data: {
+          friends: [],
+        },
       },
-    }],
-  })).mockImplementationOnce(update);
+    ],
+  })).mockImplementationOnce(update).mockImplementationOnce(update);
   fetch.mockImplementationOnce(async () => ({
     json: () => ({ users: [{ email: 'test@email.com' }] }),
   }));
-
   resp = await handler({
     httpMethod: 'POST',
     body: JSON.stringify({
       email: 'test@email.com',
+      accept: true,
     }),
   }, context);
   expect(resp.statusCode).toBe(200);
-  expect(JSON.parse(resp.body).pending).toBeFalsy();
-  expect(update).toHaveBeenCalled();
-  expect(faunadb.query.Update).toHaveBeenCalled();
+  expect(update).toHaveBeenCalledTimes(2);
+  expect(faunadb.query.Update).toHaveBeenCalledTimes(2);
+
+  // reject
+  update.mockClear();
+  faunadb.query.Update.mockClear();
+  query.mockImplementationOnce(async () => ({
+    data: [
+      {
+        data: {
+          friends: [
+            { email: 'test@email.com', waiting: 1 },
+          ],
+        },
+      },
+    ],
+  })).mockImplementationOnce(update);
+  fetch.mockImplementationOnce(async () => ({
+    json: () => ({ users: [{ email: 'test@email.com' }] }),
+  }));
+  resp = await handler({
+    httpMethod: 'POST',
+    body: JSON.stringify({
+      email: 'test@email.com',
+      accept: false,
+    }),
+  }, context);
+  expect(resp.statusCode).toBe(200);
+  expect(update).toHaveBeenCalledTimes(1);
+  expect(faunadb.query.Update).toHaveBeenCalledTimes(1);
 });
