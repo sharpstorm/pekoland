@@ -13,7 +13,7 @@ exports.handler = async function handle(event, context) {
     };
   }
 
-  if (event.httpMethod !== 'POST') {
+  if (event.httpMethod !== 'POST' || !event.body) {
     return {
       statusCode: 400,
       body: JSON.stringify({ message: 'Bad Request' }),

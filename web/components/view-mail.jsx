@@ -14,12 +14,11 @@ const mailDataStore = () => {
   const [mails, setMails] = useState([]);
   const [friends, setFriends] = useState([]);
   const getMails = () => mails;
-
   const getFriends = () => friends;
 
   const refreshMails = (fetchAgent) => fetchAgent('/functions/mail-list', {
     method: 'POST',
-    body: {},
+    body: '',
   }).then((resp) => {
     if (resp.status > 399) {
       throw new Error('Failed to Contact Server');
@@ -59,7 +58,13 @@ const mailDataStore = () => {
       throw new Error('Failed to Contact Server');
     }
     return resp.json();
-  }).then((x) => { setMails(x.mailBlock.data); });
+  }).then((x) => {
+    if (x.mailBlock === undefined) {
+      throw new Error('Failed to contact server');
+    } else {
+      setMails(x.mailBlock.data);
+    }
+  });
 
   const refreshFriends = (fetchAgent) => fetchAgent('/functions/friends-get', {
     method: 'POST',
@@ -156,8 +161,9 @@ export default function MailView() {
 
   function getIgn(email) {
     if (mailDataStoreInstance.getFriends().length !== 0) {
-      if (mailDataStoreInstance.getFriends().filter((x) => (x.email === email))[0] !== undefined) {
-        return mailDataStoreInstance.getFriends().filter((x) => (x.email === email))[0].ign;
+      const target = mailDataStoreInstance.getFriends().find((x) => (x.email === email));
+      if (target !== undefined) {
+        return target.ign;
       }
     }
     return '';
@@ -314,7 +320,7 @@ export default function MailView() {
         />
         <div className="flexbox flex-row" style={{ textAlign: 'left', margin: '8px' }}>
           <div style={{ marginLeft: '45px' }} className="flexbox flex-col flex-center flex-equal">
-            <Button disabled={selectedIndex === 0 ? true : false} onClick={() => sendMail(identity.authorizedFetch, currentTo, identity.user.email.toLowerCase(), subject, content)} className="btn-accent">Send</Button>
+            <Button disabled={selectedIndex === 0} onClick={() => sendMail(identity.authorizedFetch, currentTo, identity.user.email.toLowerCase(), subject, content)} className="btn-accent">Send</Button>
           </div>
           <div style={{ marginLeft: '9px', marginRight: '40px' }} className="flexbox flex-col flex-center flex-equal">
             <Button onClick={() => setCurrentPage(0)} className="btn-accent">Back</Button>
