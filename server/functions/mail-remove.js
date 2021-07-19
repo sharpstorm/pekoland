@@ -30,6 +30,13 @@ exports.handler = async function handle(event, context) {
     };
   }
 
+  if (data.mailId === undefined) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ message: 'Bad Request' }),
+    };
+  }
+
   // Validate OK
   const client = new faunadb.Client({
     secret: process.env.FAUNADB_SECRET,
@@ -37,7 +44,7 @@ exports.handler = async function handle(event, context) {
 
   try {
     await client.query(q.Delete(q.Ref(q.Collection('mails'), data.mailId)));
-    const ret = await client.query(q.Paginate(q.Match(q.Index('mail_by_to'), user.email)));
+    const ret = await client.query(q.Paginate(q.Match(q.Index('mail_by_to'), user.email.toLowerCase())));
     return {
       statusCode: 200,
       body: JSON.stringify({

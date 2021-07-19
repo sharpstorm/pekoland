@@ -27,7 +27,7 @@ exports.handler = async function handle(event, context) {
 
   try {
     // IGN or Email
-    const ret = await client.query(q.Paginate(q.Match(q.Index('mail_by_to'), user.email)));
+    const ret = await client.query(q.Paginate(q.Match(q.Index('mail_by_to'), user.email.toLowerCase())));
 
     return {
       statusCode: 200,

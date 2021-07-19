@@ -30,12 +30,12 @@ exports.handler = async function handle(event, context) {
     };
   }
 
-  /* if (data.issue_type === undefined || data.issue_description === undefined) {
+  if (data.from === undefined || data.to === undefined) {
     return {
       statusCode: 400,
       body: JSON.stringify({ message: 'Bad Request' }),
     };
-  } */
+  }
 
   // Validate OK
   const client = new faunadb.Client({
@@ -43,7 +43,7 @@ exports.handler = async function handle(event, context) {
   });
 
   try {
-    const doc = await client.query(q.Create(q.Collection('mails'), {
+    await client.query(q.Create(q.Collection('mails'), {
       data: {
         from: data.from,
         to: data.to,
@@ -51,14 +51,10 @@ exports.handler = async function handle(event, context) {
         content: data.content,
       },
     }));
-
     return {
       statusCode: 200,
       body: JSON.stringify({
-        id: doc.ref.id,
-        type: data.issue_type,
-        description: data.issue_description,
-        timestamp: Date.now(),
+        message: 'Done',
       }),
     };
   } catch (ex) {
