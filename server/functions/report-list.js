@@ -20,24 +20,7 @@ exports.handler = async function handle(event, context) {
     };
   }
 
-  if (event.httpMethod !== 'POST' || !event.body) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ message: 'Bad Request' }),
-    };
-  }
-
-  let data;
-  try {
-    data = JSON.parse(event.body);
-  } catch {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ message: 'Bad Request' }),
-    };
-  }
-
-  if (!data.email || data.email === '') {
+  if (event.httpMethod !== 'POST') {
     return {
       statusCode: 400,
       body: JSON.stringify({ message: 'Bad Request' }),
@@ -50,23 +33,31 @@ exports.handler = async function handle(event, context) {
   });
 
   try {
-    const ret = await client.query(q.Paginate(q.Match(q.Index('users_to_peer_id'), data.email.toLowerCase())));
-    if (ret.data.length === 0) {
-      return {
-        statusCode: 404,
-        body: JSON.stringify({ message: 'User Not Found' }),
-      };
+    let ret;
+    if (!user.app_metadata.roles || user.app_metadata.roles.length === 0
+      || !user.app_metadata.roles.includes('admin')) {
+      // This is Normal User Route
+      ret = await client.query(q.Paginate(q.Match(q.Index('reports_by_user'), user.email.toLowerCase())));
+    } else {
+      ret = await client.query(q.Paginate(q.Match(q.Index('reports_by_time'))));
     }
+
+    // Block out potentially extra info
+    const scrubbed = ret.data.map((x) => ({
+      timestamp: x[0],
+      type: x[1],
+      description: x[2],
+      id: x[3].id,
+    }));
 
     return {
       statusCode: 200,
       body: JSON.stringify({
-        email: data.email.toLowerCase(),
-        online: !(ret.data[0][0] === ''),
-        peer_id: ret.data[0][0],
+        reports: scrubbed,
       }),
     };
-  } catch {
+  } catch (ex) {
+    console.log(ex);
     return {
       statusCode: 500,
       body: JSON.stringify({ message: 'Internal Error' }),

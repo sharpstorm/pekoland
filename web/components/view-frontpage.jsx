@@ -21,6 +21,15 @@ export default function FrontPageView() {
     const [formState, setFormState] = useState(0);
     const identity = useIdentityContext();
 
+    useEffect(() => {
+      if (identity.user
+        && identity.user.app_metadata
+        && identity.user.app_metadata.roles
+        && identity.user.app_metadata.roles.includes('banned')) {
+        identity.logout();
+      }
+    }, [identity.user]);
+
     function validateLogin() {
       return loginEmail.length > 0 && loginPassword.length > 0;
     }
@@ -33,9 +42,16 @@ export default function FrontPageView() {
         email: loginEmail,
         password: loginPassword,
       })
-        .then(() => {
-          setIsHidden(true);
-          history.replace('/home');
+        .then((response) => {
+          if (response.app_metadata && response.app_metadata.roles && response.app_metadata.roles.includes('banned')) {
+            identity.logout();
+            setLoginErr('You are currently banned');
+            setFormState(0);
+            setTimeout(() => setLoginErr(''), 4000);
+          } else {
+            setIsHidden(true);
+            history.replace('/home');
+          }
         })
         .catch((err) => {
           setLoginErr(err.message);

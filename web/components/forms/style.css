@@ -46,6 +46,20 @@ button.btn.btn-accent:disabled, button.btn.btn-accent:disabled:hover {
   background-color: var(--color-dark-gray);
 }
 
+button.btn.btn-danger {
+  border: none;
+  background-color: var(--color-danger);
+  color: var(--color-font-light);
+}
+
+button.btn.btn-danger:hover {
+  background-color: var(--color-danger-dark);
+}
+
+button.btn.btn-danger:disabled, button.btn.btn-danger:disabled:hover {
+  background-color: var(--color-dark-gray);
+}
+
 button.btn.loading {
   transition: border linear 0.2s, background ease-in 0.5s;
   background: transparent;
@@ -75,4 +89,26 @@ button.btn.loading::after {
 @keyframes button-loading-spinner {
   from { transform: rotate(0turn); }
   to { transform: rotate(1turn); }
+}
+
+select.form-control {
+  background: none;
+  border: 2px solid #CCC;
+  color: #FFF;
+  padding: 4px 12px;
+  border-radius: 4px;
+}
+
+select.form-control > option {
+  background: #000;
+  color: #FFF;
+}
+
+textarea.form-control {
+  font-family: 'Poppins', sans-serif;
+  background: none;
+  border: none;
+  color: var(--color-font-light);
+  resize: none;
+  overflow-y: scroll;
 }

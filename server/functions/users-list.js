@@ -11,31 +11,16 @@ exports.handler = async function handle(event, context) {
     };
   }
 
-  if (user.app_metadata && user.app_metadata.roles && user.app_metadata.roles.includes('banned')) {
+  // This is an administrator only route
+  if (!user.app_metadata.roles || user.app_metadata.roles.length === 0
+    || !user.app_metadata.roles.includes('admin')) {
     return {
       statusCode: 401,
       body: JSON.stringify({ message: 'Unauthorized' }),
     };
   }
 
-  if (event.httpMethod !== 'POST' || !event.body) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ message: 'Bad Request' }),
-    };
-  }
-
-  let data;
-  try {
-    data = JSON.parse(event.body);
-  } catch {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ message: 'Bad Request' }),
-    };
-  }
-
-  if (data.email === undefined) {
+  if (event.httpMethod !== 'POST') {
     return {
       statusCode: 400,
       body: JSON.stringify({ message: 'Bad Request' }),
@@ -52,19 +37,19 @@ exports.handler = async function handle(event, context) {
     }).then((x) => x.json());
 
     const { users } = userList;
-    const obj = users.find((x) => x.email.toLowerCase() === data.email.toLowerCase());
-    if (obj === undefined) {
-      return {
-        statusCode: 404,
-        body: JSON.stringify({ message: 'User not Found' }),
-      };
-    }
+    const obj = users
+      .map((x) => ({
+        email: x.email.toLowerCase(),
+        id: x.id,
+        isAdmin: (x.app_metadata.roles && x.app_metadata.roles.includes('admin')),
+        banned: (x.app_metadata.roles && x.app_metadata.roles.includes('banned')),
+        ign: x.user_metadata.ign,
+      }));
 
     return {
       statusCode: 200,
       body: JSON.stringify({
-        email: obj.email,
-        ign: obj.user_metadata.ign,
+        users: obj,
       }),
     };
   } catch (ex) {

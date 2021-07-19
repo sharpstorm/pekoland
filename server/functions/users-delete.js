@@ -11,7 +11,9 @@ exports.handler = async function handle(event, context) {
     };
   }
 
-  if (user.app_metadata && user.app_metadata.roles && user.app_metadata.roles.includes('banned')) {
+  // This is an administrator only route
+  if (!user.app_metadata.roles || user.app_metadata.roles.length === 0
+    || !user.app_metadata.roles.includes('admin')) {
     return {
       statusCode: 401,
       body: JSON.stringify({ message: 'Unauthorized' }),
@@ -35,7 +37,7 @@ exports.handler = async function handle(event, context) {
     };
   }
 
-  if (data.email === undefined) {
+  if (data.user_id === undefined || data.user_id === '') {
     return {
       statusCode: 400,
       body: JSON.stringify({ message: 'Bad Request' }),
@@ -44,27 +46,38 @@ exports.handler = async function handle(event, context) {
 
   // Validate OK
   try {
-    const usersUrl = `${identity.url}/admin/users`;
+    const usersUrl = `${identity.url}/admin/users/${data.user_id}`;
     const adminAuthHeader = `Bearer ${identity.token}`;
-    const userList = await fetch(usersUrl, {
-      method: 'GET',
-      headers: { Authorization: adminAuthHeader },
-    }).then((x) => x.json());
-
-    const { users } = userList;
-    const obj = users.find((x) => x.email.toLowerCase() === data.email.toLowerCase());
-    if (obj === undefined) {
+    let targetUser;
+    try {
+      targetUser = await fetch(usersUrl, {
+        method: 'GET',
+        headers: { Authorization: adminAuthHeader },
+      }).then((x) => x.json());
+    } catch {
       return {
         statusCode: 404,
         body: JSON.stringify({ message: 'User not Found' }),
       };
     }
-
+    if (targetUser.app_metadata
+      && targetUser.app_metadata.roles
+      && targetUser.app_metadata.roles.includes('admin')) {
+      return {
+        statusCode: 401,
+        body: JSON.stringify({
+          message: 'Not allowed to delete an admin',
+        }),
+      };
+    }
+    await fetch(usersUrl, {
+      method: 'DELETE',
+      headers: { Authorization: adminAuthHeader },
+    });
     return {
       statusCode: 200,
       body: JSON.stringify({
-        email: obj.email,
-        ign: obj.user_metadata.ign,
+        message: `${data.user_id} Deleted`,
       }),
     };
   } catch (ex) {

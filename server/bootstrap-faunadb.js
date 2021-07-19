@@ -95,17 +95,30 @@ function createFaunaDB(key) {
             { field: ['data', 'content'] },
             { field: ['ref'] },
           ],
-        })))
-        .catch((e) => {
-          // Database already exists
-          if (e.requestResult.statusCode === 400 && e.message === 'instance not unique') {
-            console.log('DB already exists');
-            throw e;
-          } else {
-            console.log(e);
-          }
-        });
+        })));
     })
+    .then(() => client.query(q.CreateCollection({ name: 'reports' })))
+    .then(() => client.query(q.CreateIndex({
+      name: 'reports_by_time',
+      source: q.Collection('reports'),
+      values: [
+        { field: ['data', 'timestamp'] },
+        { field: ['data', 'type'] },
+        { field: ['data', 'description'] },
+        { field: ['ref'] },
+      ],
+    })))
+    .then(() => client.query(q.CreateIndex({
+      name: 'reports_by_user',
+      source: q.Collection('reports'),
+      terms: [{ field: ['data', 'submitted_by'] }],
+      values: [
+        { field: ['data', 'timestamp'] },
+        { field: ['data', 'type'] },
+        { field: ['data', 'description'] },
+        { field: ['ref'] },
+      ],
+    })))
     .catch((e) => {
       // Database already exists
       if (e.requestResult.statusCode === 400 && e.message === 'instance not unique') {
