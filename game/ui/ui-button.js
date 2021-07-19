@@ -51,7 +51,7 @@ class Button extends UIElement {
 
     const { content } = this;
     if (content.drawAt !== undefined) {
-      const contentImg = this.drawImage((ctx) => {
+      const contentImg = super.drawImage((ctx) => {
         content.drawAt(ctx, (width - content.width) / 2, (height - content.height) / 2);
       });
       this.contentArea.style.background = contentImg;
@@ -59,17 +59,6 @@ class Button extends UIElement {
       this.contentArea.textContent = content;
       this.contentArea.style.color = '#000';
     }
-  }
-
-  drawImage(drawFunc) {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    const { width, height } = this;
-    canvas.width = width;
-    canvas.height = height;
-
-    drawFunc(ctx);
-    return `url('${canvas.toDataURL()}')`;
   }
 
   setContent(content) {

@@ -4,6 +4,8 @@ import SpriteManager from '../../managers/sprite-manager.js';
 
 const BOARD_SIZE = 800;
 const PANEL_SIZE = 900;
+const ANIMATION_DELTA = 0.02;
+
 export default class CheckerBoard {
   constructor(player1, player2, flipped) {
     this.player1 = player1;
@@ -13,6 +15,10 @@ export default class CheckerBoard {
     this.gridArray = [];
     this.selectedGrid = undefined;
     this.currentTurn = this.player1;
+
+    // Animation Helpers
+    this.animation = undefined;
+    this.animationCallback = undefined;
 
     this.setUp();
   }
@@ -45,28 +51,49 @@ export default class CheckerBoard {
     const panelY = (camContext.viewportHeight / 2 - (BOARD_SIZE / 2))
       - ((PANEL_SIZE - BOARD_SIZE) / 2);
     SpriteManager.getInstance().getSprite('panel').drawAt(ctx, panelX, panelY, PANEL_SIZE, PANEL_SIZE);
+
+    let xResolver;
+    let yResolver;
+
     if (!this.flipped) {
       // Reference coordinate is bottom left
       const baseX = (camContext.viewportWidth / 2 - (BOARD_SIZE / 2));
       const baseY = (camContext.viewportHeight / 2 + (BOARD_SIZE / 2));
-      for (let i = 0; i < 8; i += 1) {
-        for (let j = 0; j < 8; j += 1) {
-          const x = baseX + (j * unit);
-          const y = baseY - ((i + 1) * unit); // +1 because canvas reference is top left
-
-          this.getGridAtCoord(j, i).drawAt(ctx, x, y);
-        }
-      }
+      xResolver = (a) => baseX + (a * unit);
+      yResolver = (a) => baseY - ((a + 1) * unit); // +1 because canvas reference is top left
     } else {
       // Reference coordinate is top right
       const baseX = (camContext.viewportWidth / 2 + (BOARD_SIZE / 2));
       const baseY = (camContext.viewportHeight / 2 - (BOARD_SIZE / 2));
-      for (let i = 0; i < 8; i += 1) {
-        for (let j = 0; j < 8; j += 1) {
-          const x = baseX - ((j + 1) * unit);
-          const y = baseY + (i * unit); // +1 because canvas reference is top left
+      xResolver = (a) => baseX - ((a + 1) * unit); // +1 because canvas reference is top right
+      yResolver = (a) => baseY + (a * unit);
+    }
 
-          this.getGridAtCoord(j, i).drawAt(ctx, x, y);
+    for (let i = 0; i < 8; i += 1) {
+      for (let j = 0; j < 8; j += 1) {
+        this.getGridAtCoord(j, i).drawAt(ctx, xResolver(j), yResolver(i));
+      }
+    }
+
+    if (this.animation !== undefined) {
+      const fromX = xResolver(this.animation.from.x);
+      const fromY = yResolver(this.animation.from.y);
+      const toX = xResolver(this.animation.to.x);
+      const toY = yResolver(this.animation.to.y);
+      const deltaX = Math.floor((toX - fromX) * this.animation.progress);
+      const deltaY = Math.floor((toY - fromY) * this.animation.progress);
+
+      const x = fromX + deltaX;
+      const y = fromY + deltaY;
+      this.animation.piece.drawAt(ctx, x, y);
+
+      this.animation.progress += ANIMATION_DELTA;
+      if (this.animation.progress > 1) {
+        // End of animation
+        this.animation = undefined;
+        if (this.animationCallback !== undefined) {
+          this.animationCallback();
+          this.animationCallback = undefined;
         }
       }
     }
@@ -104,11 +131,11 @@ export default class CheckerBoard {
     this.selectedGrid = selectedGrid;
   }
 
-  move(newGrid) {
+  move(newGrid, callback) {
     if (newGrid.getState() === GridBox.State.SELECTABLE) {
-      this.selectedGrid.movePieceTo(newGrid);
       const oldCoord = this.selectedGrid.getCoordinates();
       const newCoord = newGrid.getCoordinates();
+      const piece = this.selectedGrid.getPiece();
 
       let king;
       let remove;
@@ -123,11 +150,19 @@ export default class CheckerBoard {
       }
 
       // Kinging
-      if ((newCoord.y === 7 && newGrid.getPiece().getPlayer() === 1)
-        || (newCoord.y === 0 && newGrid.getPiece().getPlayer() === 2)) {
-        newGrid.getPiece().setKing(true);
+      if ((newCoord.y === 7 && piece.getPlayer() === 1)
+        || (newCoord.y === 0 && piece.getPlayer() === 2)) {
         king = true;
       }
+
+      this.animatedMove(this.selectedGrid, newGrid, () => {
+        if (king) {
+          piece.setKing(true);
+        }
+        if (callback !== undefined) {
+          callback();
+        }
+      });
 
       const from = this.selectedGrid.index;
       this.unsetBoard();
@@ -140,6 +175,34 @@ export default class CheckerBoard {
       };
     }
     return undefined;
+  }
+
+  animatedMove(fromGrid, toGrid, callback) {
+    const piece = fromGrid.getPiece();
+
+    if (this.animation !== undefined) {
+      // Fast Forward
+      fromGrid.movePieceTo(toGrid);
+    } else {
+      // Remove from source grid so both are empty
+      fromGrid.removePiece();
+      this.animation = {
+        from: fromGrid.getCoordinates(),
+        to: toGrid.getCoordinates(),
+        piece,
+        progress: 0,
+      };
+      this.animationCallback = () => {
+        toGrid.assignPiece(piece);
+        if (callback !== undefined) {
+          callback();
+        }
+      };
+    }
+  }
+
+  isAnimating() {
+    return this.animation !== undefined;
   }
 
   getGridAtScreenCoord(x, y, viewportWidth, viewportHeight) {
@@ -282,23 +345,35 @@ export default class CheckerBoard {
   }
 
   getState() {
-    return this.gridArray.map((grid) => {
-      const ret = { state: grid.getState() };
-      if (grid.hasPiece()) {
-        ret.p = {
-          k: grid.getPiece().isKing(),
-          p: grid.getPiece().getPlayer(),
-        };
-      }
-      return ret;
-    });
+    return {
+      board: this.gridArray.map((grid) => {
+        const ret = { state: grid.getState() };
+        if (grid.hasPiece()) {
+          ret.p = {
+            k: grid.getPiece().isKing(),
+            p: grid.getPiece().getPlayer(),
+          };
+        } else if (this.isAnimating()) {
+          const gridCoord = grid.getCoordinates();
+          if (gridCoord.x === this.animation.to.x
+            && gridCoord.y === this.animation.to.y) {
+            ret.p = {
+              k: this.animation.piece.isKing(),
+              p: this.animation.piece.getPlayer(),
+            };
+          }
+        }
+        return ret;
+      }),
+      turn: this.currentTurn,
+    };
   }
 
   inflateState(data) {
     if (data === undefined || data === null) {
       return;
     }
-    data.forEach((x, idx) => {
+    data.board.forEach((x, idx) => {
       const grid = this.gridArray[idx];
       grid.setState(x.state);
       if (x.p) {
@@ -309,5 +384,6 @@ export default class CheckerBoard {
         grid.removePiece();
       }
     });
+    this.currentTurn = data.turn;
   }
 }

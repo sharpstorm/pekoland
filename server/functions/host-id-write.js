@@ -1,5 +1,6 @@
 const faunadb = require('faunadb');
 const { createUserStructure } = require('./util');
+const { fetchFurnitureList } = require('./game-op');
 
 const q = faunadb.query;
 
@@ -61,11 +62,17 @@ exports.handler = async function handle(event, context) {
       }));
     }
 
+    let furnitureData = await fetchFurnitureList(user.email);
+    if (furnitureData !== undefined) {
+      furnitureData = furnitureData.data.furniture;
+    }
+
     return {
       statusCode: 200,
       body: JSON.stringify({
         email: user.email.toLowerCase(),
         peer_id: data.peer_id,
+        furniture: furnitureData,
       }),
     };
   } catch (ex) {

@@ -19,13 +19,16 @@
   <script>
     // Send Message Headers
     const SENDOP_CONFIG_CHANGED = 'pekoconn-config-changed';
+    const SENDOP_GAME_OP = 'pekoconn-game-reply';
 
     // Recv Message Headers
     const RECVOP_CONFIG_REQUEST = 'pekoconn-config-request';
     const RECVOP_UPDATE_PEERID = 'pekoconn-update-peerid';
+    const RECVOP_GAME_OP = 'pekoconn-game-op';
 
     let channel = new BroadcastChannel('pekoland-data');
     let peerId;
+    let furnitureCache = undefined;
 
     document.addEventListener('DOMContentLoaded', () => {
       let opMode, name, connString, windowId;
@@ -64,6 +67,28 @@
         } else if (data.op === RECVOP_UPDATE_PEERID) {
           peerId = data.peerId;
           document.getElementById('reply-peerid').textContent = peerId;
+        } else if (data.op === RECVOP_GAME_OP) {
+          console.log(`Got Game OP ${data.payload.op}`);
+          if (data.payload.op === 'furniture-get') {
+            channel.postMessage({
+              op: SENDOP_GAME_OP,
+              channel: windowId,
+              reply: {
+                message: 'OK',
+                data: furnitureCache
+              },
+            });
+          } else if (data.payload.op === 'furniture-save') {
+            console.log(data.payload.data);
+            furnitureCache = data.payload.data;
+            channel.postMessage({
+              op: SENDOP_GAME_OP,
+              channel: windowId,
+              reply: {
+                message: 'OK',
+              },
+            });
+          }
         }
       }
     });

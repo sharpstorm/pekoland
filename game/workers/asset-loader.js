@@ -3,11 +3,12 @@ import Map from '../models/map.js';
 import Sprite, { AnimatableSprite, AvatarSprite, SlicedSprite } from '../models/sprites.js';
 import MapManager from '../managers/map-manager.js';
 import SpriteManager from '../managers/sprite-manager.js';
+import Furniture from '../models/furniture.js';
 
 export default function loadAssets() {
   return new Promise((resolve) => {
     // Rabbit
-    const load1 = loadAsset('Images/rabbit.png')
+    const load1 = loadAsset('Images/avatars/rabbit.png')
       .then((rabbitSheet) => {
         const rabbitSprite = new AvatarSprite(
           AnimatableSprite.generateFromTiledFrames(rabbitSheet, 7, 118, 24, 36, 33, 0, 7),
@@ -18,7 +19,62 @@ export default function loadAssets() {
         SpriteManager.getInstance().registerSprite('rabbit-avatar', rabbitSprite);
       });
 
-    const load2 = loadAsset('Images/chat-bubble.png')
+    const load2 = loadAsset('Images/avatars/rabbit-brown.png')
+      .then((rabbitSheet) => {
+        const rabbitSprite = new AvatarSprite(
+          AnimatableSprite.generateFromTiledFrames(rabbitSheet, 5, 118, 24, 36, 33, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(rabbitSheet, 0, 159, 36, 36, 40, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(rabbitSheet, 5, 38, 24, 36, 33, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(rabbitSheet, 0, 79, 36, 36, 40, 0, 7),
+        );
+        SpriteManager.getInstance().registerSprite('rabbit-brown-avatar', rabbitSprite);
+      });
+
+    const load3 = loadAsset('Images/avatars/chick.png')
+      .then((chickSheet) => {
+        const chickSprite = new AvatarSprite(
+          AnimatableSprite.generateFromTiledFrames(chickSheet, 1, 81, 25, 25, 25, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(chickSheet, 4, 108, 25, 25, 33, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(chickSheet, 1, 28, 25, 25, 25, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(chickSheet, 4, 55, 25, 25, 33, 0, 7),
+        );
+        SpriteManager.getInstance().registerSprite('chick-avatar', chickSprite);
+      });
+
+    const load4 = loadAsset('Images/avatars/cat.png')
+      .then((catSheet) => {
+        const catSprite = new AvatarSprite(
+          AnimatableSprite.generateFromTiledFrames(catSheet, 1, 105, 31, 33, 33, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(catSheet, 1, 140, 34, 33, 36, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(catSheet, 1, 35, 31, 33, 33, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(catSheet, 1, 70, 34, 33, 36, 0, 7),
+        );
+        SpriteManager.getInstance().registerSprite('cat-avatar', catSprite);
+      });
+
+    const load5 = loadAsset('Images/avatars/red-panda.png')
+      .then((redPandaSheet) => {
+        const redPandaSprite = new AvatarSprite(
+          AnimatableSprite.generateFromTiledFrames(redPandaSheet, 1, 108, 31, 41, 33, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(redPandaSheet, 1, 149, 39, 31, 41, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(redPandaSheet, 1, 40, 31, 41, 33, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(redPandaSheet, 1, 75, 39, 31, 41, 0, 7),
+        );
+        SpriteManager.getInstance().registerSprite('red-panda-avatar', redPandaSprite);
+      });
+
+    const load6 = loadAsset('Images/avatars/worm.png')
+      .then((wormSheet) => {
+        const wormSprite = new AvatarSprite(
+          AnimatableSprite.generateFromTiledFrames(wormSheet, 0.5, 77.5, 31, 27, 25, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(wormSheet, 1, 105, 31, 23, 33, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(wormSheet, 1, 26, 31, 27, 26, 0, 7),
+          AnimatableSprite.generateFromTiledFrames(wormSheet, 1, 54, 31, 23, 33, 0, 7),
+        );
+        SpriteManager.getInstance().registerSprite('worm-avatar', wormSprite);
+      });
+
+    const load7 = loadAsset('Images/chat-bubble.png')
       .then((x) => {
         const sprite = SlicedSprite.from(x, [
           [0, 0, 14, 5],
@@ -34,14 +90,7 @@ export default function loadAssets() {
         SpriteManager.getInstance().registerSprite('chat-bubble', sprite);
       });
 
-    // Map
-    const load3 = loadAsset(['Images/template1.png', 'Images/template1_collision.png'])
-      .then(([map, colli]) => {
-        const map1 = new Map(map, colli, 3300, 1200, 66, 24);
-        MapManager.getInstance().registerMap('testMap', map1);
-      });
-
-    const load4 = loadAsset('Images/ui.png')
+    const load8 = loadAsset('Images/ui.png')
       .then((x) => {
         const spriteManager = SpriteManager.getInstance();
         spriteManager.registerSprite('button', new Sprite(x, 1, 1, 36, 36));
@@ -91,7 +140,7 @@ export default function loadAssets() {
         spriteManager.registerSprite('panel', panel);
       });
 
-    const load5 = loadAsset('Images/battleship.png')
+    const load9 = loadAsset('Images/battleship.png')
       .then((x) => {
         const spriteManager = SpriteManager.getInstance();
         spriteManager.registerSprite('battleship-board', new Sprite(x, 0, 0, 512, 512));
@@ -116,7 +165,7 @@ export default function loadAssets() {
         spriteManager.registerSprite('battleship-plane', new Sprite(x, 694, 216, 46, 45));
       });
 
-    const load6 = loadAsset('Images/checkers.png')
+    const load10 = loadAsset('Images/checkers.png')
       .then((x) => {
         const spriteManager = SpriteManager.getInstance();
         spriteManager.registerSprite('checkers-grid-brown', new Sprite(x, 0, 0, 147, 144));
@@ -127,6 +176,30 @@ export default function loadAssets() {
         spriteManager.registerSprite('checkers-piece-black-king', new Sprite(x, 210, 383, 187, 187));
       });
 
-    Promise.all([load1, load2, load3, load4, load5, load6]).then(resolve);
+    // Map and Furniture
+    const load11 = loadAsset(['Images/template1.png', 'Images/template1_collision.png', 'Images/furniture.png'])
+      .then(([map, colli, furniture]) => {
+        // Init Furniture List
+        const furnitureFactory = MapManager.getInstance().getFurnitureFactory();
+        furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-game-table', 'Game Table', new Sprite(furniture, 0, 0, 72, 72)));
+        furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-sofa1', 'Sofa 1', new Sprite(furniture, 72, 0, 72, 72)));
+        furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-sofa2', 'Sofa 2', new Sprite(furniture, 144, 0, 72, 72)));
+        furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-table1', 'Table 1', new Sprite(furniture, 0, 72, 72, 72)));
+        furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-sofa3', 'Sofa 3', new Sprite(furniture, 72, 72, 72, 72)));
+        furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-plant1', 'Plant A', new Sprite(furniture, 144, 72, 72, 72)));
+        furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-plant2', 'Plant B', new Sprite(furniture, 0, 144, 72, 72)));
+        furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-deco1', 'Bird Statue that looks like some cunt but whatever', new Sprite(furniture, 72, 144, 72, 72)));
+        furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-plant3', 'Plant C', new Sprite(furniture, 144, 144, 72, 72)));
+        furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-whiteboard', 'Whiteboard', new Sprite(furniture, 0, 216, 72, 72)));
+        furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-cooler', 'Water Cooler', new Sprite(furniture, 72, 216, 72, 72)));
+        furnitureFactory.registerFurnitureTemplate(new Furniture('furniture-lamp1', 'Lamp A', new Sprite(furniture, 144, 216, 72, 72)));
+
+        // Init Map
+        const map1 = new Map(map, colli, 3300, 1200, 66, 24);
+        MapManager.getInstance().registerMap('testMap', map1);
+      });
+
+    Promise.all([load1, load2, load3, load4, load5,
+      load6, load7, load8, load9, load10, load11]).then(resolve);
   });
 }

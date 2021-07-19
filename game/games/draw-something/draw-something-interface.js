@@ -1,3 +1,5 @@
+import SpriteManager from '../../managers/sprite-manager.js';
+
 const BOARD_SIZE = 505;
 let BORDER_COLOR = 'white';
 
@@ -16,6 +18,10 @@ export default class DrawSomethingWhiteboard {
     this.counter = 0;
     this.setup();
     this.freeze = false;
+
+    // Caching
+    this.cache = undefined;
+    this.dirty = false;
   }
 
   setup() {
@@ -37,8 +43,6 @@ export default class DrawSomethingWhiteboard {
 
   // eslint-disable-next-line class-methods-use-this
   draw(ctx, camContext) {
-    const image = new Image();
-    image.src = this.canv.toDataURL('image/png');
     ctx.beginPath();
     ctx.strokeStyle = BORDER_COLOR;
     const lineWidthOld = ctx.lineWidth;
@@ -50,16 +54,22 @@ export default class DrawSomethingWhiteboard {
     this.topY = y;
     ctx.rect(x, y, BOARD_SIZE, BOARD_SIZE);
     ctx.stroke();
-    ctx.drawImage(this.canv, x + 2.5, y + 2.5, 500, 500);
 
-    if (this.isDrawing) {
+    if (this.isDrawing && this.newX && this.newY && this.x && this.y) {
       this.canvCtx.beginPath();
       this.canvCtx.lineWidth = 1;
       this.canvCtx.strokeStyle = 'yellow';
       this.canvCtx.moveTo(this.x, this.y);
       this.canvCtx.lineTo(this.newX, this.newY);
       this.canvCtx.stroke();
+      this.x = this.newX;
+      this.y = this.newY;
+      this.newX = undefined;
+      this.newY = undefined;
+      this.dirty = true;
     }
+
+    ctx.drawImage(this.canv, x + 2.5, y + 2.5, 500, 500);
     ctx.lineWidth = lineWidthOld;
   }
 
@@ -72,26 +82,31 @@ export default class DrawSomethingWhiteboard {
   }
 
   getImage() {
-    return this.canv.toDataURL('image/jpg');
+    if (this.cache === undefined || this.dirty) {
+      this.cache = this.canv.toDataURL('image/jpg');
+      this.dirty = false;
+    }
+    return this.cache;
   }
 
   handle(e) {
     if (e.type === 'mousedown') {
       this.isDrawing = true;
+      this.dirty = true;
+      this.x = e.x - this.topX;
+      this.y = e.y - this.topY;
     }
     if (e.type === 'mouseup') {
       this.isDrawing = false;
+      this.x = undefined;
+      this.y = undefined;
+      this.newX = undefined;
+      this.newY = undefined;
     }
-    if (e.type === 'mousemove') {
-      if (this.counter > 1) {
-        this.x = this.newX;
-        this.y = this.newY;
-        this.newX = e.x - this.topX;
-        this.newY = e.y - this.topY;
-        this.counter = 0;
-      }
+    if (e.type === 'mousemove' && this.isDrawing) {
+      this.newX = e.x - this.topX;
+      this.newY = e.y - this.topY;
     }
-    this.counter += 1;
   }
 }
 
@@ -161,28 +176,31 @@ class DrawSomethingInputBox {
 class DrawSomethingPrompt {
   constructor() {
     this.text = 'GET READY...';
+    this.background = SpriteManager.getInstance().getSprite('panel');
+    this.cachedWidth = undefined;
   }
 
   draw(ctx, camContext) {
-    ctx.beginPath();
-    ctx.fillStyle = 'black';
     const x = camContext.viewportWidth / 2 - (BOARD_SIZE / 2);
     const y = (camContext.viewportHeight / 2 - (BOARD_SIZE / 2)) - 75;
-    ctx.rect(x, y, BOARD_SIZE, 50);
-    ctx.fill();
+    this.background.drawAt(ctx, x, y, BOARD_SIZE, 50);
 
-    ctx.beginPath();
     ctx.font = '30px Arial';
-    ctx.fillStyle = 'white';
-    ctx.fillText(this.text, x, y + 30);
+    ctx.fillStyle = 'black';
+    if (this.cachedWidth === undefined) {
+      this.cachedWidth = ctx.measureText(this.text).width;
+    }
+    ctx.fillText(this.text, x + (BOARD_SIZE - this.cachedWidth) / 2, y + 35);
   }
 
   reset() {
     this.text = 'GET READY...';
+    this.cachedWidth = undefined;
   }
 
   set(text) {
     this.text = `${text}`;
+    this.cachedWidth = undefined;
   }
 }
 
@@ -193,19 +211,16 @@ class DrawSomethingTimer {
     this.running = false;
     this.timer = TIMER_DURATION;
     this.handler = undefined;
+    this.background = SpriteManager.getInstance().getSprite('panel');
   }
 
   draw(ctx, camContext) {
-    ctx.beginPath();
-    ctx.fillStyle = 'black';
     const x = camContext.viewportWidth / 2 - (BOARD_SIZE / 2) + BOARD_SIZE + 25;
     const y = (camContext.viewportHeight / 2 - (BOARD_SIZE / 2));
-    ctx.rect(x, y, 100, 50);
-    ctx.fill();
+    this.background.drawAt(ctx, x, y, 100, 50);
 
-    ctx.beginPath();
     ctx.font = '30px Arial';
-    ctx.fillStyle = 'white';
+    ctx.fillStyle = 'black';
     ctx.fillText(this.timer, x + 40, y + 35);
   }
 
@@ -246,24 +261,27 @@ class DrawSomethingTimer {
 class DrawSomethingScore {
   constructor() {
     this.score = 0;
+    this.cachedWidth = undefined;
+    this.background = SpriteManager.getInstance().getSprite('panel');
   }
 
   draw(ctx, camContext) {
-    ctx.beginPath();
-    ctx.fillStyle = 'black';
     const x = camContext.viewportWidth / 2 - (BOARD_SIZE / 2) + BOARD_SIZE + 25;
     const y = (camContext.viewportHeight / 2 - (BOARD_SIZE / 2)) + 75;
-    ctx.rect(x, y, 200, 50);
-    ctx.fill();
+    this.background.drawAt(ctx, x, y, 200, 50);
 
-    ctx.beginPath();
     ctx.font = '30px Arial';
-    ctx.fillStyle = 'white';
-    ctx.fillText(`Score: ${this.score}`, x + 40, y + 35);
+    ctx.fillStyle = 'black';
+    const text = `Score: ${this.score}`;
+    if (this.cachedWidth === undefined) {
+      this.cachedWidth = ctx.measureText(text).width;
+    }
+    ctx.fillText(text, x + (200 - this.cachedWidth) / 2, y + 35);
   }
 
   increase() {
     this.score += 1;
+    this.cachedWidth = undefined;
   }
 }
 

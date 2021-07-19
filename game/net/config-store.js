@@ -1,13 +1,13 @@
-/* eslint-disable no-extra-bind */
-
 const BROADCAST_CHANNEL_ID = 'pekoland-data';
 
 // Receive Message Headers
 const RECVOP_CONFIG_CHANGED = 'pekoconn-config-changed';
+const RECVOP_GAME_OP = 'pekoconn-game-reply';
 
 // Send Message Headers
 const SENDOP_CONFIG_REQUEST = 'pekoconn-config-request';
 const SENDOP_UPDATE_PEERID = 'pekoconn-update-peerid';
+const SENDOP_GAME_OP = 'pekoconn-game-op';
 
 export default class ConfigStore {
   constructor() {
@@ -29,11 +29,11 @@ export default class ConfigStore {
 
   setup() {
     this.broadcastChannel.onmessage = ((ev) => {
-      if (!ev.data || !ev.data.op || this.frozen) return;
+      if (!ev.data || !ev.data.op) return;
       const { data } = ev;
       if (this.subchannelId !== '' && ev.data.channel !== this.subchannelId) return;
 
-      if (data.op === RECVOP_CONFIG_CHANGED) {
+      if (data.op === RECVOP_CONFIG_CHANGED && !this.frozen) {
         this.peerConnectionString = data.partnerString;
         this.userId = data.userId;
         this.name = data.name;
@@ -43,8 +43,11 @@ export default class ConfigStore {
         console.log('[NetworkConfig] Configuration Received');
         if (this.listener) this.listener(this.peerConnectionString);
         this.isBusy = false;
+      } else if (data.op === RECVOP_GAME_OP) {
+        if (this.listener) this.listener(data.reply);
+        this.isBusy = false;
       }
-    }).bind(this);
+    });
   }
 
   updateConfig() {
@@ -66,6 +69,25 @@ export default class ConfigStore {
     this.broadcastChannel.postMessage({
       op: SENDOP_UPDATE_PEERID,
       peerId,
+    });
+  }
+
+  fetchGameOperation(opCode, data) {
+    return new Promise((resolve, reject) => {
+      if (this.isBusy) {
+        reject(new Error('[NetworkConfig] Config Worker is Busy'));
+        return;
+      }
+
+      this.listener = resolve;
+      this.isBusy = true;
+      this.broadcastChannel.postMessage({
+        op: SENDOP_GAME_OP,
+        payload: {
+          op: opCode,
+          data,
+        },
+      });
     });
   }
 

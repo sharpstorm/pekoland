@@ -1,6 +1,8 @@
 import { expect, jest, test } from '@jest/globals';
+import GameConstants from '../game-constants';
 import Renderer from '../managers/animation-manager';
 import MapManager from '../managers/map-manager';
+import Map from '../models/map';
 import PlayerManager from '../managers/player-manager';
 import Player from '../models/player';
 import { getDummyContext } from './mock-canvas';
@@ -125,9 +127,67 @@ test('[Renderer] Test Render Path', () => {
   expect(playerDraw2).toHaveBeenCalled();
 
   const drawerMap = jest.fn();
+  const drawGrid = jest.fn();
+  const refreshComposite = jest.fn();
   MapManager.getInstance().registerMap('map1', {
+    hookFurnitureFactory: () => {},
     draw: drawerMap,
+    drawGrid,
+    refreshComposite,
   });
   Renderer.render(0);
   expect(drawerMap).toHaveBeenCalled();
+
+  expect(drawGrid).not.toHaveBeenCalled();
+  Renderer.getMapRenderer().setFurniturePlacementMode(true);
+  Renderer.render(0);
+  expect(drawGrid).toHaveBeenCalled();
+});
+
+test('[Renderer] Test Map Layer Event System', async () => {
+  const map = new Map('map', [
+    [0, 0, 0, 255],
+    [255, 255, 255, 255],
+    [255, 0, 0, 255],
+    [0, 0, 0, 255],
+  ], 10, 10, 2, 2);
+  map.refreshComposite();
+
+  MapManager.getInstance = jest.fn();
+  MapManager.getInstance.mockImplementation(() => ({
+    getCurrentMap: () => map,
+  }));
+  Renderer.init();
+  Renderer.cameraContext = {
+    x: 0,
+    y: 0,
+    viewportWidth: 100,
+    viewportHeight: 100,
+  };
+
+  expect(Renderer.getMapRenderer()).toBeDefined();
+
+  const handler = jest.fn();
+  const handler2 = jest.fn();
+  Renderer.getMapRenderer().registerFurnitureHandler('furniture-game-table', handler);
+  Renderer.getMapRenderer().registerFurnitureHandler('place', handler2);
+
+  Renderer.getMapRenderer().setFurniturePlacementMode(false);
+  Renderer.propagateEvent('click', {
+    clientX: GameConstants.UNIT,
+    clientY: 0,
+  });
+  expect(handler).toHaveBeenCalled();
+
+  Renderer.getMapRenderer().setFurniturePlacementMode(true);
+  Renderer.propagateEvent('click', {
+    clientX: GameConstants.UNIT,
+    clientY: 0,
+  }, {
+    x: 0,
+    y: 0,
+    viewportWidth: 200,
+    viewportHeight: 200,
+  });
+  expect(handler2).toHaveBeenCalled();
 });
