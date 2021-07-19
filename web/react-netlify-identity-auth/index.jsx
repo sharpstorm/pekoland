@@ -25,4 +25,5 @@ const NetlifyIdentityContext = ({ url, children }) => {
 export {
   NetlifyIdentityContext as default,
   useIdentityContext,
+  IdentityContext,
 };

@@ -1,0 +1,33 @@
+#report-submit-table, #report-table {
+  width: 100%;
+  max-width: 500px;
+  margin: auto;
+  text-align: left;
+}
+
+#report-submit-table > tbody > tr > td, #report-table > tbody > tr > td {
+  padding: 8px 16px;
+  border: 1px solid #CCC;
+}
+
+#report-submit-table > tbody > tr > td.header, #report-table > tbody > tr > td.header {
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+#report-list {
+  list-style-type: none;
+  overflow-y: scroll;
+  max-height: 60vh;
+  padding: 0 8px;
+}
+
+#report-list > li {
+  display: flex;
+  padding: 16px 0;
+  border-bottom: 1px solid #CCC;
+}
+
+#report-list > li > div {
+  flex: 1 1 0;
+}

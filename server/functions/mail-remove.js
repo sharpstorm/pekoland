@@ -1,17 +1,12 @@
-const fetch = require('node-fetch');
+const faunadb = require('faunadb');
+
+const q = faunadb.query;
 
 exports.handler = async function handle(event, context) {
   const { identity, user } = context.clientContext;
 
   // Validation Step
   if (!identity || !user) {
-    return {
-      statusCode: 401,
-      body: JSON.stringify({ message: 'Unauthorized' }),
-    };
-  }
-
-  if (user.app_metadata && user.app_metadata.roles && user.app_metadata.roles.includes('banned')) {
     return {
       statusCode: 401,
       body: JSON.stringify({ message: 'Unauthorized' }),
@@ -35,7 +30,7 @@ exports.handler = async function handle(event, context) {
     };
   }
 
-  if (data.email === undefined) {
+  if (data.mailId === undefined) {
     return {
       statusCode: 400,
       body: JSON.stringify({ message: 'Bad Request' }),
@@ -43,28 +38,17 @@ exports.handler = async function handle(event, context) {
   }
 
   // Validate OK
+  const client = new faunadb.Client({
+    secret: process.env.FAUNADB_SECRET,
+  });
+
   try {
-    const usersUrl = `${identity.url}/admin/users`;
-    const adminAuthHeader = `Bearer ${identity.token}`;
-    const userList = await fetch(usersUrl, {
-      method: 'GET',
-      headers: { Authorization: adminAuthHeader },
-    }).then((x) => x.json());
-
-    const { users } = userList;
-    const obj = users.find((x) => x.email.toLowerCase() === data.email.toLowerCase());
-    if (obj === undefined) {
-      return {
-        statusCode: 404,
-        body: JSON.stringify({ message: 'User not Found' }),
-      };
-    }
-
+    await client.query(q.Delete(q.Ref(q.Collection('mails'), data.mailId)));
+    const ret = await client.query(q.Paginate(q.Match(q.Index('mail_by_to'), user.email.toLowerCase())));
     return {
       statusCode: 200,
       body: JSON.stringify({
-        email: obj.email,
-        ign: obj.user_metadata.ign,
+        mailBlock: ret,
       }),
     };
   } catch (ex) {

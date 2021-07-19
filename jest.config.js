@@ -1,6 +1,6 @@
 module.exports = {
   testEnvironment: 'jsdom',
-  testMatch: ['**/game/test/*.test.js', '**/web/test/*.test.js'],
+  testMatch: ['**/game/test/*.test.js', '**/web/test/*.test.js', '**/server/test/*.test.js'],
   setupFilesAfterEnv: ['./game/test/setup.js'],
   moduleNameMapper: {
     '\\.(css|less|sass|scss)$': '<rootDir>/web/test/styleMock.js',

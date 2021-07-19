@@ -1,25 +1,46 @@
 [build]
-
   base = "./"
   publish = "build-out/"
   command = "echo 'No Build'"
 
 [context.production]
   publish = "dist/"
-  command = "(parcel build web/index.html --out-dir dist) && (parcel build game/index.html --out-dir dist/game --public-url ./) && (cp -r game/Images dist/game/Images)"
+  command = "(parcel build web/index.html web/admin.html --no-source-maps --out-dir dist) && (parcel build game/index.html --out-dir dist/game --public-url ./) && (cp -r game/Images dist/game/Images)"
 
 [context.react-staging]
   publish = "react-staging-dist/"
-  command = "parcel build web/index.html --out-dir react-staging-dist && cp -r game react-staging-dist/game"
+  command = "parcel build web/index.html web/admin.html --no-source-maps --out-dir react-staging-dist && cp -r game react-staging-dist/game"
 
 [context.game-dev]
   publish = "game-dev-dist/"
-  command = "(parcel build web/index.html --out-dir game-dev-dist) && (parcel build game/index.html --out-dir game-dev-dist/game --public-url ./) && (cp -r game/Images game-dev-dist/game/Images)"
+  command = "(parcel build web/index.html web/admin.html --no-source-maps --out-dir game-dev-dist) && (parcel build game/index.html --out-dir game-dev-dist/game --public-url ./) && (cp -r game/Images game-dev-dist/game/Images)"
+
+[dev]
+  autoLaunch = false
 
 [[redirects]]
   from = "/functions/*"
   to = "/.netlify/functions/:splat"
   status = 200
+
+[[redirects]]
+  from = "/admin/*"
+  to = "/admin.html"
+  status = 200
+  force = true
+  conditions = {Role = ["admin"]}
+
+[[redirects]]
+  from = "/admin/*"
+  to = "/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/admin.html"
+  to = "/"
+  status = 301
+  force = true
 
 [[redirects]]
   from = "/*"

@@ -11,7 +11,9 @@ exports.handler = async function handle(event, context) {
     };
   }
 
-  if (user.app_metadata && user.app_metadata.roles && user.app_metadata.roles.includes('banned')) {
+  // This is an administrator only route
+  if (!user.app_metadata.roles || user.app_metadata.roles.length === 0
+    || !user.app_metadata.roles.includes('admin')) {
     return {
       statusCode: 401,
       body: JSON.stringify({ message: 'Unauthorized' }),
@@ -35,7 +37,7 @@ exports.handler = async function handle(event, context) {
     };
   }
 
-  if (data.email === undefined) {
+  if (data.user_id === undefined || data.ign === undefined) {
     return {
       statusCode: 400,
       body: JSON.stringify({ message: 'Bad Request' }),
@@ -44,29 +46,28 @@ exports.handler = async function handle(event, context) {
 
   // Validate OK
   try {
-    const usersUrl = `${identity.url}/admin/users`;
+    const usersUrl = `${identity.url}/admin/users/${data.user_id}`;
     const adminAuthHeader = `Bearer ${identity.token}`;
-    const userList = await fetch(usersUrl, {
-      method: 'GET',
-      headers: { Authorization: adminAuthHeader },
-    }).then((x) => x.json());
-
-    const { users } = userList;
-    const obj = users.find((x) => x.email.toLowerCase() === data.email.toLowerCase());
-    if (obj === undefined) {
+    try {
+      await fetch(usersUrl, {
+        method: 'PUT',
+        headers: { Authorization: adminAuthHeader },
+        body: JSON.stringify({ user_metadata: { ign: data.ign } }),
+      });
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          id: data.user_id,
+          email: user.email,
+          ign: data.ign,
+        }),
+      };
+    } catch {
       return {
         statusCode: 404,
         body: JSON.stringify({ message: 'User not Found' }),
       };
     }
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        email: obj.email,
-        ign: obj.user_metadata.ign,
-      }),
-    };
   } catch (ex) {
     console.log(ex);
     return {

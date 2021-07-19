@@ -1,8 +1,7 @@
 const faunadb = require('faunadb');
-const { createUserStructure } = require('./util');
-const { fetchFurnitureList } = require('./game-op');
 
 const q = faunadb.query;
+const REPORT_TYPES = ['', 'Report User', 'Report Bug', 'Report Problem', 'Help Request'];
 
 exports.handler = async function handle(event, context) {
   const { identity, user } = context.clientContext;
@@ -39,7 +38,14 @@ exports.handler = async function handle(event, context) {
     };
   }
 
-  if (data.peer_id === undefined) {
+  if (data.issue_type === undefined || data.issue_description === undefined) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ message: 'Bad Request' }),
+    };
+  }
+
+  if (data.issue_type < 1 || data.issue_type >= REPORT_TYPES.length || data.issue_description === '') {
     return {
       statusCode: 400,
       body: JSON.stringify({ message: 'Bad Request' }),
@@ -52,34 +58,24 @@ exports.handler = async function handle(event, context) {
   });
 
   try {
-    const ret = await client.query(q.Paginate(q.Match(q.Index('users_to_peer_id'), user.email.toLowerCase())));
-    if (ret.data.length === 0) {
-      const newUser = createUserStructure(user.email.toLowerCase());
-      newUser.peer_id = data.peer_id;
-
-      await client.query(q.Create(q.Collection('users'), {
-        data: newUser,
-      }));
-    } else if (ret.data[0][0] !== data.peer_id) {
-      const ref = ret.data[0][1];
-      await client.query(q.Update(ref, {
-        data: {
-          peer_id: data.peer_id,
-        },
-      }));
-    }
-
-    let furnitureData = await fetchFurnitureList(user.email);
-    if (furnitureData !== undefined) {
-      furnitureData = furnitureData.data.furniture;
-    }
+    const doc = await client.query(q.Create(q.Collection('reports'), {
+      data: {
+        type: data.issue_type,
+        description: data.issue_description,
+        status: 0,
+        submitted_by: user.email.toLowerCase(),
+        timestamp: Date.now(),
+        action: '',
+      },
+    }));
 
     return {
       statusCode: 200,
       body: JSON.stringify({
-        email: user.email.toLowerCase(),
-        peer_id: data.peer_id,
-        furniture: furnitureData,
+        id: doc.ref.id,
+        type: data.issue_type,
+        description: data.issue_description,
+        timestamp: Date.now(),
       }),
     };
   } catch (ex) {
