@@ -38,6 +38,7 @@ export default class DrawSomethingWhiteboard {
   reset() {
     this.canvCtx.fillStyle = 'black';
     this.canvCtx.fillRect(0, 0, 500, 500);
+    this.cache = undefined;
     this.isDrawing = false;
   }
 
@@ -76,8 +77,10 @@ export default class DrawSomethingWhiteboard {
   updateBoard(image) {
     if (!this.freeze) {
       const newImage = new Image();
+      newImage.onload = () => {
+        this.canvCtx.drawImage(newImage, 0, 0);
+      };
       newImage.src = image;
-      this.canvCtx.drawImage(newImage, 0, 0);
     }
   }
 
