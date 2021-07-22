@@ -149,7 +149,7 @@ export default function ReportView() {
                 })
                 }
               </div>
-              <div>{(report.type > 0 && report.type < 5) ? REPORT_TYPES[report.type] : ''}</div>
+              <div>{(report.type > 0 && report.type < 5) ? REPORT_TYPES[report.type - 1] : ''}</div>
               <div>{(report.description.length > 37) ? `${report.description.substring(0, 40)}...` : report.description}</div>
               <div style={{ display: 'flex' }}>
                 <Button
@@ -276,7 +276,7 @@ export default function ReportView() {
 
     const isFormValid = () => problemText !== '';
     const submitForm = () => {
-      reportCache.createReport(identity.authorizedFetch, problemType, problemText)
+      reportCache.createReport(identity.authorizedFetch, problemType + 1, problemText)
         .then(() => setCurrentView(0))
         .catch(() => alert('Failed to create report'));
     };
